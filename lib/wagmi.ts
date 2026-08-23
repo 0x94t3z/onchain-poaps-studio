@@ -1,13 +1,20 @@
 "use client";
 import { createConfig, createStorage, http } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
-import { coinbaseWallet, injected } from "wagmi/connectors";
+import { coinbaseWallet, injected, metaMask } from "wagmi/connectors";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 
-// The host wallet must be first so Farcaster can connect without a browser
-// wallet picker. Injected and Coinbase connectors keep the standalone app useful.
+// Keep the host wallet first for the native Mini App path. MetaMask and
+// Coinbase support mobile handoff; injected wallets serve standalone browsers.
 const connectors = [
   farcasterMiniApp(),
+  metaMask({
+    dappMetadata: {
+      name: "Onchain POAPs",
+      url:
+        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    },
+  }),
   injected(),
   coinbaseWallet({ appName: "Onchain POAPs Studio" }),
 ];

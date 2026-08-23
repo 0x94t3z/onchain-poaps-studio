@@ -138,7 +138,7 @@ Browser or Farcaster host
 | Application | Next.js 15 App Router, React 19, strict TypeScript |
 | Contract client | Wagmi and Viem |
 | Query cache | TanStack Query |
-| Wallets | EIP-6963, injected providers, Coinbase Wallet, and Farcaster host wallet |
+| Wallets | EIP-6963, injected providers, MetaMask SDK, Coinbase Wallet, and Farcaster host wallet |
 | Mini App | Farcaster Mini App SDK and Wagmi connector |
 | QR generation | `qrcode` |
 | Testing | Vitest and TypeScript compiler |
@@ -204,7 +204,7 @@ Never put a private key, seed phrase, or server-only RPC secret in a `NEXT_PUBLI
 
 ### Wallet behavior
 
-The standalone app discovers EIP-6963 and injected browser wallets and also supports Coinbase Wallet. Inside a verified Farcaster host, it uses the host wallet directly. The selected connection is persisted across routes and restored after refresh. If the wallet is on another network, the UI requests Base Sepolia before contract interaction.
+The standalone app discovers EIP-6963 and injected browser wallets and also supports MetaMask and Coinbase Wallet handoff. Inside a verified Farcaster host, the wallet chooser offers the native Farcaster wallet first, followed by MetaMask and Coinbase Wallet for users who prefer an external account. The selected connection is persisted across routes and restored after refresh. If the wallet is on another network, the UI requests Base Sepolia before contract interaction.
 
 ENS primary names are resolved from Ethereum mainnet for display only; transactions remain on Base Sepolia. WalletConnect QR support is not configured, so `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` is intentionally not part of the environment contract.
 

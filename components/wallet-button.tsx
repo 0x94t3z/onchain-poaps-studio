@@ -13,6 +13,7 @@ const CONNECT_TIMEOUT = 30_000;
 const BUILT_IN_CONNECTORS = new Set([
   "farcaster",
   "injected",
+  "metaMaskSDK",
   "coinbaseWalletSDK",
 ]);
 
@@ -70,13 +71,24 @@ export function WalletButton() {
     const discovered = connectors.filter(
       ({ id }) => !BUILT_IN_CONNECTORS.has(id),
     );
-    const candidates = [
-      ...discovered,
-      ...(hasInjectedWallet && discovered.length === 0
-        ? connectors.filter(({ id }) => id === "injected")
-        : []),
-      ...connectors.filter(({ id }) => id === "coinbaseWalletSDK"),
-    ];
+    const fixed = (id: string) => connectors.filter((item) => item.id === id);
+    const hasDiscoveredMetaMask = discovered.some(({ name, id }) =>
+      `${name} ${id}`.toLowerCase().includes("metamask"),
+    );
+    const candidates = isMiniApp
+      ? [
+          ...fixed("farcaster"),
+          ...fixed("metaMaskSDK"),
+          ...fixed("coinbaseWalletSDK"),
+        ]
+      : [
+          ...discovered,
+          ...(hasInjectedWallet && discovered.length === 0
+            ? fixed("injected")
+            : []),
+          ...(hasDiscoveredMetaMask ? [] : fixed("metaMaskSDK")),
+          ...fixed("coinbaseWalletSDK"),
+        ];
     return candidates.filter(
       (connector, index) =>
         candidates.findIndex(
@@ -84,7 +96,7 @@ export function WalletButton() {
             candidate.id === connector.id && candidate.name === connector.name,
         ) === index,
     );
-  }, [connectors]);
+  }, [connectors, isMiniApp]);
 
   async function requestConnection(connector: (typeof connectors)[number]) {
     let timer = 0;
@@ -158,10 +170,6 @@ export function WalletButton() {
 
   function openConnection() {
     setConnectionError("");
-    if (isMiniApp) {
-      void connectWallet("farcaster");
-      return;
-    }
     setIsOpen(true);
   }
 
@@ -261,9 +269,13 @@ export function WalletButton() {
                       <span>
                         <strong>{connector.name}</strong>
                         <small>
-                          {connector.id === "coinbaseWalletSDK"
-                            ? "Extension or mobile app"
-                            : "Detected in this browser"}
+                          {connector.id === "farcaster"
+                            ? "Recommended in Farcaster"
+                            : connector.id === "metaMaskSDK"
+                              ? "Open the MetaMask app"
+                              : connector.id === "coinbaseWalletSDK"
+                                ? "Extension or mobile app"
+                                : "Detected in this browser"}
                         </small>
                       </span>
                       <b>{isPending ? "Waiting…" : "Connect →"}</b>
