@@ -10,11 +10,6 @@ import { getPrimaryEnsName } from "@/lib/ens";
 import { short } from "@/lib/metadata";
 
 const CONNECT_TIMEOUT = 30_000;
-const BUILT_IN_CONNECTORS = new Set([
-  "farcaster",
-  "injected",
-  "walletConnect",
-]);
 
 function formatEnsName(name: string, maxLength = 24) {
   if (name.length <= maxLength) return name;
@@ -65,24 +60,10 @@ export function WalletButton() {
   }, [isOpen, isPending]);
 
   const walletOptions = useMemo(() => {
-    const hasInjectedWallet =
-      typeof window !== "undefined" && "ethereum" in window;
-    const discovered = connectors.filter(
-      ({ id }) => !BUILT_IN_CONNECTORS.has(id),
-    );
     const fixed = (id: string) => connectors.filter((item) => item.id === id);
     const candidates = isMiniApp
-      ? [
-          ...fixed("farcaster"),
-          ...fixed("walletConnect"),
-        ]
-      : [
-          ...discovered,
-          ...(hasInjectedWallet && discovered.length === 0
-            ? fixed("injected")
-            : []),
-          ...fixed("walletConnect"),
-        ];
+      ? [...fixed("farcaster"), ...fixed("walletConnect")]
+      : fixed("walletConnect");
     return candidates.filter(
       (connector, index) =>
         candidates.findIndex(
@@ -275,8 +256,8 @@ export function WalletButton() {
                   ))}
                   {walletOptions.length === 0 && (
                     <div className="wallet-empty">
-                      No browser wallet was detected. Install a Base-compatible
-                      wallet, then reload this page.
+                      WalletConnect is not configured. Add the project ID and
+                      reload this page.
                     </div>
                   )}
                   {(connectionError || error) && (
