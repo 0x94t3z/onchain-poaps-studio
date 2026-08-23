@@ -4,10 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { ShieldCheck, WalletCards, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { chain } from "@/lib/constants";
 import { getPrimaryEnsName } from "@/lib/ens";
 import { short } from "@/lib/metadata";
+import { walletConnectConfigured } from "@/lib/wagmi";
 
 const CONNECT_TIMEOUT = 30_000;
 
@@ -28,6 +30,7 @@ export function WalletButton() {
     retry: 1,
   });
   const { connectAsync, connectors, isPending, error, reset } = useConnect();
+  const { openConnectModal } = useConnectModal();
   const { disconnect, disconnectAsync } = useDisconnect();
   const { switchChain } = useSwitchChain();
   const [isMiniApp, setIsMiniApp] = useState<boolean | null>(null);
@@ -61,9 +64,7 @@ export function WalletButton() {
 
   const walletOptions = useMemo(() => {
     const fixed = (id: string) => connectors.filter((item) => item.id === id);
-    const candidates = isMiniApp
-      ? [...fixed("farcaster"), ...fixed("walletConnect")]
-      : fixed("walletConnect");
+    const candidates = isMiniApp ? fixed("farcaster") : [];
     return candidates.filter(
       (connector, index) =>
         candidates.findIndex(
@@ -146,9 +147,8 @@ export function WalletButton() {
   function openConnection() {
     setConnectionError("");
     if (!isMiniApp) {
-      const connector = connectors.find(({ id }) => id === "walletConnect");
-      if (connector) {
-        void connectWallet(connector.id);
+      if (walletConnectConfigured && openConnectModal) {
+        openConnectModal();
         return;
       }
       setConnectionError(
@@ -188,7 +188,7 @@ export function WalletButton() {
       <button
         className="button"
         disabled={isPending || isReconnecting || isMiniApp === null}
-        aria-haspopup={isMiniApp ? undefined : "dialog"}
+        aria-haspopup="dialog"
         onClick={openConnection}
       >
         {isReconnecting
@@ -237,7 +237,9 @@ export function WalletButton() {
               <div className="wallet-modal-body">
                 <div className="wallet-list">
                   <span className="wallet-section-label">
-                    {walletOptions.length > 1 ? "AVAILABLE WALLETS" : "WALLET"}
+                    {walletOptions.length > 0 && walletConnectConfigured
+                      ? "AVAILABLE WALLETS"
+                      : "WALLET"}
                   </span>
                   {walletOptions.map((connector) => (
                     <button
@@ -265,12 +267,29 @@ export function WalletButton() {
                       <b>{isPending ? "Waiting…" : "Connect →"}</b>
                     </button>
                   ))}
-                  {walletOptions.length === 0 && (
-                    <div className="wallet-empty">
-                      WalletConnect is not configured. Add the project ID and
-                      reload this page.
-                    </div>
+                  {isMiniApp && walletConnectConfigured && (
+                    <button
+                      disabled={isPending}
+                      onClick={() => {
+                        setIsOpen(false);
+                        openConnectModal?.();
+                      }}
+                    >
+                      <span className="wallet-icon">W</span>
+                      <span>
+                        <strong>Other wallets</strong>
+                        <small>Choose an external wallet</small>
+                      </span>
+                      <b>Choose →</b>
+                    </button>
                   )}
+                  {walletOptions.length === 0 &&
+                    !(isMiniApp && walletConnectConfigured) && (
+                      <div className="wallet-empty">
+                        WalletConnect is not configured. Add the project ID and
+                        reload this page.
+                      </div>
+                    )}
                   {(connectionError || error) && (
                     <p className="wallet-modal-error" role="alert">
                       {connectionError || "The wallet could not connect."}

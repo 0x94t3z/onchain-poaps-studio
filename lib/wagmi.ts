@@ -1,32 +1,28 @@
 "use client";
 import { createConfig, createStorage, http } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
-import { walletConnect } from "wagmi/connectors";
+import { getDefaultWallets } from "@rainbow-me/rainbowkit";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const walletConnectProjectId =
   process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID?.trim();
+export const walletConnectConfigured = Boolean(walletConnectProjectId);
 
-// Keep the host wallet first for the native Mini App path. WalletConnect is the
-// single external-wallet route in both the Mini App and standalone website.
-const connectors = [
-  farcasterMiniApp(),
-  ...(typeof window !== "undefined" && walletConnectProjectId
-    ? [
-        walletConnect({
-          projectId: walletConnectProjectId,
-          showQrModal: true,
-          metadata: {
-            name: "Onchain POAPs",
-            description: "Create, distribute and collect POAPs on Base.",
-            url: appUrl,
-            icons: [`${appUrl}/icon-v2.png`],
-          },
-        }),
-      ]
-    : []),
-];
+const rainbowConnectors =
+  typeof window !== "undefined" && walletConnectProjectId
+    ? getDefaultWallets({
+        appName: "Onchain POAPs",
+        appDescription: "Create, distribute and collect POAPs on Base.",
+        appUrl,
+        appIcon: `${appUrl}/icon-v2.png`,
+        projectId: walletConnectProjectId,
+      }).connectors
+    : [];
+
+// Farcaster remains the native Mini App route. RainbowKit provides the wallet
+// picker and WalletConnect transport for every external wallet.
+const connectors = [farcasterMiniApp(), ...rainbowConnectors];
 
 export const config = createConfig({
   chains: [baseSepolia],
