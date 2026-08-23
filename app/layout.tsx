@@ -8,6 +8,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: "Onchain POAPs",
   description: "Create, distribute and collect fully onchain POAPs on Base.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon.png", type: "image/png", sizes: "1024x1024" },
+    ],
+    shortcut: "/icon.png",
+    apple: [{ url: "/icon.png", sizes: "1024x1024" }],
+  },
   openGraph: {
     title: "Onchain POAPs",
     description:

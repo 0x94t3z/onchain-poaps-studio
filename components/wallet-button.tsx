@@ -16,6 +16,13 @@ const BUILT_IN_CONNECTORS = new Set([
   "coinbaseWalletSDK",
 ]);
 
+function formatEnsName(name: string, maxLength = 24) {
+  if (name.length <= maxLength) return name;
+  const tailLength = 11;
+  const headLength = maxLength - tailLength - 1;
+  return `${name.slice(0, headLength)}…${name.slice(-tailLength)}`;
+}
+
 export function WalletButton() {
   const { address, isConnected, chainId } = useAccount();
   const { data: ensName } = useQuery({
@@ -26,7 +33,7 @@ export function WalletButton() {
     retry: 1,
   });
   const { connectAsync, connectors, isPending, error, reset } = useConnect();
-  const { disconnect } = useDisconnect();
+  const { disconnect, disconnectAsync } = useDisconnect();
   const { switchChain } = useSwitchChain();
   const [isMiniApp, setIsMiniApp] = useState<boolean | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -79,6 +86,23 @@ export function WalletButton() {
     );
   }, [connectors]);
 
+  async function requestConnection(connector: (typeof connectors)[number]) {
+    let timer = 0;
+    try {
+      return await Promise.race([
+        connectAsync({ connector, chainId: chain.id }),
+        new Promise<never>((_, reject) => {
+          timer = window.setTimeout(
+            () => reject(new Error("Wallet connection timed out")),
+            CONNECT_TIMEOUT,
+          );
+        }),
+      ]);
+    } finally {
+      window.clearTimeout(timer);
+    }
+  }
+
   async function connectWallet(connectorId: string) {
     reset();
     setConnectionError("");
@@ -90,30 +114,45 @@ export function WalletButton() {
       return;
     }
 
-    let timer = 0;
     try {
-      await Promise.race([
-        connectAsync({ connector }),
-        new Promise<never>((_, reject) => {
-          timer = window.setTimeout(
-            () => reject(new Error("Wallet connection timed out")),
-            CONNECT_TIMEOUT,
-          );
-        }),
-      ]);
+      await requestConnection(connector);
       setIsOpen(false);
     } catch (reason) {
+      let failure = reason;
+      const initialMessage = reason instanceof Error ? reason.message : "";
+
+      if (/connector already connected/i.test(initialMessage)) {
+        try {
+          await disconnectAsync({ connector });
+          reset();
+          await requestConnection(connector);
+          setIsOpen(false);
+          return;
+        } catch (retryReason) {
+          failure = retryReason;
+        }
+      }
+
       reset();
-      const message = reason instanceof Error ? reason.message : "";
+      const message = failure instanceof Error ? failure.message : "";
+      console.error("Wallet connection failed", failure);
       setConnectionError(
         /rejected|denied|cancelled/i.test(message)
           ? "Connection cancelled in the wallet."
-          : /timed out/i.test(message)
-            ? "The wallet did not respond. Try another option."
-            : "Could not connect. Unlock your wallet and try again.",
+          : /already pending|already processing|resource unavailable|-32002/i.test(
+                message,
+              )
+            ? "Your wallet already has a connection request open. Open the wallet to continue."
+            : /chain.*not configured|unsupported chain|unrecognized chain/i.test(
+                  message,
+                )
+              ? "Base Sepolia is not available in this wallet. Add or enable the network, then try again."
+              : /provider not found|connector not found/i.test(message)
+                ? "The selected wallet is no longer available. Reload the page and try again."
+                : /timed out/i.test(message)
+                  ? "The wallet did not respond. Try another option."
+                  : `Could not connect: ${message || "unknown wallet error"}`,
       );
-    } finally {
-      window.clearTimeout(timer);
     }
   }
 
@@ -137,10 +176,15 @@ export function WalletButton() {
     ) : (
       <button
         className="button secondary wallet-identity"
-        title={address}
+        title={ensName ? `${ensName} · ${address}` : address}
+        aria-label={
+          ensName
+            ? `Connected as ${ensName}, ${address}`
+            : `Connected as ${address}`
+        }
         onClick={() => disconnect()}
       >
-        {ensName || short(address)}
+        {ensName ? formatEnsName(ensName) : short(address)}
       </button>
     );
   }
