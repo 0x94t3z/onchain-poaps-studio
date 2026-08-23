@@ -1758,11 +1758,24 @@ textarea {
   }
 }
 
-/* Event collections stay browsable instead of stretching a few cards full width. */
+/* Large collection cards keep artwork and metadata readable at every viewport. */
+.event-collection {
+  scroll-margin-top: 96px;
+}
+
+.event-collection:focus {
+  outline: none;
+}
+
 .grid.event-grid {
-  grid-template-columns: repeat(auto-fill, minmax(260px, 300px));
-  justify-content: start;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
   gap: 20px;
+}
+
+.home-latest .grid.event-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .event-search {
@@ -1905,23 +1918,37 @@ textarea {
   white-space: nowrap;
 }
 
-@media (min-width: 851px) {
-  .explore-page .grid.event-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    width: 100%;
-  }
-}
-
 @media (max-width: 850px) {
   .grid.event-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
   }
-}
 
-@media (max-width: 360px) {
-  .grid.event-grid {
-    grid-template-columns: 1fr;
+  .home-latest .grid.event-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .home-latest .event-card:nth-child(n + 3),
+  .explore-page .event-card:nth-child(n + 5) {
+    display: none;
+  }
+
+  .event-grid .card-copy {
+    padding: 14px;
+  }
+
+  .event-grid .card-copy h3 {
+    font-size: clamp(16px, 4.6vw, 20px);
+  }
+
+  .event-grid .card-copy .eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+  }
+
+  .event-grid .card-copy p {
+    font-size: 13px;
   }
 }
 

@@ -49,7 +49,7 @@ export default function Home() {
           ONCHAIN ARTWORK ✦ FLEXIBLE MINTS ✦ STORED ON BASE
         </span>
       </section>
-      <section className="section">
+      <section className="section home-latest">
         <div className="section-head">
           <div>
             <span className="eyebrow">LATEST POAPS</span>
@@ -57,7 +57,7 @@ export default function Home() {
           </div>
           <Link href="/explore">View all →</Link>
         </div>
-        <EventGrid limit={4} />
+        <EventGrid limit={3} mobileLimit={2} />
       </section>
       <section className="features">
         <article>

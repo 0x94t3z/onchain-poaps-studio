@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useReadContract, useReadContracts } from "wagmi";
 import { Search, X } from "lucide-react";
 import { poapAbi } from "@/lib/abi";
@@ -10,16 +10,53 @@ import { EventCard } from "./event-card";
 export function EventGrid({
   owner,
   limit,
+  mobileLimit,
   paginate = false,
   searchable = false,
 }: {
   owner?: `0x${string}`;
   limit?: number;
+  mobileLimit?: number;
   paginate?: boolean;
   searchable?: boolean;
 }) {
   const [page, setPage] = useState(0);
   const [query, setQuery] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+  const collectionRef = useRef<HTMLDivElement>(null);
+  const restoreCollectionPosition = useRef(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 850px)");
+    const updateViewport = () => setIsMobile(media.matches);
+    updateViewport();
+    media.addEventListener("change", updateViewport);
+    return () => media.removeEventListener("change", updateViewport);
+  }, []);
+
+  useEffect(() => {
+    setPage(0);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (!restoreCollectionPosition.current) return;
+    restoreCollectionPosition.current = false;
+    const frame = window.requestAnimationFrame(() => {
+      collectionRef.current?.focus({ preventScroll: true });
+      collectionRef.current?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+        block: "start",
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [page]);
+
+  function goToPage(nextPage: number) {
+    restoreCollectionPosition.current = true;
+    setPage(nextPage);
+  }
   const total = useReadContract({
     address: CONTRACT,
     abi: poapAbi,
@@ -94,7 +131,8 @@ export function EventGrid({
   const filteredCards = normalizedQuery
     ? cards.filter((card) => card.search.includes(normalizedQuery))
     : cards;
-  const pageSize = limit ?? Math.max(filteredCards.length, 1);
+  const responsiveLimit = isMobile && mobileLimit ? mobileLimit : limit;
+  const pageSize = responsiveLimit ?? Math.max(filteredCards.length, 1);
   const pageCount = Math.max(1, Math.ceil(filteredCards.length / pageSize));
   const currentPage = paginate ? Math.min(page, pageCount - 1) : 0;
   const visibleCards = filteredCards.slice(
@@ -103,7 +141,13 @@ export function EventGrid({
   );
 
   return (
-    <>
+    <div
+      className="event-collection"
+      ref={collectionRef}
+      role="region"
+      aria-label="POAP collection"
+      tabIndex={-1}
+    >
       {searchable && (
         <div className="event-search">
           <label htmlFor="event-search">Search POAPs</label>
@@ -151,7 +195,7 @@ export function EventGrid({
         <nav className="event-pagination" aria-label="POAP collection pages">
           <button
             type="button"
-            onClick={() => setPage((value) => Math.max(0, value - 1))}
+            onClick={() => goToPage(Math.max(0, currentPage - 1))}
             disabled={currentPage === 0}
           >
             ← Previous
@@ -161,15 +205,13 @@ export function EventGrid({
           </span>
           <button
             type="button"
-            onClick={() =>
-              setPage((value) => Math.min(pageCount - 1, value + 1))
-            }
+            onClick={() => goToPage(Math.min(pageCount - 1, currentPage + 1))}
             disabled={currentPage === pageCount - 1}
           >
             Next →
           </button>
         </nav>
       )}
-    </>
+    </div>
   );
 }
