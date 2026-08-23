@@ -13,8 +13,7 @@ const CONNECT_TIMEOUT = 30_000;
 const BUILT_IN_CONNECTORS = new Set([
   "farcaster",
   "injected",
-  "metaMaskSDK",
-  "coinbaseWalletSDK",
+  "walletConnect",
 ]);
 
 function formatEnsName(name: string, maxLength = 24) {
@@ -72,22 +71,17 @@ export function WalletButton() {
       ({ id }) => !BUILT_IN_CONNECTORS.has(id),
     );
     const fixed = (id: string) => connectors.filter((item) => item.id === id);
-    const hasDiscoveredMetaMask = discovered.some(({ name, id }) =>
-      `${name} ${id}`.toLowerCase().includes("metamask"),
-    );
     const candidates = isMiniApp
       ? [
           ...fixed("farcaster"),
-          ...fixed("metaMaskSDK"),
-          ...fixed("coinbaseWalletSDK"),
+          ...fixed("walletConnect"),
         ]
       : [
           ...discovered,
           ...(hasInjectedWallet && discovered.length === 0
             ? fixed("injected")
             : []),
-          ...(hasDiscoveredMetaMask ? [] : fixed("metaMaskSDK")),
-          ...fixed("coinbaseWalletSDK"),
+          ...fixed("walletConnect"),
         ];
     return candidates.filter(
       (connector, index) =>
@@ -271,11 +265,9 @@ export function WalletButton() {
                         <small>
                           {connector.id === "farcaster"
                             ? "Recommended in Farcaster"
-                            : connector.id === "metaMaskSDK"
-                              ? "Open the MetaMask app"
-                              : connector.id === "coinbaseWalletSDK"
-                                ? "Extension or mobile app"
-                                : "Detected in this browser"}
+                            : connector.id === "walletConnect"
+                              ? "Use any compatible wallet"
+                              : "Detected in this browser"}
                         </small>
                       </span>
                       <b>{isPending ? "Waiting…" : "Connect →"}</b>

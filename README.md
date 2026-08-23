@@ -138,7 +138,7 @@ Browser or Farcaster host
 | Application | Next.js 15 App Router, React 19, strict TypeScript |
 | Contract client | Wagmi and Viem |
 | Query cache | TanStack Query |
-| Wallets | EIP-6963, injected providers, MetaMask SDK, Coinbase Wallet, and Farcaster host wallet |
+| Wallets | EIP-6963, injected providers, WalletConnect, and the Farcaster host wallet |
 | Mini App | Farcaster Mini App SDK and Wagmi connector |
 | QR generation | `qrcode` |
 | Testing | Vitest and TypeScript compiler |
@@ -186,6 +186,7 @@ Open [http://localhost:3000](http://localhost:3000). Contract reads work without
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_CONTRACT_ADDRESS=0xC3249356a483fbe17d5355D39105D2eA666d9de6
 NEXT_PUBLIC_RPC_URL=https://sepolia.base.org
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=
 FARCASTER_HEADER=
 FARCASTER_PAYLOAD=
 FARCASTER_SIGNATURE=
@@ -196,6 +197,7 @@ FARCASTER_SIGNATURE=
 | `NEXT_PUBLIC_APP_URL` | Production | Exact canonical HTTPS origin used in metadata and the Mini App manifest |
 | `NEXT_PUBLIC_CONTRACT_ADDRESS` | Optional | Overrides the included Base Sepolia deployment |
 | `NEXT_PUBLIC_RPC_URL` | Recommended | Base Sepolia RPC; use a dedicated provider for production traffic |
+| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | External wallets | Project ID from the [WalletConnect Dashboard](https://dashboard.walletconnect.com/); enables the WalletConnect option |
 | `FARCASTER_HEADER` | Verified Mini App | Account-association header signed for the production hostname |
 | `FARCASTER_PAYLOAD` | Verified Mini App | Account-association payload containing the production hostname |
 | `FARCASTER_SIGNATURE` | Verified Mini App | Account-association signature |
@@ -204,9 +206,9 @@ Never put a private key, seed phrase, or server-only RPC secret in a `NEXT_PUBLI
 
 ### Wallet behavior
 
-The standalone app discovers EIP-6963 and injected browser wallets and also supports MetaMask and Coinbase Wallet handoff. Inside a verified Farcaster host, the wallet chooser offers the native Farcaster wallet first, followed by MetaMask and Coinbase Wallet for users who prefer an external account. The selected connection is persisted across routes and restored after refresh. If the wallet is on another network, the UI requests Base Sepolia before contract interaction.
+The standalone app discovers EIP-6963 and injected browser wallets and offers WalletConnect as a vendor-neutral fallback. Inside a verified Farcaster host, the wallet chooser offers the native Farcaster wallet first, followed by WalletConnect for users who prefer an external account. The selected connection is persisted across routes and restored after refresh. If the wallet is on another network, the UI requests Base Sepolia before contract interaction.
 
-ENS primary names are resolved from Ethereum mainnet for display only; transactions remain on Base Sepolia. WalletConnect QR support is not configured, so `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` is intentionally not part of the environment contract.
+ENS primary names are resolved from Ethereum mainnet for display only; transactions remain on Base Sepolia. WalletConnect appears only when `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` is configured.
 
 ## Farcaster Mini App deployment
 

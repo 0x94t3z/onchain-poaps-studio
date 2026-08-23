@@ -1,22 +1,32 @@
 "use client";
 import { createConfig, createStorage, http } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
-import { coinbaseWallet, injected, metaMask } from "wagmi/connectors";
+import { injected, walletConnect } from "wagmi/connectors";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 
-// Keep the host wallet first for the native Mini App path. MetaMask and
-// Coinbase support mobile handoff; injected wallets serve standalone browsers.
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const walletConnectProjectId =
+  process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID?.trim();
+
+// Keep the host wallet first for the native Mini App path. WalletConnect gives
+// users a vendor-neutral external-wallet route; injected wallets serve the web.
 const connectors = [
   farcasterMiniApp(),
-  metaMask({
-    dappMetadata: {
-      name: "Onchain POAPs",
-      url:
-        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    },
-  }),
+  ...(typeof window !== "undefined" && walletConnectProjectId
+    ? [
+        walletConnect({
+          projectId: walletConnectProjectId,
+          showQrModal: true,
+          metadata: {
+            name: "Onchain POAPs",
+            description: "Create, distribute and collect POAPs on Base.",
+            url: appUrl,
+            icons: [`${appUrl}/icon-v2.png`],
+          },
+        }),
+      ]
+    : []),
   injected(),
-  coinbaseWallet({ appName: "Onchain POAPs Studio" }),
 ];
 
 export const config = createConfig({
