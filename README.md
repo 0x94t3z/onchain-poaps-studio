@@ -212,7 +212,7 @@ ENS primary names are resolved from Ethereum mainnet for display only; transacti
 
 1. Deploy to the final HTTPS origin.
 2. Set `NEXT_PUBLIC_APP_URL` to that exact origin and redeploy.
-3. Verify `/icon.png`, `/splash-v2.png`, `/api/og`, and `/.well-known/farcaster.json` return `200` publicly.
+3. Verify `/icon-v2.png`, `/splash-v2.png`, `/api/og`, and `/.well-known/farcaster.json` return `200` publicly.
 4. Open the [Farcaster Manifest Tool](https://farcaster.xyz/~/developers/mini-apps/manifest) and enter the hostname without a protocol or path.
 5. Sign the account association with the owning Farcaster account.
 6. Add the generated `header`, `payload`, and `signature` to the deployment environment.
