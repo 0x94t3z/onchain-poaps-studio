@@ -145,6 +145,17 @@ export function WalletButton() {
 
   function openConnection() {
     setConnectionError("");
+    if (!isMiniApp) {
+      const connector = connectors.find(({ id }) => id === "walletConnect");
+      if (connector) {
+        void connectWallet(connector.id);
+        return;
+      }
+      setConnectionError(
+        "WalletConnect is not configured. Add the project ID and reload this page.",
+      );
+      return;
+    }
     setIsOpen(true);
   }
 

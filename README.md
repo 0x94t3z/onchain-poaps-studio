@@ -206,7 +206,7 @@ Never put a private key, seed phrase, or server-only RPC secret in a `NEXT_PUBLI
 
 ### Wallet behavior
 
-The standalone app uses WalletConnect as its only wallet connection method. Inside a verified Farcaster host, the wallet chooser offers the native Farcaster wallet first, followed by WalletConnect for users who prefer an external account. The selected connection is persisted across routes and restored after refresh. If the wallet is on another network, the UI requests Base Sepolia before contract interaction.
+The standalone app opens WalletConnect directly without an intermediate wallet chooser. Inside a verified Farcaster host, the wallet chooser offers the native Farcaster wallet first, followed by WalletConnect for users who prefer an external account. The selected connection is persisted across routes and restored after refresh. If the wallet is on another network, the UI requests Base Sepolia before contract interaction.
 
 ENS primary names are resolved from Ethereum mainnet for display only; transactions remain on Base Sepolia. WalletConnect appears only when `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` is configured.
 
