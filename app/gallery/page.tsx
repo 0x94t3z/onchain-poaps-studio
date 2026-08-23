@@ -1,0 +1,3 @@
+'use client'
+import { useAccount } from 'wagmi'; import { EventGrid } from '@/components/event-grid'; import { WalletButton } from '@/components/wallet-button'
+export default function Gallery(){const {address}=useAccount();return <section className="page"><span className="eyebrow">YOUR COLLECTION</span><h1>Proof you were<br/><em>there.</em></h1><p className="lead">Your wallet’s attendance history, verified directly on Base.</p>{address?<EventGrid owner={address}/>:<div className="empty"><h3>Connect to reveal your collection</h3><p>We’ll read your POAP balances directly from the contract.</p><WalletButton/></div>}</section>}
