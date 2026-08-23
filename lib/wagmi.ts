@@ -1,5 +1,5 @@
 "use client";
-import { createConfig, http } from "wagmi";
+import { createConfig, createStorage, http } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
 import { coinbaseWallet, injected } from "wagmi/connectors";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
@@ -15,6 +15,11 @@ const connectors = [
 export const config = createConfig({
   chains: [baseSepolia],
   connectors,
+  storage: createStorage({
+    key: "wagmi",
+    storage:
+      typeof window === "undefined" ? undefined : window.localStorage,
+  }),
   transports: {
     [baseSepolia.id]: http(
       process.env.NEXT_PUBLIC_RPC_URL || "https://sepolia.base.org",

@@ -24,7 +24,7 @@ function formatEnsName(name: string, maxLength = 24) {
 }
 
 export function WalletButton() {
-  const { address, isConnected, chainId } = useAccount();
+  const { address, isConnected, isReconnecting, chainId } = useAccount();
   const { data: ensName } = useQuery({
     queryKey: ["ens-primary-name", address],
     queryFn: () => getPrimaryEnsName(address!),
@@ -193,11 +193,15 @@ export function WalletButton() {
     <div className="wallet-connect">
       <button
         className="button"
-        disabled={isPending || isMiniApp === null}
+        disabled={isPending || isReconnecting || isMiniApp === null}
         aria-haspopup={isMiniApp ? undefined : "dialog"}
         onClick={openConnection}
       >
-        {isPending ? "Connecting…" : "Connect wallet"}
+        {isReconnecting
+          ? "Restoring wallet…"
+          : isPending
+            ? "Connecting…"
+            : "Connect wallet"}
       </button>
 
       {connectionError && !isOpen && (

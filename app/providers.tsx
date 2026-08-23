@@ -6,7 +6,7 @@ import { useState } from "react";
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(() => new QueryClient());
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={config} reconnectOnMount>
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
     </WagmiProvider>
   );

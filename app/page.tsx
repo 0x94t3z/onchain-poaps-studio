@@ -42,7 +42,12 @@ export default function Home() {
         </div>
       </section>
       <section className="marquee">
-        ONCHAIN ARTWORK ✦ SOULBOUND OR TRANSFERABLE ✦ FOUR WAYS TO MINT ✦
+        <span className="marquee-desktop">
+          ONCHAIN ARTWORK ✦ SOULBOUND OR TRANSFERABLE ✦ FOUR WAYS TO MINT ✦
+        </span>
+        <span className="marquee-mobile">
+          ONCHAIN ARTWORK ✦ FLEXIBLE MINTS ✦ STORED ON BASE
+        </span>
       </section>
       <section className="section">
         <div className="section-head">
@@ -52,7 +57,7 @@ export default function Home() {
           </div>
           <Link href="/explore">View all →</Link>
         </div>
-        <EventGrid />
+        <EventGrid limit={4} />
       </section>
       <section className="features">
         <article>

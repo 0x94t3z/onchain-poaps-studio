@@ -28,7 +28,7 @@ export default function Manage({
 }) {
   const { id } = use(params),
     eventId = BigInt(id),
-    { address } = useAccount();
+    { address, isReconnecting } = useAccount();
   const query = useReadContract({
     address: CONTRACT,
     abi: poapAbi,
@@ -48,10 +48,12 @@ export default function Manage({
       return null;
     }
   }, [list]);
-  if (!query.data)
+  if (!query.data || isReconnecting)
     return (
       <section className="page">
-        <div className="empty">Loading creator controls…</div>
+        <div className="empty">
+          {isReconnecting ? "Restoring wallet connection…" : "Loading creator controls…"}
+        </div>
       </section>
     );
   const [name, , , , root, , creator, createdAt, , , isPublic] = query.data;
@@ -90,7 +92,20 @@ export default function Manage({
       },
     );
   }
-  if (address && !isCreator)
+  if (!address)
+    return (
+      <section className="page">
+        <div className="empty">
+          <span className="eyebrow">EVENT SETTINGS · EVENT #{id}</span>
+          <h2>Connect the creator wallet</h2>
+          <p>
+            Connect the wallet that created this POAP to change mint settings,
+            manage its allowlist, or issue signed passes.
+          </p>
+        </div>
+      </section>
+    );
+  if (!isCreator)
     return (
       <section className="page">
         <div className="empty">

@@ -1,17 +1,35 @@
 import { EventGrid } from "@/components/event-grid";
+import { CONTRACT } from "@/lib/constants";
+
 export default function Explore() {
   return (
-    <section className="page">
-      <span className="eyebrow">EXPLORE</span>
-      <h1>
-        POAPs registered
-        <br />
-        <em>onchain.</em>
-      </h1>
-      <p className="lead">
-        These are read directly from the Onchain POAPs contract on Base Sepolia.
-      </p>
-      <EventGrid />
+    <section className="page explore-page">
+      <div className="explore-intro">
+        <div>
+          <span className="eyebrow">EXPLORE</span>
+          <h1>
+            POAPs registered
+            <br />
+            <em>onchain.</em>
+          </h1>
+        </div>
+        <aside className="explore-context">
+          <span className="eyebrow">BASE SEPOLIA · LIVE</span>
+          <h2>Read from the contract.</h2>
+          <p>
+            Every card below comes directly from the deployed Onchain POAPs
+            contract. Artwork and event details are stored onchain.
+          </p>
+          <a
+            href={`https://sepolia.basescan.org/address/${CONTRACT}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            View contract ↗
+          </a>
+        </aside>
+      </div>
+      <EventGrid limit={8} paginate searchable />
     </section>
   );
 }
