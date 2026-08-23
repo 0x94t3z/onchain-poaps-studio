@@ -9,6 +9,7 @@
 
   <p>
     <a href="https://poaps.0x94t3z.site"><strong>Open the app</strong></a> ·
+    <a href="https://farcaster.xyz/miniapps/7hCH6s_9iSJh/onchain-poaps">Open in Farcaster</a> ·
     <a href="https://poaps.0x94t3z.site/explore">Explore POAPs</a> ·
     <a href="https://poaps.0x94t3z.site/docs">Read the docs</a> ·
     <a href="https://poaps.0x94t3z.site/.well-known/farcaster.json">Mini App manifest</a>
@@ -35,7 +36,7 @@ Onchain POAPs is a production-oriented, open-source client for the verified Onch
 | Resource | Link |
 | --- | --- |
 | Standalone application | [poaps.0x94t3z.site](https://poaps.0x94t3z.site) |
-| Farcaster Mini App | [Open the Mini App home URL](https://poaps.0x94t3z.site) |
+| Farcaster Mini App | [Open in Farcaster](https://farcaster.xyz/miniapps/7hCH6s_9iSJh/onchain-poaps) |
 | Signed Mini App manifest | [`.well-known/farcaster.json`](https://poaps.0x94t3z.site/.well-known/farcaster.json) |
 | Verified contract | [`0xC324…9de6`](https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6#code) |
 | Example registered POAP | [Event #7](https://poaps.0x94t3z.site/event/7) |
@@ -211,7 +212,7 @@ ENS primary names are resolved from Ethereum mainnet for display only; transacti
 
 1. Deploy to the final HTTPS origin.
 2. Set `NEXT_PUBLIC_APP_URL` to that exact origin and redeploy.
-3. Verify `/icon.png`, `/splash.png`, `/api/og`, and `/.well-known/farcaster.json` return `200` publicly.
+3. Verify `/icon.png`, `/splash-v2.png`, `/api/og`, and `/.well-known/farcaster.json` return `200` publicly.
 4. Open the [Farcaster Manifest Tool](https://farcaster.xyz/~/developers/mini-apps/manifest) and enter the hostname without a protocol or path.
 5. Sign the account association with the owning Farcaster account.
 6. Add the generated `header`, `payload`, and `signature` to the deployment environment.

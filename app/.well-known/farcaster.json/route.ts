@@ -22,7 +22,7 @@ export function GET() {
       name: "Onchain POAPs",
       homeUrl: url,
       iconUrl: `${url}/icon.png`,
-      splashImageUrl: `${url}/splash.png`,
+      splashImageUrl: `${url}/splash-v2.png`,
       splashBackgroundColor: "#eeff41",
       subtitle: "Create and mint event POAPs",
       description:

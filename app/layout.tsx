@@ -32,7 +32,7 @@ export const metadata: Metadata = {
           type: "launch_miniapp",
           name: "Onchain POAPs",
           url: appUrl,
-          splashImageUrl: `${appUrl}/splash.png`,
+          splashImageUrl: `${appUrl}/splash-v2.png`,
           splashBackgroundColor: "#eeff41",
         },
       },
