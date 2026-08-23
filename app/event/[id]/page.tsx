@@ -2,10 +2,16 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useBalance, useReadContract } from "wagmi";
 import type { Address, Hex } from "viem";
 import { poapAbi } from "@/lib/abi";
-import { CONTRACT, ZERO_ROOT, explorer, opensea } from "@/lib/constants";
+import {
+  chain,
+  CONTRACT,
+  ZERO_ROOT,
+  explorer,
+  opensea,
+} from "@/lib/constants";
 import { getPrimaryEnsName } from "@/lib/ens";
 import { decodeMetadata, deadline, remaining, short } from "@/lib/metadata";
 import { TxButton } from "@/components/tx-button";
@@ -18,6 +24,11 @@ export default function EventPage({
   const { id } = use(params);
   const eventId = BigInt(id);
   const { address } = useAccount();
+  const balance = useBalance({
+    address,
+    chainId: chain.id,
+    query: { enabled: Boolean(address) },
+  });
   const e = useReadContract({
     address: CONTRACT,
     abi: poapAbi,
@@ -77,6 +88,8 @@ export default function EventPage({
   ] = e.data;
   const meta = decodeMetadata(u.data);
   const sigEnd = deadline(createdAt, 37);
+  const isCheckingGas = Boolean(address) && balance.isLoading;
+  const needsTestEth = Boolean(address) && balance.data?.value === 0n;
   const methods = [
     {
       id: "public",
@@ -166,6 +179,22 @@ export default function EventPage({
             </button>
           ))}
         </div>
+        {needsTestEth && (
+          <div className="funding-note" role="status">
+            <strong>Base Sepolia test ETH required</strong>
+            <p>
+              This wallet has no test ETH to pay network gas. Test ETH has no
+              real-world value.
+            </p>
+            <a
+              href="https://docs.base.org/base-chain/network-information/network-faucets"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Find a Base Sepolia faucet ↗
+            </a>
+          </div>
+        )}
         {claimed.data ? (
           <div className="success big">
             This wallet already holds this POAP ✓
@@ -191,7 +220,9 @@ export default function EventPage({
                   name="mint"
                   args={[eventId]}
                   label="Mint public POAP"
-                  disabled={!address || !isPublic}
+                  disabled={
+                    !address || !isPublic || isCheckingGas || needsTestEth
+                  }
                 />
               </div>
             )}
@@ -211,7 +242,12 @@ export default function EventPage({
                   name="allowlistMint"
                   args={[eventId, proofs]}
                   label="Verify proof & mint"
-                  disabled={!address || root === ZERO_ROOT}
+                  disabled={
+                    !address ||
+                    root === ZERO_ROOT ||
+                    isCheckingGas ||
+                    needsTestEth
+                  }
                 />
               </div>
             )}
@@ -232,7 +268,12 @@ export default function EventPage({
                   name="mintWithSignature"
                   args={[eventId, sig as Hex]}
                   label="Use signed pass & mint"
-                  disabled={!address || !/^0x[0-9a-fA-F]{130}$/.test(sig)}
+                  disabled={
+                    !address ||
+                    !/^0x[0-9a-fA-F]{130}$/.test(sig) ||
+                    isCheckingGas ||
+                    needsTestEth
+                  }
                 />
               </div>
             )}

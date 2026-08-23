@@ -773,6 +773,23 @@ code {
   color: #b82020;
   overflow-wrap: anywhere;
 }
+.funding-note {
+  padding: 18px 20px;
+  border: 1px solid #c89b16;
+  background: #fff4c5;
+  color: var(--ink);
+}
+.funding-note strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.funding-note p {
+  margin: 0 0 8px;
+}
+.funding-note a {
+  font-weight: 700;
+  text-decoration: underline;
+}
 .success {
   background: #dff0c4;
   padding: 13px;

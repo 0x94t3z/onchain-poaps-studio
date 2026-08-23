@@ -52,7 +52,27 @@ export function TxButton<
             ? "Confirming…"
             : label}
       </button>
-      {error && <p className="error">{error.message.split("\n")[0]}</p>}
+      {error && <p className="error">{friendlyTransactionError(error)}</p>}
     </div>
   );
+}
+
+function friendlyTransactionError(error: Error) {
+  const candidate = error as Error & {
+    shortMessage?: string;
+    details?: string;
+  };
+  const message =
+    candidate.shortMessage || candidate.details || error.message || "";
+
+  if (/insufficient funds|exceeds.*balance|not enough funds/i.test(message))
+    return "This wallet does not have enough Base Sepolia ETH to pay network gas.";
+  if (/user rejected|user denied|rejected the request/i.test(message))
+    return "Transaction cancelled in the wallet.";
+  if (/already claimed|already minted/i.test(message))
+    return "This wallet has already claimed this POAP.";
+  if (/contract function .* reverted|execution reverted/i.test(message))
+    return "The contract rejected this transaction. Check the wallet's eligibility and the selected mint method.";
+
+  return message.split("\n")[0] || "The transaction could not be prepared.";
 }
