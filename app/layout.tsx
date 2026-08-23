@@ -49,7 +49,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <main>{children}</main>
           <footer>
             <span>ONCHAIN POAPS · BASE SEPOLIA</span>
-            <span>Open-source frontend for the Onchain POAPs contract.</span>
+            <span>Create, distribute and collect attendance onchain.</span>
           </footer>
         </Providers>
       </body>
