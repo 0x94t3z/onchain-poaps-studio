@@ -1,8 +1,271 @@
-'use client'
-import {use,useEffect,useMemo,useState} from 'react'; import {useAccount,useReadContract,useSignMessage} from 'wagmi'; import {encodePacked,getAddress,isAddress,keccak256,type Address,type Hex} from 'viem'; import QRCode from 'qrcode'; import {poapAbi} from '@/lib/abi'; import {chain,CONTRACT,CREATOR_WINDOW,SIGNATURE_WINDOW,ZERO_ROOT} from '@/lib/constants'; import {deadline,remaining} from '@/lib/metadata'; import {buildTree,normalizeAddresses} from '@/lib/merkle'; import {TxButton} from '@/components/tx-button'
-export default function Manage({params}:{params:Promise<{id:string}>}){const {id}=use(params),eventId=BigInt(id),{address}=useAccount();const query=useReadContract({address:CONTRACT,abi:poapAbi,functionName:'events',args:[eventId]});const [list,setList]=useState(''),[recipient,setRecipient]=useState(''),[batch,setBatch]=useState(''),[signature,setSignature]=useState<Hex>(),[qr,setQr]=useState('');const signer=useSignMessage();const tree=useMemo(()=>{try{return list.trim()?buildTree(normalizeAddresses(list)):null}catch{return null}},[list]);
- if(!query.data)return <section className="page"><div className="empty">Loading creator controls…</div></section>;const [name,,,,root,,creator,createdAt,,,isPublic]=query.data;const isCreator=address?.toLowerCase()===creator.toLowerCase(),controlEnd=deadline(createdAt,30),signatureEnd=deadline(createdAt,37),controlOpen=Date.now()/1000<=controlEnd;let recipients:Address[]=[];try{recipients=normalizeAddresses(batch)}catch{}
- async function sign(){if(!isAddress(recipient))return;const hash=keccak256(encodePacked(['uint256','uint256','address'],[eventId,BigInt(chain.id),getAddress(recipient)]));signer.signMessage({message:{raw:hash}},{onSuccess:async sig=>{setSignature(sig);const base=process.env.NEXT_PUBLIC_APP_URL||window.location.origin;const url=`${base}/event/${id}?method=signature&signature=${sig}`;setQr(await QRCode.toDataURL(url,{width:420,margin:2,color:{dark:'#171717',light:'#eeff41'}}))}})}
- if(address&&!isCreator)return <section className="page"><div className="empty"><h2>Creator access only</h2><p>This POAP is controlled by {creator}.</p></div></section>
- return <section className="page manage"><span className="eyebrow">CREATOR STUDIO · EVENT #{id}</span><h1>Manage<br/><em>{name}</em></h1><div className="deadline-bar"><span>Creator controls</span><strong>{remaining(controlEnd)}</strong><span>Signed passes</span><strong>{remaining(signatureEnd)}</strong></div><div className="manage-grid"><article className="panel"><span className="eyebrow">PUBLIC MINT</span><h2>{isPublic?'Open to everyone':'Currently closed'}</h2><p>You can toggle this status only during the 30-day creator window. Existing mints are never affected.</p><TxButton name="updateEventPublic" args={[eventId,!isPublic]} label={isPublic?'Close public mint':'Open public mint'} disabled={!isCreator||!controlOpen}/></article><article className="panel"><span className="eyebrow">CREATOR DROP</span><h2>Send directly</h2><p>Batch mint to up to 101 unique recipients. Wallets that already claimed are skipped by the contract.</p><textarea className="mono" value={batch} onChange={e=>setBatch(e.target.value)} placeholder="One address per line"/><small>{recipients.length}/101 valid unique addresses</small><TxButton name="creatorMint" args={[eventId,recipients]} label="Mint to recipients" disabled={!isCreator||!controlOpen||!recipients.length||recipients.length>101}/></article><article className="panel wide-card"><span className="eyebrow">ALLOWLIST BUILDER</span><h2>Addresses in. Proofs out.</h2><p>The app hashes each address exactly as Solidity does, sorts pairs, and creates a proof for every recipient. The root can be set only once; allowlist minting itself has no expiry.</p><textarea className="mono tall" value={list} onChange={e=>setList(e.target.value)} placeholder="0x123…\n0x456…"/>{tree&&<><div className="root"><span>Merkle root</span><code>{tree.root}</code></div><button className="button secondary" onClick={()=>download(`${name}-allowlist.json`,JSON.stringify({eventId:id,chainId:chain.id,contract:CONTRACT,root:tree.root,recipients:tree.entries},null,2))}>Download recipient proofs</button><TxButton name="updateAllowlistRoot" args={[eventId,tree.root]} label="Set root permanently" disabled={!isCreator||!controlOpen||root!==ZERO_ROOT}/></>}{root!==ZERO_ROOT&&<div className="success">Allowlist root is already locked onchain.</div>}</article><article className="panel wide-card"><span className="eyebrow">SIGNED PASS + QR</span><h2>A one-wallet invitation</h2><ol><li>Enter the attendee wallet.</li><li>Your wallet signs event ID + Base Sepolia chain ID + recipient. This is an offchain personal signature—no gas.</li><li>Share the signature or QR privately. Only that wallet can redeem it before the 37-day deadline.</li></ol><input value={recipient} onChange={e=>setRecipient(e.target.value)} placeholder="Recipient 0x address"/><button className="button" disabled={!isCreator||!isAddress(recipient)||Date.now()/1000>signatureEnd||signer.isPending} onClick={sign}>Generate signed pass</button>{signature&&<div className="pass"><code>{signature}</code>{qr&&<img src={qr} alt="Signed mint QR code"/>}<button className="button secondary" onClick={()=>navigator.clipboard.writeText(signature)}>Copy signature</button><p className="note">Because the signature is recipient-specific, a public poster cannot grant every scanner a mint. Generate one QR per known attendee. This limitation comes from the contract payload.</p></div>}</article></div></section>}
-function download(name:string,data:string){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+"use client";
+import { use, useEffect, useMemo, useState } from "react";
+import { useAccount, useReadContract, useSignMessage } from "wagmi";
+import {
+  encodePacked,
+  getAddress,
+  isAddress,
+  keccak256,
+  type Address,
+  type Hex,
+} from "viem";
+import QRCode from "qrcode";
+import { poapAbi } from "@/lib/abi";
+import {
+  chain,
+  CONTRACT,
+  CREATOR_WINDOW,
+  SIGNATURE_WINDOW,
+  ZERO_ROOT,
+} from "@/lib/constants";
+import { deadline, remaining } from "@/lib/metadata";
+import { buildTree, normalizeAddresses } from "@/lib/merkle";
+import { TxButton } from "@/components/tx-button";
+export default function Manage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params),
+    eventId = BigInt(id),
+    { address } = useAccount();
+  const query = useReadContract({
+    address: CONTRACT,
+    abi: poapAbi,
+    functionName: "events",
+    args: [eventId],
+  });
+  const [list, setList] = useState(""),
+    [recipient, setRecipient] = useState(""),
+    [batch, setBatch] = useState(""),
+    [signature, setSignature] = useState<Hex>(),
+    [qr, setQr] = useState("");
+  const signer = useSignMessage();
+  const tree = useMemo(() => {
+    try {
+      return list.trim() ? buildTree(normalizeAddresses(list)) : null;
+    } catch {
+      return null;
+    }
+  }, [list]);
+  if (!query.data)
+    return (
+      <section className="page">
+        <div className="empty">Loading creator controls…</div>
+      </section>
+    );
+  const [name, , , , root, , creator, createdAt, , , isPublic] = query.data;
+  const isCreator = address?.toLowerCase() === creator.toLowerCase(),
+    controlEnd = deadline(createdAt, 30),
+    signatureEnd = deadline(createdAt, 37),
+    controlOpen = Date.now() / 1000 <= controlEnd;
+  let recipients: Address[] = [];
+  try {
+    recipients = normalizeAddresses(batch);
+  } catch {}
+  async function sign() {
+    if (!isAddress(recipient)) return;
+    const hash = keccak256(
+      encodePacked(
+        ["uint256", "uint256", "address"],
+        [eventId, BigInt(chain.id), getAddress(recipient)],
+      ),
+    );
+    signer.signMessage(
+      { message: { raw: hash } },
+      {
+        onSuccess: async (sig) => {
+          setSignature(sig);
+          const base =
+            process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+          const url = `${base}/event/${id}?method=signature&signature=${sig}`;
+          setQr(
+            await QRCode.toDataURL(url, {
+              width: 420,
+              margin: 2,
+              color: { dark: "#171717", light: "#eeff41" },
+            }),
+          );
+        },
+      },
+    );
+  }
+  if (address && !isCreator)
+    return (
+      <section className="page">
+        <div className="empty">
+          <h2>Creator access only</h2>
+          <p>This POAP is controlled by {creator}.</p>
+        </div>
+      </section>
+    );
+  return (
+    <section className="page manage">
+      <span className="eyebrow">EVENT SETTINGS · EVENT #{id}</span>
+      <h1>
+        Manage
+        <br />
+        <em>{name}</em>
+      </h1>
+      <div className="deadline-bar">
+        <span>Creator controls</span>
+        <strong>{remaining(controlEnd)}</strong>
+        <span>Signed passes</span>
+        <strong>{remaining(signatureEnd)}</strong>
+      </div>
+      <div className="manage-grid">
+        <article className="panel">
+          <span className="eyebrow">PUBLIC MINT</span>
+          <h2>{isPublic ? "Public mint is open" : "Public mint is closed"}</h2>
+          <p>
+            You can toggle this status only during the 30-day creator window.
+            Existing mints are never affected.
+          </p>
+          <TxButton
+            name="updateEventPublic"
+            args={[eventId, !isPublic]}
+            label={isPublic ? "Close public mint" : "Open public mint"}
+            disabled={!isCreator || !controlOpen}
+          />
+        </article>
+        <article className="panel">
+          <span className="eyebrow">CREATOR DROP</span>
+          <h2>Mint to attendee wallets</h2>
+          <p>
+            Batch mint to up to 101 unique recipients. Wallets that already
+            claimed are skipped by the contract.
+          </p>
+          <textarea
+            className="mono"
+            value={batch}
+            onChange={(e) => setBatch(e.target.value)}
+            placeholder="One address per line"
+          />
+          <small>{recipients.length}/101 valid unique addresses</small>
+          <TxButton
+            name="creatorMint"
+            args={[eventId, recipients]}
+            label="Mint to recipients"
+            disabled={
+              !isCreator ||
+              !controlOpen ||
+              !recipients.length ||
+              recipients.length > 101
+            }
+          />
+        </article>
+        <article className="panel wide-card">
+          <span className="eyebrow">ALLOWLIST BUILDER</span>
+          <h2>Build an allowlist</h2>
+          <p>
+            Paste one wallet per line. Download the JSON before saving the root;
+            each recipient needs their proof to mint. The root can only be set
+            once.
+          </p>
+          <textarea
+            className="mono tall"
+            value={list}
+            onChange={(e) => setList(e.target.value)}
+            placeholder="0x123…\n0x456…"
+          />
+          {tree && (
+            <>
+              <div className="root">
+                <span>Merkle root</span>
+                <code>{tree.root}</code>
+              </div>
+              <button
+                className="button secondary"
+                onClick={() =>
+                  download(
+                    `${name}-allowlist.json`,
+                    JSON.stringify(
+                      {
+                        eventId: id,
+                        chainId: chain.id,
+                        contract: CONTRACT,
+                        root: tree.root,
+                        recipients: tree.entries,
+                      },
+                      null,
+                      2,
+                    ),
+                  )
+                }
+              >
+                Download recipient proofs
+              </button>
+              <TxButton
+                name="updateAllowlistRoot"
+                args={[eventId, tree.root]}
+                label="Set root permanently"
+                disabled={!isCreator || !controlOpen || root !== ZERO_ROOT}
+              />
+            </>
+          )}
+          {root !== ZERO_ROOT && (
+            <div className="success">
+              Allowlist root is already locked onchain.
+            </div>
+          )}
+        </article>
+        <article className="panel wide-card">
+          <span className="eyebrow">SIGNED PASS + QR</span>
+          <h2>Issue a signed mint</h2>
+          <ol>
+            <li>Enter the attendee wallet.</li>
+            <li>
+              Sign the event ID, Base Sepolia chain ID, and recipient address.
+              This does not send a transaction or cost gas.
+            </li>
+            <li>
+              Share the signature or QR privately. Only that wallet can redeem
+              it before the 37-day deadline.
+            </li>
+          </ol>
+          <input
+            value={recipient}
+            onChange={(e) => setRecipient(e.target.value)}
+            placeholder="Recipient 0x address"
+          />
+          <button
+            className="button"
+            disabled={
+              !isCreator ||
+              !isAddress(recipient) ||
+              Date.now() / 1000 > signatureEnd ||
+              signer.isPending
+            }
+            onClick={sign}
+          >
+            Generate signed pass
+          </button>
+          {signature && (
+            <div className="pass">
+              <code>{signature}</code>
+              {qr && <img src={qr} alt="Signed mint QR code" />}
+              <button
+                className="button secondary"
+                onClick={() => navigator.clipboard.writeText(signature)}
+              >
+                Copy signature
+              </button>
+              <p className="note">
+                Because the signature is recipient-specific, a public poster
+                cannot grant every scanner a mint. Generate one QR per known
+                attendee. This limitation comes from the contract payload.
+              </p>
+            </div>
+          )}
+        </article>
+      </div>
+    </section>
+  );
+}
+function download(name: string, data: string) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}

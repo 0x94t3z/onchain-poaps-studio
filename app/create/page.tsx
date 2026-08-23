@@ -1,10 +1,10 @@
 "use client";
 import { useMemo, useState } from "react";
-import { isHex } from "viem";
+import { ArtworkStudio } from "@/components/artwork-studio";
 import { TxButton } from "@/components/tx-button";
 import { ZERO_ROOT } from "@/lib/constants";
 import { buildTree, normalizeAddresses } from "@/lib/merkle";
-import { Check, Upload } from "lucide-react";
+import { Check } from "lucide-react";
 const blank =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="256" fill="#171717"/><circle cx="256" cy="256" r="210" fill="none" stroke="#eeff41" stroke-width="12"/><text x="256" y="240" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="white">I WAS</text><text x="256" y="302" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="#eeff41">THERE</text></svg>';
 export default function Create() {
@@ -35,24 +35,16 @@ export default function Create() {
     svg.trim().startsWith("<svg");
   const flags = (soulbound ? 1 : 0) + (isPublic ? 2 : 0);
   const image = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-  function upload(file?: File) {
-    if (!file) return;
-    file.text().then((text) => {
-      if (!text.trim().startsWith("<svg"))
-        return alert("Please choose a raw .svg file.");
-      setSvg(text);
-    });
-  }
   return (
     <section className="page create">
-      <span className="eyebrow">CREATE · STEP {step} OF 3</span>
+      <span className="eyebrow">CREATE · STEP {step} OF 4</span>
       <h1>
         Create an
         <br />
         <em>onchain POAP.</em>
       </h1>
       <div className="stepper">
-        {["Details", "Distribution", "Review"].map((x, i) => (
+        {["Artwork", "Details", "Distribution", "Review"].map((x, i) => (
           <button
             onClick={() => i + 1 <= step && setStep(i + 1)}
             className={step === i + 1 ? "current" : step > i + 1 ? "done" : ""}
@@ -63,7 +55,10 @@ export default function Create() {
           </button>
         ))}
       </div>
-      {step === 1 && (
+      <div hidden={step !== 1}>
+        <ArtworkStudio onChange={setSvg} />
+      </div>
+      {step === 2 && (
         <div className="form-layout">
           <div className="panel form">
             <label>
@@ -80,7 +75,7 @@ export default function Create() {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="What made this moment matter?"
+                placeholder="What was this event about?"
               />
             </label>
             <div className="split">
@@ -110,39 +105,19 @@ export default function Create() {
                 placeholder="https://…"
               />
             </label>
-            <label className="upload">
-              <Upload />
-              <strong>Upload SVG artwork</strong>
-              <span>
-                Raw SVG only. Optimize with{" "}
-                <a
-                  target="_blank"
-                  href="https://jakearchibald.github.io/svgomg/"
-                >
-                  SVGOMG ↗
-                </a>{" "}
-                before writing it onchain.
-              </span>
-              <input
-                hidden
-                type="file"
-                accept=".svg,image/svg+xml"
-                onChange={(e) => upload(e.target.files?.[0])}
-              />
-            </label>
           </div>
           <aside className="preview panel">
             <span className="eyebrow">LIVE PREVIEW</span>
             <img src={image} alt="POAP preview" />
             <h3>{name || "Your POAP name"}</h3>
-            <p>{description || "Your story will appear here."}</p>
+            <p>{description || "Your event description will appear here."}</p>
             <small>
               {new Blob([svg]).size.toLocaleString()} bytes · stored onchain
             </small>
           </aside>
         </div>
       )}
-      {step === 2 && (
+      {step === 3 && (
         <div className="panel form narrow">
           <h2>How can people collect it?</h2>
           <Toggle
@@ -177,12 +152,12 @@ export default function Create() {
             </div>
           )}
           <p className="note">
-            Signature invitations do not need setup now. The creator can sign
+            Signed mints do not need setup now. The creator can sign
             recipient-specific passes for 37 days after registration.
           </p>
         </div>
       )}
-      {step === 3 && (
+      {step === 4 && (
         <div className="form-layout">
           <div className="panel review">
             <span className="eyebrow">FINAL CHECK</span>
@@ -190,7 +165,7 @@ export default function Create() {
             <dl>
               <div>
                 <dt>Transfer</dt>
-                <dd>{soulbound ? "Soulbound forever" : "Transferable"}</dd>
+                <dd>{soulbound ? "Soulbound" : "Transferable"}</dd>
               </div>
               <div>
                 <dt>Public mint</dt>
@@ -244,10 +219,13 @@ export default function Create() {
             Back
           </button>
         )}
-        {step < 3 && (
+        {step < 4 && (
           <button
             className="button"
-            disabled={step === 1 && !valid}
+            disabled={
+              (step === 1 && !svg.trim().startsWith("<svg")) ||
+              (step === 2 && !valid)
+            }
             onClick={() => setStep(step + 1)}
           >
             Continue →

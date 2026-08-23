@@ -1,4 +1,50 @@
-import type { Metadata } from 'next'; import './globals.css'; import { Providers } from './providers'; import { Header } from '@/components/header'; import { MiniAppReady } from '@/components/miniapp-ready'
-const appUrl=process.env.NEXT_PUBLIC_APP_URL||'http://localhost:3000'
-export const metadata:Metadata={metadataBase:new URL(appUrl),title:'Onchain POAPs — memories that live forever',description:'Create, distribute and collect fully onchain POAPs on Base.',openGraph:{title:'Onchain POAPs',description:'Memories that live forever — fully onchain on Base.',images:['/api/og']},other:{'fc:miniapp':JSON.stringify({version:'next',imageUrl:`${appUrl}/api/og`,button:{title:'Open Onchain POAPs',action:{type:'launch_miniapp',name:'Onchain POAPs',url:appUrl,splashImageUrl:`${appUrl}/splash.png`,splashBackgroundColor:'#eeff41'}}})}}
-export default function Layout({children}:{children:React.ReactNode}){return <html lang="en" suppressHydrationWarning><body suppressHydrationWarning><Providers><MiniAppReady/><Header/><main>{children}</main><footer><span>ONCHAIN POAPS · BASE SEPOLIA</span><span>Open-source frontend for the Onchain POAPs contract.</span></footer></Providers></body></html>}
+import type { Metadata } from "next";
+import "./globals.css";
+import { Providers } from "./providers";
+import { Header } from "@/components/header";
+import { MiniAppReady } from "@/components/miniapp-ready";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+export const metadata: Metadata = {
+  metadataBase: new URL(appUrl),
+  title: "Onchain POAPs",
+  description: "Create, distribute and collect fully onchain POAPs on Base.",
+  openGraph: {
+    title: "Onchain POAPs",
+    description:
+      "Create and distribute ERC-1155 attendance tokens with SVG artwork stored on Base.",
+    images: ["/api/og"],
+  },
+  other: {
+    "fc:miniapp": JSON.stringify({
+      version: "next",
+      imageUrl: `${appUrl}/api/og`,
+      button: {
+        title: "Open Onchain POAPs",
+        action: {
+          type: "launch_miniapp",
+          name: "Onchain POAPs",
+          url: appUrl,
+          splashImageUrl: `${appUrl}/splash.png`,
+          splashBackgroundColor: "#eeff41",
+        },
+      },
+    }),
+  },
+};
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
+        <Providers>
+          <MiniAppReady />
+          <Header />
+          <main>{children}</main>
+          <footer>
+            <span>ONCHAIN POAPS · BASE SEPOLIA</span>
+            <span>Open-source frontend for the Onchain POAPs contract.</span>
+          </footer>
+        </Providers>
+      </body>
+    </html>
+  );
+}

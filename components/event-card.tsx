@@ -1,3 +1,30 @@
-import Link from 'next/link'
-import type { Metadata } from '@/lib/metadata'
-export function EventCard({id,meta,publicMint,soulbound}:{id:bigint,meta:Metadata,publicMint:boolean,soulbound:boolean}){return <Link href={`/event/${id}`} className="event-card"><div className="art"><img src={meta.image} alt={meta.name}/><span className="id">#{id.toString().padStart(3,'0')}</span></div><div className="card-copy"><div className="eyebrow">{publicMint?'OPEN MINT':'GATED'} · {soulbound?'SOULBOUND':'TRANSFERABLE'}</div><h3>{meta.name}</h3><p>{meta.description||'A permanent onchain memory.'}</p></div></Link>}
+import Link from "next/link";
+import type { Metadata } from "@/lib/metadata";
+export function EventCard({
+  id,
+  meta,
+  publicMint,
+  soulbound,
+}: {
+  id: bigint;
+  meta: Metadata;
+  publicMint: boolean;
+  soulbound: boolean;
+}) {
+  return (
+    <Link href={`/event/${id}`} className="event-card">
+      <div className="art">
+        <img src={meta.image} alt={meta.name} />
+        <span className="id">#{id.toString().padStart(3, "0")}</span>
+      </div>
+      <div className="card-copy">
+        <div className="eyebrow">
+          {publicMint ? "OPEN MINT" : "GATED"} ·{" "}
+          {soulbound ? "SOULBOUND" : "TRANSFERABLE"}
+        </div>
+        <h3>{meta.name}</h3>
+        <p>{meta.description || "No description provided."}</p>
+      </div>
+    </Link>
+  );
+}

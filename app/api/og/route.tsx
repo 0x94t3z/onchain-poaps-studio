@@ -1,2 +1,61 @@
-import {ImageResponse} from 'next/og'
-export const runtime='edge';export function GET(){return new ImageResponse(<div style={{width:'100%',height:'100%',display:'flex',background:'#171717',color:'white',padding:70,alignItems:'center',justifyContent:'space-between',fontFamily:'sans-serif'}}><div style={{display:'flex',flexDirection:'column'}}><div style={{display:'flex',fontSize:26,color:'#eeff41'}}>ONCHAIN POAPS · BASE</div><div style={{display:'flex',flexDirection:'column',fontSize:82,fontWeight:800,lineHeight:.92,marginTop:30}}><span>MEMORIES</span><span>THAT LIVE</span><span style={{color:'#eeff41'}}>FOREVER.</span></div></div><div style={{width:330,height:330,borderRadius:999,border:'14px solid #eeff41',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontSize:42,fontWeight:800,textAlign:'center'}}><span>PROOF</span><span>YOU WERE</span><span>THERE</span></div></div>,{width:1200,height:630})}
+import { ImageResponse } from "next/og";
+export const runtime = "edge";
+export function GET() {
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          background: "#171717",
+          color: "white",
+          padding: 70,
+          alignItems: "center",
+          justifyContent: "space-between",
+          fontFamily: "sans-serif",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", fontSize: 26, color: "#eeff41" }}>
+            ONCHAIN POAPS · BASE
+          </div>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              fontSize: 82,
+              fontWeight: 800,
+              lineHeight: 0.92,
+              marginTop: 30,
+            }}
+          >
+            <span>CREATE</span>
+            <span>EVENT</span>
+            <span style={{ color: "#eeff41" }}>POAPS.</span>
+          </div>
+        </div>
+        <div
+          style={{
+            width: 330,
+            height: 330,
+            borderRadius: 999,
+            border: "14px solid #eeff41",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 42,
+            fontWeight: 800,
+            textAlign: "center",
+          }}
+        >
+          <span>ERC-1155</span>
+          <span>ON</span>
+          <span>BASE</span>
+        </div>
+      </div>
+    ),
+    { width: 1200, height: 630 },
+  );
+}
