@@ -222,6 +222,11 @@ footer {
   font: 700 11px "Space Grotesk";
   letter-spacing: 0.12em;
 }
+.wallet-section-label-separated {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
 .wallet-list > button {
   width: 100%;
   min-height: 70px;

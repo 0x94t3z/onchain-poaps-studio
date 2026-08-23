@@ -138,7 +138,7 @@ Browser or Farcaster host
 | Application | Next.js 15 App Router, React 19, strict TypeScript |
 | Contract client | Wagmi and Viem |
 | Query cache | TanStack Query |
-| Wallets | RainbowKit, WalletConnect, and the Farcaster host wallet |
+| Wallets | Reown AppKit, EIP-6963 browser wallets, WalletConnect, and the Farcaster host wallet |
 | Mini App | Farcaster Mini App SDK and Wagmi connector |
 | QR generation | `qrcode` |
 | Testing | Vitest and TypeScript compiler |
@@ -206,7 +206,7 @@ Never put a private key, seed phrase, or server-only RPC secret in a `NEXT_PUBLI
 
 ### Wallet behavior
 
-The standalone app opens RainbowKit's wallet picker, with WalletConnect available as the universal fallback. Inside a verified Farcaster host, the wallet chooser offers the native Farcaster wallet first and an external-wallet path into the same picker. The selected connection is persisted across routes and restored after refresh. If the wallet is on another network, the UI requests Base Sepolia before contract interaction.
+The standalone app uses the project's custom chooser and offers detected MetaMask and Phantom EVM wallets for direct connection. Choosing WalletConnect opens Reown AppKit's searchable All Wallets view for mobile and other EVM wallets. Inside a verified Farcaster host, the first chooser is limited to the native Farcaster wallet and WalletConnect. The selected connection is persisted across routes and restored after refresh. If the wallet is on another network, the UI requests Base Sepolia before contract interaction.
 
 ENS primary names are resolved from Ethereum mainnet for display only; transactions remain on Base Sepolia. WalletConnect appears only when `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` is configured.
 
