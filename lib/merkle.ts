@@ -25,3 +25,17 @@ export function buildTree(addresses:Address[]){
   }
   return {root:levels.at(-1)![0],proofFor,entries:addresses.map(address=>({address,proof:proofFor(address)}))}
 }
+
+export function verifyProof(address:Address,proof:Hex[],root:Hex){
+  try {
+    if(!/^0x[0-9a-fA-F]{64}$/.test(root)) return false
+    let node=addressLeaf(getAddress(address))
+    for(const sibling of proof){
+      if(!/^0x[0-9a-fA-F]{64}$/.test(sibling)) return false
+      node=pair(node,sibling)
+    }
+    return node.toLowerCase()===root.toLowerCase()
+  } catch {
+    return false
+  }
+}

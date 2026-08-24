@@ -20,6 +20,7 @@ import {
 } from "@/lib/constants";
 import { deadline, remaining } from "@/lib/metadata";
 import { buildTree, normalizeAddresses } from "@/lib/merkle";
+import { AddressIdentity } from "@/components/address-identity";
 import { TxButton } from "@/components/tx-button";
 export default function Manage({
   params,
@@ -110,7 +111,10 @@ export default function Manage({
       <section className="page">
         <div className="empty">
           <h2>Creator access only</h2>
-          <p>This POAP is controlled by {creator}.</p>
+          <p>
+            This POAP is controlled by{" "}
+            <AddressIdentity address={creator} context="Creator" />.
+          </p>
         </div>
       </section>
     );
@@ -123,9 +127,9 @@ export default function Manage({
         <em>{name}</em>
       </h1>
       <div className="deadline-bar">
-        <span>Creator controls</span>
+        <span>Creator controls close in</span>
         <strong>{remaining(controlEnd)}</strong>
-        <span>Signed passes</span>
+        <span>Signed passes expire in</span>
         <strong>{remaining(signatureEnd)}</strong>
       </div>
       <div className="manage-grid">

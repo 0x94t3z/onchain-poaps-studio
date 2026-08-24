@@ -1,9 +1,8 @@
 "use client";
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { useAccount, useBalance, useReadContract } from "wagmi";
-import type { Address, Hex } from "viem";
+import type { Hex } from "viem";
 import { poapAbi } from "@/lib/abi";
 import {
   chain,
@@ -12,8 +11,9 @@ import {
   explorer,
   opensea,
 } from "@/lib/constants";
-import { getPrimaryEnsName } from "@/lib/ens";
-import { decodeMetadata, deadline, remaining, short } from "@/lib/metadata";
+import { decodeMetadata, deadline, remaining } from "@/lib/metadata";
+import { verifyProof } from "@/lib/merkle";
+import { AddressIdentity } from "@/components/address-identity";
 import { TxButton } from "@/components/tx-button";
 import { Clock, ExternalLink, LockKeyhole, MapPin } from "lucide-react";
 export default function EventPage({
@@ -114,6 +114,7 @@ export default function EventPage({
   try {
     proofs = proof.split(/[\s,]+/).filter(Boolean) as Hex[];
   } catch {}
+  const proofIsValid = Boolean(address) && verifyProof(address!, proofs, root);
   return (
     <section className="page event">
       <Link href="/explore" className="back">
@@ -148,10 +149,10 @@ export default function EventPage({
           </div>
           <div className="event-meta-actions">
             <div className="event-owner">
-              <span className="event-creator-line">
-                <span>Created by</span>
-                <CreatorAddress address={creator} />
-              </span>
+                <span className="event-creator-line">
+                  <span>Created by</span>
+                  <AddressIdentity address={creator} context="Creator" />
+                </span>
               {address?.toLowerCase() === creator.toLowerCase() && (
                 <Link className="button tiny" href={`/manage/${id}`}>
                   Manage
@@ -248,6 +249,16 @@ export default function EventPage({
                   onChange={(x) => setProof(x.target.value)}
                   placeholder="0xabc… 0xdef…"
                 />
+                {proof.trim() && (
+                  <p
+                    className={proofIsValid ? "success" : "error"}
+                    role="status"
+                  >
+                    {proofIsValid
+                      ? "This proof matches the connected wallet."
+                      : "This proof belongs to a different wallet or is invalid. Ask the organizer for the proof generated for this wallet."}
+                  </p>
+                )}
                 <TxButton
                   name="allowlistMint"
                   args={[eventId, proofs]}
@@ -255,6 +266,7 @@ export default function EventPage({
                   disabled={
                     !address ||
                     root === ZERO_ROOT ||
+                    !proofIsValid ||
                     isCheckingGas ||
                     needsTestEth
                   }
@@ -292,31 +304,4 @@ export default function EventPage({
       </div>
     </section>
   );
-}
-
-function CreatorAddress({ address }: { address: Address }) {
-  const { data: ensName } = useQuery({
-    queryKey: ["ens-primary-name", address],
-    queryFn: () => getPrimaryEnsName(address),
-    staleTime: 60 * 60 * 1000,
-    retry: 1,
-  });
-  const label = ensName ? compactEnsName(ensName) : short(address);
-
-  return (
-    <a
-      className="creator-address"
-      href={explorer(`address/${address}`)}
-      title={ensName ? `${ensName} · ${address}` : address}
-      aria-label={ensName ? `Creator ${ensName}, ${address}` : `Creator ${address}`}
-    >
-      {label}
-    </a>
-  );
-}
-
-function compactEnsName(name: string, maxLength = 28) {
-  if (name.length <= maxLength) return name;
-  const tailLength = Math.min(13, Math.floor(maxLength / 2));
-  return `${name.slice(0, maxLength - tailLength - 1)}…${name.slice(-tailLength)}`;
 }
