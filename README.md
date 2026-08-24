@@ -1,190 +1,97 @@
 <div align="center">
   <a href="https://poaps.0x94t3z.site">
-    <img src="./public/icon.svg" width="112" height="112" alt="Onchain POAPs logo" />
+    <img src="./public/readme-hero.svg" width="100%" alt="Onchain POAPs — proof you showed up" />
   </a>
 
-  <h1>Onchain POAPs</h1>
-
-  <p>Create, distribute, and collect event credentials whose artwork and metadata live directly on Base.</p>
-
   <p>
-    <a href="https://poaps.0x94t3z.site"><strong>Open the app</strong></a> ·
-    <a href="https://farcaster.xyz/miniapps/7hCH6s_9iSJh/onchain-poaps">Open in Farcaster</a> ·
+    <a href="https://poaps.0x94t3z.site"><strong>Launch studio</strong></a> ·
+    <a href="https://farcaster.xyz/miniapps/7hCH6s_9iSJh/onchain-poaps">Open Mini App</a> ·
     <a href="https://poaps.0x94t3z.site/explore">Explore POAPs</a> ·
-    <a href="https://poaps.0x94t3z.site/docs">Read the docs</a> ·
-    <a href="https://poaps.0x94t3z.site/.well-known/farcaster.json">Mini App manifest</a>
+    <a href="https://poaps.0x94t3z.site/docs">Docs</a>
   </p>
 
   <p>
     <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-eeff41?style=flat-square&labelColor=171717" /></a>
-    <img alt="Next.js 15" src="https://img.shields.io/badge/Next.js-15-f4f2e9?style=flat-square&logo=nextdotjs&logoColor=171717&labelColor=f4f2e9" />
-    <img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript&logoColor=white" />
     <img alt="Base Sepolia" src="https://img.shields.io/badge/Base-Sepolia-0052ff?style=flat-square&logo=coinbase&logoColor=white" />
     <img alt="Farcaster Mini App" src="https://img.shields.io/badge/Farcaster-Mini_App-855dcd?style=flat-square" />
     <img alt="ERC-1155" src="https://img.shields.io/badge/token-ERC--1155-eeff41?style=flat-square&labelColor=171717" />
+    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript&logoColor=white" />
   </p>
 </div>
 
----
+## From event to wallet
 
-Onchain POAPs is a production-oriented, open-source client for the verified Onchain POAPs contract. It works as a standalone responsive web app and as a signed Farcaster Mini App. Organizers can take an event from artwork to distribution without handling raw calldata, Merkle-tree internals, or signature payloads.
+| 🎨 Design | ⛓️ Register | 🎟️ Distribute | ✓ Collect |
+| :---: | :---: | :---: | :---: |
+| Build or upload an SVG | Store it directly on Base | Choose the right mint route | Keep verifiable proof |
 
-> **Network notice:** the public deployment currently uses **Base Sepolia** and test ETH. It never asks for Base mainnet funds. The client is ready for real use on the supplied testnet contract; a mainnet launch requires a reviewed mainnet contract address and production RPC configuration.
+```mermaid
+flowchart LR
+    A[Event artwork] --> B[Register on Base]
+    B --> C{Distribution}
+    C --> D[Public mint]
+    C --> E[Allowlist]
+    C --> F[Signed pass]
+    C --> G[Creator drop]
+    D & E & F & G --> H[ERC-1155 POAP]
 
-## Live deployment
+    classDef primary fill:#eeff41,stroke:#171717,color:#171717,stroke-width:2px;
+    classDef accent fill:#7357ff,stroke:#171717,color:#fff,stroke-width:2px;
+    class A,B,H primary;
+    class C,D,E,F,G accent;
+```
 
-| Resource | Link |
-| --- | --- |
-| Standalone application | [poaps.0x94t3z.site](https://poaps.0x94t3z.site) |
-| Farcaster Mini App | [Open in Farcaster](https://farcaster.xyz/miniapps/7hCH6s_9iSJh/onchain-poaps) |
-| Signed Mini App manifest | [`.well-known/farcaster.json`](https://poaps.0x94t3z.site/.well-known/farcaster.json) |
-| Verified contract | [`0xC324…9de6`](https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6#code) |
-| Example registered POAP | [Event #7](https://poaps.0x94t3z.site/event/7) |
-| Registration transaction | [BaseScan](https://sepolia.basescan.org/tx/0xac137763b73be0d727f7b2dd5532e757cbbe94ace2c2c254fcf6bc716ea9142f) |
-| Example token | [BaseScan](https://sepolia.basescan.org/token/0xC3249356a483fbe17d5355D39105D2eA666d9de6?a=7) · [OpenSea](https://testnets.opensea.io/assets/base_sepolia/0xC3249356a483fbe17d5355D39105D2eA666d9de6/7) |
+## Built around the contract
 
-## Testnet evidence
+| Onchain artwork | Four mint routes | Creator controls | Wallet gallery |
+| --- | --- | --- | --- |
+| Self-contained SVG and event metadata | Public, allowlist, signed pass, and batch drop | Public-mint status, Merkle root, QR passes | Read ERC-1155 ownership from Base |
 
-The following workflows were exercised through the production interface against the verified Base Sepolia contract. The links open the resulting onchain records directly.
+The supplied verified contract remains the source of truth. The app does not modify, proxy, or wrap it.
 
-| Workflow | Result | Evidence |
+## Live proof
+
+| Workflow | Status | Onchain record |
+| --- | :---: | --- |
+| Register event #7 | ✓ | [Transaction](https://sepolia.basescan.org/tx/0xac137763b73be0d727f7b2dd5532e757cbbe94ace2c2c254fcf6bc716ea9142f) |
+| Public mint and ownership | ✓ | [Token #7](https://sepolia.basescan.org/token/0xC3249356a483fbe17d5355D39105D2eA666d9de6?a=7) |
+| Close public mint | ✓ | [Transaction](https://sepolia.basescan.org/tx/0x1b73e554712fabed4d89e063c3370066bc36118ab49cd46896ffb4cd9611bd88) |
+| Reopen public mint | ✓ | [Transaction](https://sepolia.basescan.org/tx/0x288d1d865ed8d017e2ab8bd5c1991ac0c818649e8fed2676adb1569f6eb458f2) |
+| Creator drop | ✓ | [Transaction](https://sepolia.basescan.org/tx/0x27718c6f6637ee7c7e94f20154fbbfac352f29df002bbede6dc3bdfad82f626b) |
+| Lock allowlist root | ✓ | [Transaction](https://sepolia.basescan.org/tx/0xbeab4be9f094a04e0a8a16e68f757d68a9f3f20dd9003867e4d70e9e4d22f9bb) |
+| Allowlist mint | ✓ | [Transaction](https://sepolia.basescan.org/tx/0x50862fc6a3025a0c26bf07a27730a799b4a3e372dfef0eaed317c02eb041883b) |
+| Signed-pass mint | ✓ | [Transaction](https://sepolia.basescan.org/tx/0x96491eedf018c7935b5a1def6389ee5bbde95799e11dbd6e8f1f0fa22f844c2a) |
+
+<p>
+  <a href="https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6#code"><strong>Verified contract ↗</strong></a> ·
+  <a href="https://poaps.0x94t3z.site/event/7">Event #7 ↗</a> ·
+  <a href="https://farcaster.xyz/0x94t3z.eth/0x4dd9ea63">Launch cast ↗</a>
+</p>
+
+## Product map
+
+| | Route | Purpose |
 | --- | --- | --- |
-| Register event #7 with onchain SVG and metadata | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0xac137763b73be0d727f7b2dd5532e757cbbe94ace2c2c254fcf6bc716ea9142f) |
-| Public mint and ERC-1155 ownership | Confirmed | [Token balance](https://sepolia.basescan.org/token/0xC3249356a483fbe17d5355D39105D2eA666d9de6?a=7) · [Token metadata](https://testnets.opensea.io/assets/base_sepolia/0xC3249356a483fbe17d5355D39105D2eA666d9de6/7) |
-| Close public mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x1b73e554712fabed4d89e063c3370066bc36118ab49cd46896ffb4cd9611bd88) |
-| Reopen public mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x288d1d865ed8d017e2ab8bd5c1991ac0c818649e8fed2676adb1569f6eb458f2) |
-| Creator drop to an attendee wallet | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x27718c6f6637ee7c7e94f20154fbbfac352f29df002bbede6dc3bdfad82f626b) |
-| Lock a generated allowlist root | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0xbeab4be9f094a04e0a8a16e68f757d68a9f3f20dd9003867e4d70e9e4d22f9bb) |
-| Redeem a recipient-specific allowlist proof | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x50862fc6a3025a0c26bf07a27730a799b4a3e372dfef0eaed317c02eb041883b) |
-| Redeem a recipient-bound signed pass | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x96491eedf018c7935b5a1def6389ee5bbde95799e11dbd6e8f1f0fa22f844c2a) |
-
-## What it does
-
-### Create
-
-- Build compact, self-contained SVG artwork in the browser using four layouts, five preset palettes, custom colors, and four vector marks.
-- Upload or paste a custom raw SVG and preview its encoded byte size before registration.
-- Register every contract-supported field: name, SVG, soulbound state, public-mint state, allowlist root, description, location, event date, and project URL.
-- Review the final immutable artwork and metadata before sending the transaction.
-
-### Distribute
-
-- **Public mint:** let any wallet claim once while public minting is open.
-- **Allowlist mint:** generate a compatible Merkle tree from wallet addresses, export recipient proofs, lock the root once, and let eligible wallets claim.
-- **Signed mint:** create recipient-bound signatures and private QR links without paying gas to issue them.
-- **Creator mint:** send the POAP directly to batches of up to 101 attendee wallets.
-
-### Collect and verify
-
-- Browse registered events directly from the contract.
-- Search by event name, ID, or location.
-- View the POAPs held by the connected wallet as a collection.
-- Inspect artwork, metadata, distribution state, and deadlines before minting.
-- Verify registrations, mints, ownership, and token metadata through BaseScan and OpenSea.
-- Use the system-aware light or dark interface; an explicit choice persists across visits and also updates the wallet selector.
-
-## Contract feature coverage
-
-| Contract capability | Product workflow |
-| --- | --- |
-| `register` with all supported parameters | Four-step creation flow with artwork, metadata, distribution, and immutable review |
-| Soulbound or transferable | Plain-language choice during creation and a visible status on event cards and detail pages |
-| Public mint | Availability-aware mint tab with one-claim-per-wallet feedback |
-| Allowlist mint | Address-list builder, deterministic Merkle proofs, exportable JSON, root lock, and proof entry |
-| Signature mint | Creator-side signing, recipient-bound URL and QR generation, deadline display, and redemption tab |
-| Public-mint controls | Creator-only management screen with current status and the 30-day deadline |
-| Creator batch mint | Validated, deduplicated recipient input capped at 101 wallets |
-| ERC-1155 gallery | Connected-wallet token discovery with artwork, metadata, and verification links |
-| Fully onchain metadata | Raw SVG and event metadata decoded from the contract rather than an application database |
-
-The supplied smart contract is not modified, proxied, or wrapped. The verified contract remains the source of truth for permissions, timing, validation, and token behavior.
-
-## Important protocol rules
-
-- Each wallet can receive an event token only once across all mint methods.
-- Artwork, event metadata, and the soulbound setting are immutable after registration.
-- The creator has 30 days after registration to toggle public minting, set the allowlist root, or creator-mint.
-- A non-zero allowlist root can be set only once.
-- Recipient-specific signed mints are valid for 37 days after registration.
-- Public and allowlist minting do not automatically expire at the contract level.
-- Soulbound tokens cannot be transferred after minting.
-- Contract reads are public; creating, minting, and management actions require a wallet on Base Sepolia.
-
-## User flows
-
-### Register a POAP
-
-1. Open [`/create`](https://poaps.0x94t3z.site/create) and build or upload the artwork.
-2. Enter the event details and review which fields become permanent.
-3. Choose soulbound or transferable and configure the initial distribution methods.
-4. Inspect the complete preview, connect the creator wallet, and approve the registration transaction.
-5. Use the resulting event page to share the mint or open creator controls.
-
-### Configure an allowlist
-
-1. Open the event's creator-only management page during the first 30 days.
-2. Paste one wallet address per line. Invalid entries are rejected; valid entries are normalized and deduplicated.
-3. Download the generated JSON before setting the root. It contains the root and each recipient's proof.
-4. Save the root onchain once, then privately distribute each recipient's proof.
-5. The attendee selects **Allowlist**, connects the listed wallet, enters the proof, and mints.
-
-### Issue a signed pass
-
-1. Enter the recipient wallet in the event management page.
-2. Sign the event-, chain-, and recipient-bound payload. Signing does not send a transaction.
-3. Share the generated link, signature, or QR code with that recipient.
-4. The recipient opens it with the matching wallet and redeems before the 37-day deadline.
-
-Signatures are recipient-specific because that is what the contract verifies. A single public poster cannot safely authorize every scanner; for a live event, generate one QR per known attendee or use public minting for a shared QR.
+| ◉ | [`/create`](https://poaps.0x94t3z.site/create) | Artwork studio and registration |
+| ⌕ | [`/explore`](https://poaps.0x94t3z.site/explore) | Searchable onchain events |
+| ◫ | `/event/[id]` | Event details and mint routes |
+| ⚙ | `/manage/[id]` | Creator drops, allowlists, passes, and QR codes |
+| ◇ | [`/gallery`](https://poaps.0x94t3z.site/gallery) | POAPs held by the connected wallet |
 
 ## Architecture
 
-```text
-Browser or Farcaster host
-        │
-        ├── Next.js interface ── artwork studio, docs, gallery, creator tools
-        │
-        ├── Wagmi + Viem ─────── contract reads, wallet signatures, transactions
-        │
-        └── Base Sepolia ─────── verified ERC-1155 contract and onchain metadata
+```mermaid
+flowchart TB
+    U[Web browser or Farcaster] --> N[Next.js 15 + React 19]
+    N --> W[Wagmi + Viem]
+    N --> M[Farcaster Mini App SDK]
+    W --> C[Verified ERC-1155 contract]
+    C --> B[(Base Sepolia)]
 ```
 
-| Layer | Technology |
-| --- | --- |
-| Application | Next.js 15 App Router, React 19, strict TypeScript |
-| Contract client | Wagmi and Viem |
-| Query cache | TanStack Query |
-| Wallets | Reown AppKit, EIP-6963 browser wallets, WalletConnect, and the Farcaster host wallet |
-| Mini App | Farcaster Mini App SDK and Wagmi connector |
-| QR generation | `qrcode` |
-| Testing | Vitest and TypeScript compiler |
-
-The frontend reads and writes directly to the contract. There is no custody layer, application database, private transaction relay, or server-held signing key.
-
-## Routes
-
-| Route | Purpose |
-| --- | --- |
-| `/` | Product overview and four newest events |
-| `/create` | Artwork studio and contract registration |
-| `/explore` | Searchable, paginated event collection |
-| `/event/[id]` | Event metadata, mint availability, and verification |
-| `/manage/[id]` | Creator-only controls, allowlists, batch minting, signatures, and QR codes |
-| `/gallery` | POAPs held by the connected wallet |
-| `/docs` | Organizer and developer documentation |
-| `/api/og` | Generated social and Mini App preview image |
-| `/.well-known/farcaster.json` | Signed Farcaster Mini App manifest |
+No custody layer. No application database. No server-held signing key.
 
 ## Run locally
-
-### Requirements
-
-- Node.js 20 or newer
-- npm
-- A browser wallet that supports Base Sepolia
-- Base Sepolia test ETH for write operations
-
-### Installation
 
 ```bash
 git clone https://github.com/0x94t3z/onchain-poaps-studio.git
@@ -194,9 +101,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Contract reads work without a wallet.
-
-## Configuration
+Open [localhost:3000](http://localhost:3000). Reads work without a wallet; writes require Base Sepolia test ETH.
 
 ```env
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -208,59 +113,48 @@ FARCASTER_PAYLOAD=
 FARCASTER_SIGNATURE=
 ```
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `NEXT_PUBLIC_APP_URL` | Production | Exact canonical HTTPS origin used in metadata and the Mini App manifest |
-| `NEXT_PUBLIC_CONTRACT_ADDRESS` | Optional | Overrides the included Base Sepolia deployment |
-| `NEXT_PUBLIC_RPC_URL` | Recommended | Base Sepolia RPC; use a dedicated provider for production traffic |
-| `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` | External wallets | Project ID from the [WalletConnect Dashboard](https://dashboard.walletconnect.com/); enables the WalletConnect option |
-| `FARCASTER_HEADER` | Verified Mini App | Account-association header signed for the production hostname |
-| `FARCASTER_PAYLOAD` | Verified Mini App | Account-association payload containing the production hostname |
-| `FARCASTER_SIGNATURE` | Verified Mini App | Account-association signature |
+<details>
+<summary><strong>Configuration notes</strong></summary>
 
-Never put a private key, seed phrase, or server-only RPC secret in a `NEXT_PUBLIC_` variable. `.env.local` is ignored by Git.
+- `NEXT_PUBLIC_APP_URL` must match the final HTTPS origin exactly.
+- `NEXT_PUBLIC_RPC_URL` should use a dedicated provider for production traffic.
+- A [WalletConnect project ID](https://dashboard.walletconnect.com/) enables the external-wallet chooser.
+- The three Farcaster values are the account association generated for the production hostname.
+- Never place a private key, seed phrase, or server secret in a `NEXT_PUBLIC_` variable.
 
-### Wallet behavior
+</details>
 
-The standalone app uses the project's custom chooser and offers detected MetaMask and Phantom EVM wallets for direct connection. Choosing WalletConnect opens Reown AppKit's searchable All Wallets view for mobile and other EVM wallets. Inside a verified Farcaster host, the first chooser is limited to the native Farcaster wallet and WalletConnect. The selected connection is persisted across routes and restored after refresh. If the wallet is on another network, the UI requests Base Sepolia before contract interaction.
+<details>
+<summary><strong>Protocol rules</strong></summary>
 
-ENS primary names are resolved from Ethereum mainnet for display only; transactions remain on Base Sepolia. WalletConnect appears only when `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` is configured.
+- One event token per wallet across all mint methods.
+- Artwork, metadata, and the soulbound setting are immutable after registration.
+- Creator controls remain available for 30 days; signed passes remain valid for 37 days.
+- A non-zero allowlist root can be set only once.
+- Soulbound tokens cannot be transferred.
 
-## Farcaster Mini App deployment
+</details>
 
-1. Deploy to the final HTTPS origin.
-2. Set `NEXT_PUBLIC_APP_URL` to that exact origin and redeploy.
-3. Verify `/icon-v2.png`, `/splash-v2.png`, `/api/og`, and `/.well-known/farcaster.json` return `200` publicly.
-4. Open the [Farcaster Manifest Tool](https://farcaster.xyz/~/developers/mini-apps/manifest) and enter the hostname without a protocol or path.
-5. Sign the account association with the owning Farcaster account.
-6. Add the generated `header`, `payload`, and `signature` to the deployment environment.
-7. Redeploy, validate the manifest, and test wallet and transaction flows inside the Farcaster client.
+<details>
+<summary><strong>Cryptographic compatibility</strong></summary>
 
-The signed domain must match exactly. `example.com`, `www.example.com`, and a preview deployment are different Mini App identities.
-
-## Artwork and metadata
-
-The contract stores raw SVG and returns Base64-encoded ERC-1155 metadata. Studio artwork is self-contained and has no remote images, fonts, or scripts. Custom SVG should include an explicit square `viewBox`, avoid remote dependencies, and be optimized before registration because every extra byte costs gas. The upload flow links to SVGOMG for optimization and reports the encoded size before approval.
-
-## Cryptographic compatibility
-
-### Signed mint payload
+Signed pass:
 
 ```text
 keccak256(abi.encodePacked(eventId, chainId, recipient))
 ```
 
-The creator signs the packed hash with `personal_sign`. The contract applies the Ethereum signed-message prefix and recovers the event creator. The signature is bound to one event, chain, and recipient.
-
-### Allowlist construction
+Allowlist leaf:
 
 ```text
-leaf = keccak256(abi.encodePacked(address))
+keccak256(abi.encodePacked(address))
 ```
 
-Leaves and node pairs are sorted lexicographically before hashing. An unpaired node is promoted unchanged. Addresses are checksummed and deduplicated. The exported JSON records the event, chain, contract, Merkle root, and proof for every recipient.
+Leaves and node pairs are sorted lexicographically. Addresses are checksummed and deduplicated before export.
 
-## Validation
+</details>
+
+## Validate
 
 ```bash
 npm run typecheck
@@ -268,19 +162,6 @@ npm test
 npm run build
 ```
 
-The automated suite verifies metadata handling, Merkle-tree compatibility, signed-pass validation, and address normalization. Contract transaction evidence comes from the actual Base Sepolia deployment rather than mocked writes.
-
-## Security and operational notes
-
-- The app never requests or stores private keys.
-- Every transaction is prepared client-side and requires explicit wallet approval.
-- Creator permissions and deadlines are enforced by the contract; UI guards are an additional usability layer.
-- Registration and the allowlist root are irreversible. The UI asks users to review and export required data first.
-- RPC endpoints are public configuration. Use rate-limited, monitored infrastructure for sustained traffic.
-- Review the verified contract independently before using a future mainnet deployment.
-
 ## License
 
-Released under the [MIT License](./LICENSE).
-
-The smart contract is maintained separately in [`jvaleskadevs/onchain-poaps`](https://github.com/jvaleskadevs/onchain-poaps).
+[MIT](./LICENSE) · Contract maintained separately in [`jvaleskadevs/onchain-poaps`](https://github.com/jvaleskadevs/onchain-poaps).
