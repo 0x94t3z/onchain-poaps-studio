@@ -134,13 +134,8 @@ export default function Manage({
       <span className="eyebrow">EVENT SETTINGS · EVENT #{id}</span>
       <h1 className="manage-title">
         <span>
-          Manage
-          {titleLead && (
-            <>
-              {" "}
-              <em>{titleLead}</em>
-            </>
-          )}
+          <b>Manage</b>
+          {titleLead && <b>{titleLead}</b>}
         </span>
         <em>{titleTail}</em>
       </h1>
@@ -228,7 +223,7 @@ export default function Manage({
             className="mono tall"
             value={list}
             onChange={(e) => setList(e.target.value)}
-            placeholder="alice.eth\n0x456…"
+            placeholder={"0x94t3z.eth\n0x456…"}
           />
           <AddressResolutionStatus
             resolution={allowlistResolution}

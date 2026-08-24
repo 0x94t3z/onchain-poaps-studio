@@ -983,6 +983,10 @@ code {
   margin: 0;
 }
 .manage-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1em;
+  line-height: 0.79;
   max-width: 100%;
 }
 .manage-title > span,
@@ -990,7 +994,14 @@ code {
   display: block;
 }
 .manage-title > span {
+  display: flex;
+  align-items: baseline;
+  gap: 0.16em;
   white-space: nowrap;
+}
+.manage-title > span b {
+  color: var(--ink);
+  font: inherit;
 }
 .deadline-bar {
   background: var(--ink);
