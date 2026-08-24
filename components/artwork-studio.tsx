@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Code2, Upload } from "lucide-react";
+import {
+  Check,
+  Code2,
+  MapPin,
+  Sparkles,
+  Upload,
+  Zap,
+} from "lucide-react";
 
 const palettes = [
   { name: "Signal", background: "#171717", accent: "#eeff41", ink: "#ffffff" },
@@ -10,6 +17,35 @@ const palettes = [
   { name: "Clay", background: "#f2e8d5", accent: "#d74926", ink: "#171717" },
   { name: "Aqua", background: "#073b4c", accent: "#4de2c5", ink: "#ffffff" },
 ];
+
+function colorLuminance(hex: string) {
+  const channels = [1, 3, 5].map((offset) => {
+    const value = Number.parseInt(hex.slice(offset, offset + 2), 16) / 255;
+    return value <= 0.04045
+      ? value / 12.92
+      : Math.pow((value + 0.055) / 1.055, 2.4);
+  });
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+}
+
+function contrastRatio(first: string, second: string) {
+  const lighter = Math.max(colorLuminance(first), colorLuminance(second));
+  const darker = Math.min(colorLuminance(first), colorLuminance(second));
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function automaticPalette(accent: string) {
+  const dark = "#171717";
+  const light = "#f4f2e9";
+  const background =
+    contrastRatio(accent, dark) >= contrastRatio(accent, light) ? dark : light;
+  return {
+    name: "Auto",
+    background,
+    accent,
+    ink: background === dark ? "#ffffff" : dark,
+  };
+}
 
 const marks = {
   spark:
@@ -46,6 +82,8 @@ function makeSvg({
       ? `<path d="M0 0h512v138H0z" fill="${palette.accent}"/><path d="M24 162h464v326H24z" fill="none" stroke="${palette.accent}" stroke-width="4"/>`
       : style === "orbit"
         ? `<circle cx="256" cy="256" r="222" fill="none" stroke="${palette.accent}" stroke-width="4"/><circle cx="256" cy="256" r="194" fill="none" stroke="${palette.ink}" stroke-width="2" stroke-dasharray="8 12"/>`
+        : style === "ticket"
+          ? `<path d="M28 40h456v170c-26 0-46 20-46 46s20 46 46 46v170H28V302c26 0 46-20 46-46s-20-46-46-46Z" fill="none" stroke="${palette.accent}" stroke-width="7"/><path d="M74 130h364M74 402h364" stroke="${palette.ink}" stroke-width="2" stroke-dasharray="8 10"/>`
         : `<path d="M28 28h456v456H28z" fill="none" stroke="${palette.accent}" stroke-width="8"/><path d="M28 116h456M28 396h456" stroke="${palette.accent}" stroke-width="3"/>`;
   const layout =
     style === "split"
@@ -62,6 +100,13 @@ function makeSvg({
             detailY: 420,
             titleColor: palette.ink,
           }
+        : style === "ticket"
+          ? {
+              markTransform: "translate(102 104) scale(.6)",
+              titleY: 94,
+              detailY: 448,
+              titleColor: palette.ink,
+            }
         : {
             markTransform: "translate(102 100) scale(.6)",
             titleY: 82,
@@ -85,15 +130,22 @@ export function ArtworkStudio({
 }) {
   const [mode, setMode] = useState<"build" | "source">("build");
   const [style, setStyle] = useState("split");
-  const [paletteIndex, setPaletteIndex] = useState(0);
+  const [paletteIndex, setPaletteIndex] = useState<number | "auto">(0);
+  const [customAccent, setCustomAccent] = useState("#eeff41");
   const [mark, setMark] = useState<keyof typeof marks>("spark");
   const [title, setTitle] = useState("EVENT POAP");
   const [detail, setDetail] = useState("BASE · 2026");
   const [source, setSource] = useState("");
-  const generated = useMemo(
+  const palette = useMemo(
     () =>
-      makeSvg({ style, palette: palettes[paletteIndex], mark, title, detail }),
-    [style, paletteIndex, mark, title, detail],
+      paletteIndex === "auto"
+        ? automaticPalette(customAccent)
+        : palettes[paletteIndex],
+    [customAccent, paletteIndex],
+  );
+  const generated = useMemo(
+    () => makeSvg({ style, palette, mark, title, detail }),
+    [style, palette, mark, title, detail],
   );
   const activeSvg = mode === "build" ? generated : source;
 
@@ -156,24 +208,30 @@ export function ArtworkStudio({
           <div className="studio-controls">
             <fieldset>
               <legend>Layout</legend>
-              <div className="choice-row">
+              <div className="choice-row layout-choice-row">
                 {[
-                  ["split", "Signal block"],
+                  ["split", "Signal"],
                   ["orbit", "Orbit"],
-                  ["grid", "Grid pass"],
-                ].map(([value, label]) => (
-                  <button
-                    key={value}
-                    className={style === value ? "active" : ""}
-                    onClick={() => setStyle(value)}
-                  >
-                    {label}
-                  </button>
-                ))}
+                  ["grid", "Grid"],
+                  ["ticket", "Ticket"],
+                ].map(([value, label]) => {
+                  const selected = style === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      className={selected ? "active" : ""}
+                      aria-pressed={selected}
+                      onClick={() => setStyle(value)}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </fieldset>
             <fieldset>
-              <legend>Palette</legend>
+              <legend>Palette · {palette.name}</legend>
               <div className="palette-row">
                 {palettes.map((palette, index) => (
                   <button
@@ -187,27 +245,57 @@ export function ArtworkStudio({
                     }}
                   />
                 ))}
+                <label
+                  className={
+                    paletteIndex === "auto"
+                      ? "custom-palette active"
+                      : "custom-palette"
+                  }
+                  title="Custom color"
+                >
+                  <input
+                    type="color"
+                    value={customAccent}
+                    aria-label="Custom color"
+                    onChange={(event) => {
+                      setCustomAccent(event.target.value);
+                      setPaletteIndex("auto");
+                    }}
+                  />
+                  <span>+</span>
+                </label>
               </div>
+              <small className="palette-help">
+                Choose + for a custom color. Background and text contrast are set
+                automatically.
+              </small>
             </fieldset>
             <fieldset>
               <legend>Center mark</legend>
               <div className="choice-row mark-row">
                 {(
                   [
-                    ["spark", "Spark"],
-                    ["check", "Check"],
-                    ["pin", "Place"],
-                    ["bolt", "Bolt"],
+                    ["spark", "Spark", Sparkles],
+                    ["check", "Check", Check],
+                    ["pin", "Place", MapPin],
+                    ["bolt", "Bolt", Zap],
                   ] as const
-                ).map(([value, label]) => (
-                  <button
-                    key={value}
-                    className={mark === value ? "active" : ""}
-                    onClick={() => setMark(value)}
-                  >
-                    {label}
-                  </button>
-                ))}
+                ).map(([value, label, Icon]) => {
+                  const selected = mark === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      className={selected ? "active" : ""}
+                      aria-label={`${label} center mark`}
+                      aria-pressed={selected}
+                      title={label}
+                      onClick={() => setMark(value)}
+                    >
+                      <Icon aria-hidden="true" />
+                    </button>
+                  );
+                })}
               </div>
             </fieldset>
             <div className="studio-fields">

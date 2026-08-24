@@ -1548,6 +1548,25 @@ code {
   color: white;
   box-shadow: 3px 3px 0 var(--lime);
 }
+.studio-tabs button:focus-visible,
+.choice-row button:focus-visible,
+.palette-row button:focus-visible,
+.custom-palette:focus-within {
+  outline: 2px solid var(--violet);
+  outline-offset: 3px;
+}
+.mark-row button {
+  width: 50px;
+  height: 46px;
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+}
+.mark-row button svg {
+  width: 21px;
+  height: 21px;
+  stroke-width: 2.25;
+}
 .studio-layout {
   display: grid;
   grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.28fr);
@@ -1608,8 +1627,47 @@ code {
   border-radius: 50%;
   cursor: pointer;
 }
-.palette-row button.active {
+.palette-row button.active,
+.custom-palette.active {
   outline: 3px solid var(--ink);
+}
+.custom-palette {
+  position: relative;
+  width: 45px;
+  height: 45px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 4px solid var(--paper);
+  border-radius: 50%;
+  outline: 1px solid var(--line);
+  cursor: pointer;
+}
+.custom-palette input {
+  position: absolute;
+  inset: -8px;
+  width: calc(100% + 16px);
+  height: calc(100% + 16px);
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+.custom-palette span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: white;
+  background: #17171766;
+  font-size: 20px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.palette-help {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
 }
 .studio-fields {
   display: grid;
@@ -1703,6 +1761,13 @@ code {
   }
   .studio-fields {
     grid-template-columns: 1fr;
+  }
+  .layout-choice-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .layout-choice-row button {
+    width: 100%;
   }
 }
 
