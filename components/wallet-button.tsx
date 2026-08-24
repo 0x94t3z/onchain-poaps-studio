@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -7,6 +8,7 @@ import {
   ChevronDown,
   Copy,
   LogOut,
+  Images,
   ShieldCheck,
   WalletCards,
   X,
@@ -303,6 +305,14 @@ export function WalletButton() {
               {ensName && <strong>{formatEnsName(ensName, 30)}</strong>}
               <code title={address}>{address}</code>
             </div>
+            <Link
+              href="/gallery"
+              role="menuitem"
+              onClick={() => setIsAccountOpen(false)}
+            >
+              <Images />
+              <span>View my POAPs</span>
+            </Link>
             <button role="menuitem" onClick={copyAddress}>
               {addressCopied ? <Check /> : <Copy />}
               <span>{addressCopied ? "Address copied" : "Copy address"}</span>
@@ -439,6 +449,16 @@ export function WalletButton() {
                         <b>Browse wallets →</b>
                       </button>
                     </>
+                  )}
+                  {isMiniApp === false && (
+                    <a
+                      className="wallet-miniapp-hint"
+                      href="https://farcaster.xyz/miniapps/7hCH6s_9iSJh/onchain-poaps"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Want to use your Farcaster wallet? Open the Mini App →
+                    </a>
                   )}
                   {walletOptions.length === 0 && !walletConnectConfigured && (
                     <div className="wallet-empty">

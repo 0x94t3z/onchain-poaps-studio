@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArtworkStudio } from "@/components/artwork-studio";
 import { TxButton } from "@/components/tx-button";
@@ -7,6 +8,8 @@ import { buildTree, normalizeAddresses } from "@/lib/merkle";
 import { downloadJson } from "@/lib/download";
 import { validateSvgSource } from "@/lib/svg";
 import { Check } from "lucide-react";
+import { parseEventLogs } from "viem";
+import { poapAbi } from "@/lib/abi";
 const blank =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="256" fill="#171717"/><circle cx="256" cy="256" r="210" fill="none" stroke="#eeff41" stroke-width="12"/><text x="256" y="240" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="white">I WAS</text><text x="256" y="302" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="#eeff41">THERE</text></svg>';
 export default function Create() {
@@ -20,7 +23,9 @@ export default function Create() {
     [soulbound, setSoulbound] = useState(true),
     [isPublic, setPublic] = useState(true),
     [list, setList] = useState(""),
-    [downloadedAllowlistRoot, setDownloadedAllowlistRoot] = useState("");
+    [downloadedAllowlistRoot, setDownloadedAllowlistRoot] = useState(""),
+    [createdEventId, setCreatedEventId] = useState<string | null>(null),
+    [eventLinkCopied, setEventLinkCopied] = useState(false);
   const allowlist = useMemo(() => {
     try {
       if (!list.trim()) return { tree: null, error: "" };
@@ -293,7 +298,53 @@ export default function Create() {
               ]}
               label="Register POAP on Base"
               disabled={!valid}
+              onSuccess={(receipt) => {
+                const eventLog = parseEventLogs({
+                  abi: poapAbi,
+                  eventName: "NewEvent",
+                  logs: receipt.logs,
+                })[0];
+                if (eventLog) {
+                  setCreatedEventId(eventLog.args.eventId.toString());
+                }
+              }}
             />
+            {createdEventId && (
+              <div className="creation-next" role="status">
+                <span className="eyebrow">POAP REGISTERED</span>
+                <h3>Ready to share.</h3>
+                <p>
+                  Open the event page to share its mint, or manage how attendees
+                  can collect it.
+                </p>
+                <div className="creation-next-actions">
+                  <Link className="button" href={`/event/${createdEventId}`}>
+                    View and share POAP →
+                  </Link>
+                  <Link
+                    className="button secondary"
+                    href={`/manage/${createdEventId}`}
+                  >
+                    Manage distribution
+                  </Link>
+                  <button
+                    type="button"
+                    className="text-link"
+                    onClick={async () => {
+                      const eventUrl = `${window.location.origin}/event/${createdEventId}`;
+                      await navigator.clipboard.writeText(eventUrl);
+                      setEventLinkCopied(true);
+                      window.setTimeout(() => setEventLinkCopied(false), 1800);
+                    }}
+                  >
+                    {eventLinkCopied ? "Link copied ✓" : "Copy event link"}
+                  </button>
+                  <a className="text-link" href="/create">
+                    Create another
+                  </a>
+                </div>
+              </div>
+            )}
             {!valid && (
               <p className="error">
                 Add valid required fields and stay within every byte limit.

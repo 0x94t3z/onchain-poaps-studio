@@ -119,8 +119,8 @@ function makeSvg({
     .replaceAll("INK", palette.ink);
   const labels =
     style === "orbit"
-      ? `<defs><path id="orbit-top" d="M91 256a165 165 0 0 1 330 0"/><path id="orbit-bottom" d="M91 256a165 165 0 0 0 330 0"/></defs><text text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="3" fill="${palette.ink}"><textPath href="#orbit-top" startOffset="50%">${escapeXml(title || "EVENT POAP")}</textPath></text><text text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="${palette.ink}"><textPath href="#orbit-bottom" startOffset="50%">${escapeXml(detail || "BASE · 2026")}</textPath></text>`
-      : `<text x="256" y="${layout.titleY}" text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="3" fill="${layout.titleColor}">${escapeXml(title || "EVENT POAP")}</text><text x="256" y="${layout.detailY}" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="${palette.ink}">${escapeXml(detail || "BASE · 2026")}</text>`;
+      ? `<defs><path id="orbit-top" d="M91 256a165 165 0 0 1 330 0"/><path id="orbit-bottom" d="M91 256a165 165 0 0 0 330 0"/></defs><text text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="3" fill="${palette.ink}"><textPath href="#orbit-top" startOffset="50%">${escapeXml((title || "EVENT POAP").toUpperCase())}</textPath></text><text text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="${palette.ink}"><textPath href="#orbit-bottom" startOffset="50%">${escapeXml((detail || "BASE · 2026").toUpperCase())}</textPath></text>`
+      : `<text x="256" y="${layout.titleY}" text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="3" fill="${layout.titleColor}">${escapeXml((title || "EVENT POAP").toUpperCase())}</text><text x="256" y="${layout.detailY}" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="${palette.ink}">${escapeXml((detail || "BASE · 2026").toUpperCase())}</text>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="${palette.background}"/>${frame}<g transform="${layout.markTransform}">${center}</g>${labels}</svg>`;
 }
 
@@ -309,9 +309,7 @@ export function ArtworkStudio({
                 <input
                   value={title}
                   maxLength={24}
-                  onChange={(event) =>
-                    setTitle(event.target.value.toUpperCase())
-                  }
+                  onChange={(event) => setTitle(event.target.value)}
                 />
               </label>
               <label>
@@ -319,9 +317,7 @@ export function ArtworkStudio({
                 <input
                   value={detail}
                   maxLength={28}
-                  onChange={(event) =>
-                    setDetail(event.target.value.toUpperCase())
-                  }
+                  onChange={(event) => setDetail(event.target.value)}
                 />
               </label>
             </div>

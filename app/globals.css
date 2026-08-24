@@ -290,7 +290,8 @@ footer {
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
-.wallet-account-menu > button {
+.wallet-account-menu > button,
+.wallet-account-menu > a {
   width: 100%;
   min-height: 48px;
   padding: 0 18px;
@@ -303,16 +304,21 @@ footer {
   font-weight: 700;
   text-align: left;
   cursor: pointer;
+  color: var(--ink);
+  text-decoration: none;
 }
-.wallet-account-menu > button:last-child {
+.wallet-account-menu > :last-child {
   border-bottom: 0;
 }
 .wallet-account-menu > button:hover,
-.wallet-account-menu > button:focus-visible {
+.wallet-account-menu > button:focus-visible,
+.wallet-account-menu > a:hover,
+.wallet-account-menu > a:focus-visible {
   background: var(--hover);
   outline: none;
 }
-.wallet-account-menu > button svg {
+.wallet-account-menu > button svg,
+.wallet-account-menu > a svg {
   width: 17px;
   height: 17px;
 }
@@ -332,6 +338,20 @@ footer {
   font-size: 12px;
   font-weight: 700;
   box-shadow: 3px 3px 0 var(--ink);
+}
+.wallet-miniapp-hint {
+  display: inline-flex;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.wallet-miniapp-hint:hover,
+.wallet-miniapp-hint:focus-visible {
+  color: var(--ink);
 }
 .wallet-modal-backdrop {
   position: fixed;
@@ -564,6 +584,12 @@ footer {
   gap: 5px;
   text-decoration: underline;
   text-underline-offset: 4px;
+}
+button.text-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 .hero-medal {
   display: grid;
@@ -1853,6 +1879,31 @@ code {
   border: 1px solid var(--line);
   background: transparent;
   padding: 0 14px;
+  text-transform: uppercase;
+}
+
+.creation-next {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid var(--ink);
+  background: var(--surface-muted);
+  box-shadow: 4px 4px 0 var(--lime);
+}
+.creation-next h3 {
+  margin: 8px 0;
+  font-size: clamp(24px, 3vw, 36px);
+}
+.creation-next p {
+  max-width: 580px;
+  margin: 0;
+  color: var(--muted);
+}
+.creation-next-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-top: 18px;
 }
 .source-controls .upload.compact {
   min-height: 100px;
@@ -2162,11 +2213,21 @@ textarea {
     font-size: 10px;
   }
 
-  .wallet-account-menu > button {
+  .wallet-account-menu > button,
+  .wallet-account-menu > a {
     min-height: 44px;
     padding-inline: 14px;
     gap: 9px;
     font-size: 14px;
+  }
+
+  .creation-next-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .creation-next-actions .button {
+    width: 100%;
   }
 
   .hero {

@@ -6,7 +6,7 @@ import { ThemeToggle } from "./theme-toggle";
 const links = [
   ["/explore", "Explore"],
   ["/create", "Create"],
-  ["/gallery", "Gallery"],
+  ["/gallery", "My POAPs"],
   ["/docs", "Docs"],
 ];
 export function Header() {

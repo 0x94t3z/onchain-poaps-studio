@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { ContractFunctionArgs, ContractFunctionName } from "viem";
+import type { TransactionReceipt } from "viem";
 import { poapAbi } from "@/lib/abi";
 import { CONTRACT, explorer } from "@/lib/constants";
 export function TxButton<
@@ -19,7 +20,7 @@ export function TxButton<
   args: ContractFunctionArgs<typeof poapAbi, "nonpayable", T>;
   label: string;
   disabled?: boolean;
-  onSuccess?: () => void;
+  onSuccess?: (receipt: TransactionReceipt) => void;
   wide?: boolean;
   variant?: "primary" | "secondary";
 }) {
@@ -29,8 +30,8 @@ export function TxButton<
   useEffect(() => {
     if (!receipt.isSuccess || !data || notifiedHash.current === data) return;
     notifiedHash.current = data;
-    onSuccess?.();
-  }, [data, onSuccess, receipt.isSuccess]);
+    if (receipt.data) onSuccess?.(receipt.data);
+  }, [data, onSuccess, receipt.data, receipt.isSuccess]);
   if (receipt.isSuccess)
     return (
       <div className="success">
