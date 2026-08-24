@@ -29,31 +29,31 @@ const wagmiAdapter = new WagmiAdapter({
 
 export const config = wagmiAdapter.wagmiConfig;
 
-if (projectId) {
-  createAppKit({
-    adapters: [wagmiAdapter],
-    networks: [...networks],
-    defaultNetwork: baseSepolia,
-    projectId,
-    metadata: {
-      name: "Onchain POAPs",
-      description: "Create, distribute and collect POAPs on Base.",
-      url: appUrl,
-      icons: [`${appUrl}/icon-v2.png`],
-    },
-    allWallets: "SHOW",
-    themeMode: "dark",
-    enableEIP6963: true,
-    enableInjected: true,
-    enableCoinbase: false,
-    enableBaseAccount: false,
-    features: {
-      email: false,
-      socials: false,
-      swaps: false,
-      onramp: false,
-      history: false,
-      analytics: false,
-    },
-  });
-}
+export const appKit = projectId
+  ? createAppKit({
+      adapters: [wagmiAdapter],
+      networks: [...networks],
+      defaultNetwork: baseSepolia,
+      projectId,
+      metadata: {
+        name: "Onchain POAPs",
+        description: "Create, distribute and collect POAPs on Base.",
+        url: appUrl,
+        icons: [`${appUrl}/icon-v2.png`],
+      },
+      allWallets: "SHOW",
+      themeMode: "dark",
+      enableEIP6963: true,
+      enableInjected: true,
+      enableCoinbase: false,
+      enableBaseAccount: false,
+      features: {
+        email: false,
+        socials: false,
+        swaps: false,
+        onramp: false,
+        history: false,
+        analytics: false,
+      },
+    })
+  : null;

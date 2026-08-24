@@ -9,6 +9,7 @@ import {
   Upload,
   Zap,
 } from "lucide-react";
+import { validateSvgSource } from "@/lib/svg";
 
 const palettes = [
   { name: "Signal", background: "#171717", accent: "#eeff41", ink: "#ffffff" },
@@ -148,6 +149,7 @@ export function ArtworkStudio({
     [style, palette, mark, title, detail],
   );
   const activeSvg = mode === "build" ? generated : source;
+  const svgValidation = validateSvgSource(activeSvg);
 
   useEffect(() => onChange(activeSvg), [activeSvg, onChange]);
 
@@ -163,7 +165,7 @@ export function ArtworkStudio({
     });
   }
 
-  const preview = activeSvg.trim().startsWith("<svg")
+  const preview = svgValidation.valid
     ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(activeSvg)}`
     : "";
 
@@ -177,12 +179,14 @@ export function ArtworkStudio({
         </div>
         <div className="studio-tabs" aria-label="Artwork source">
           <button
+            type="button"
             className={mode === "build" ? "active" : ""}
             onClick={() => setMode("build")}
           >
             Build
           </button>
           <button
+            type="button"
             className={mode === "source" ? "active" : ""}
             onClick={() => setMode("source")}
           >
@@ -235,6 +239,7 @@ export function ArtworkStudio({
               <div className="palette-row">
                 {palettes.map((palette, index) => (
                   <button
+                    type="button"
                     key={palette.name}
                     className={paletteIndex === index ? "active" : ""}
                     aria-label={palette.name}
@@ -347,6 +352,9 @@ export function ArtworkStudio({
                   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">…</svg>'
                 }
               />
+              {!svgValidation.valid && source.trim() && (
+                <span className="error" role="alert">{svgValidation.error}</span>
+              )}
             </label>
             <small>
               Remote images, fonts, and scripts may not render in wallets. Keep

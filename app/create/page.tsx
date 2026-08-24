@@ -4,6 +4,8 @@ import { ArtworkStudio } from "@/components/artwork-studio";
 import { TxButton } from "@/components/tx-button";
 import { ZERO_ROOT } from "@/lib/constants";
 import { buildTree, normalizeAddresses } from "@/lib/merkle";
+import { downloadJson } from "@/lib/download";
+import { validateSvgSource } from "@/lib/svg";
 import { Check } from "lucide-react";
 const blank =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="256" fill="#171717"/><circle cx="256" cy="256" r="210" fill="none" stroke="#eeff41" stroke-width="12"/><text x="256" y="240" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="white">I WAS</text><text x="256" y="302" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="#eeff41">THERE</text></svg>';
@@ -17,22 +19,47 @@ export default function Create() {
     [svg, setSvg] = useState(blank),
     [soulbound, setSoulbound] = useState(true),
     [isPublic, setPublic] = useState(true),
-    [list, setList] = useState("");
-  const allow = useMemo(() => {
+    [list, setList] = useState(""),
+    [downloadedAllowlistRoot, setDownloadedAllowlistRoot] = useState("");
+  const allowlist = useMemo(() => {
     try {
-      return list.trim() ? buildTree(normalizeAddresses(list)).root : ZERO_ROOT;
-    } catch {
-      return ZERO_ROOT;
+      if (!list.trim()) return { tree: null, error: "" };
+      return { tree: buildTree(normalizeAddresses(list)), error: "" };
+    } catch (reason) {
+      return {
+        tree: null,
+        error:
+          reason instanceof Error
+            ? reason.message
+            : "Check every allowlist address.",
+      };
     }
   }, [list]);
+  const allow = allowlist.tree?.root ?? ZERO_ROOT;
   const bytes = (x: string) => new TextEncoder().encode(x).length;
-  const valid =
-    name.length > 0 &&
+  const svgValidation = useMemo(() => validateSvgSource(svg), [svg]);
+  const urlIsValid = useMemo(() => {
+    if (!url.trim()) return true;
+    try {
+      return ["http:", "https:"].includes(new URL(url).protocol);
+    } catch {
+      return false;
+    }
+  }, [url]);
+  const detailsAreValid =
+    name.trim().length > 0 &&
     bytes(name) <= 128 &&
     bytes(description) <= 512 &&
     bytes(location) <= 128 &&
     bytes(url) <= 128 &&
-    svg.trim().startsWith("<svg");
+    urlIsValid;
+  const allowlistIsSafe =
+    !list.trim() ||
+    Boolean(
+      allowlist.tree && downloadedAllowlistRoot === allowlist.tree.root,
+    );
+  const valid =
+    detailsAreValid && svgValidation.valid && allowlistIsSafe;
   const flags = (soulbound ? 1 : 0) + (isPublic ? 2 : 0);
   const image = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   return (
@@ -46,8 +73,11 @@ export default function Create() {
       <div className="stepper">
         {["Artwork", "Details", "Distribution", "Review"].map((x, i) => (
           <button
+            type="button"
             onClick={() => i + 1 <= step && setStep(i + 1)}
             className={step === i + 1 ? "current" : step > i + 1 ? "done" : ""}
+            aria-current={step === i + 1 ? "step" : undefined}
+            aria-label={`${x}, step ${i + 1} of 4${step > i + 1 ? ", completed" : ""}`}
             key={x}
           >
             <span>{step > i + 1 ? <Check size={15} /> : i + 1}</span>
@@ -68,7 +98,13 @@ export default function Create() {
                 maxLength={128}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Base Builders Summit"
+                aria-describedby="name-limit"
               />
+              {bytes(name) > 128 && (
+                <small id="name-limit" className="field-error">
+                  Shorten the name to 128 UTF-8 bytes.
+                </small>
+              )}
             </label>
             <label>
               Description <b>{bytes(description)}/512 bytes</b>
@@ -77,6 +113,11 @@ export default function Create() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="What was this event about?"
               />
+              {bytes(description) > 512 && (
+                <small className="field-error">
+                  Shorten the description to 512 UTF-8 bytes.
+                </small>
+              )}
             </label>
             <div className="split">
               <label>
@@ -86,6 +127,9 @@ export default function Create() {
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                 />
+                <small>
+                  Interpreted in {Intl.DateTimeFormat().resolvedOptions().timeZone}.
+                </small>
               </label>
               <label>
                 Location <b>{bytes(location)}/128</b>
@@ -94,6 +138,11 @@ export default function Create() {
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="Jakarta · Online"
                 />
+                {bytes(location) > 128 && (
+                  <small className="field-error">
+                    Shorten the location to 128 UTF-8 bytes.
+                  </small>
+                )}
               </label>
             </div>
             <label>
@@ -104,6 +153,16 @@ export default function Create() {
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://…"
               />
+              {!urlIsValid && (
+                <small className="field-error">
+                  Enter a complete http:// or https:// URL.
+                </small>
+              )}
+              {bytes(url) > 128 && (
+                <small className="field-error">
+                  Shorten the URL to 128 UTF-8 bytes.
+                </small>
+              )}
             </label>
           </div>
           <aside className="preview panel">
@@ -137,11 +196,19 @@ export default function Create() {
             <textarea
               className="mono"
               value={list}
-              onChange={(e) => setList(e.target.value)}
+              onChange={(e) => {
+                setList(e.target.value);
+                setDownloadedAllowlistRoot("");
+              }}
               placeholder="One wallet address per line"
             />
           </label>
-          {list && (
+          {allowlist.error && (
+            <p className="error" role="alert">
+              {allowlist.error}
+            </p>
+          )}
+          {allowlist.tree && (
             <div className="root">
               <span>Generated Merkle root</span>
               <code>{allow}</code>
@@ -149,7 +216,33 @@ export default function Create() {
                 This list uses sorted address leaves compatible with the
                 contract’s keccak256(abi.encodePacked(address)) check.
               </small>
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => {
+                  downloadJson(
+                    `${name.trim() || "onchain-poap"}-allowlist-proofs.json`,
+                    {
+                      eventName: name.trim() || null,
+                      root: allowlist.tree!.root,
+                      recipients: allowlist.tree!.entries,
+                      note: "Keep this file private and give each recipient only their own proof.",
+                    },
+                  );
+                  setDownloadedAllowlistRoot(allowlist.tree!.root);
+                }}
+              >
+                {downloadedAllowlistRoot === allowlist.tree.root
+                  ? "Proof file downloaded ✓"
+                  : "Download recipient proofs"}
+              </button>
             </div>
+          )}
+          {allowlist.tree && downloadedAllowlistRoot !== allowlist.tree.root && (
+            <p className="warning" role="status">
+              Download the recipient proofs before review. The Merkle root is
+              permanent and attendees cannot mint without their proof.
+            </p>
           )}
           <p className="note">
             Signed mints do not need setup now. The creator can sign
@@ -180,6 +273,12 @@ export default function Create() {
                 <dd>30 days</dd>
               </div>
             </dl>
+            {date && (
+              <p className="review-time">
+                Event time: {new Date(date).toLocaleString()} (
+                {Intl.DateTimeFormat().resolvedOptions().timeZone})
+              </p>
+            )}
             <TxButton
               name="registerEvent"
               args={[
@@ -202,7 +301,7 @@ export default function Create() {
             )}
           </div>
           <aside className="preview panel">
-            <img src={image} />
+            <img src={image} alt={`${name || "POAP"} artwork`} />
             <p>
               Review artwork and metadata carefully. Registration is immutable
               and stores the raw SVG onchain.
@@ -213,6 +312,7 @@ export default function Create() {
       <div className="form-nav">
         {step > 1 && (
           <button
+            type="button"
             className="button secondary"
             onClick={() => setStep(step - 1)}
           >
@@ -221,10 +321,12 @@ export default function Create() {
         )}
         {step < 4 && (
           <button
+            type="button"
             className="button"
             disabled={
-              (step === 1 && !svg.trim().startsWith("<svg")) ||
-              (step === 2 && !valid)
+              (step === 1 && !svgValidation.valid) ||
+              (step === 2 && !detailsAreValid) ||
+              (step === 3 && (!allowlistIsSafe || Boolean(allowlist.error)))
             }
             onClick={() => setStep(step + 1)}
           >
@@ -247,7 +349,13 @@ function Toggle({
   set: (x: boolean) => void;
 }) {
   return (
-    <button className="toggle-row" onClick={() => set(!on)}>
+    <button
+      type="button"
+      className="toggle-row"
+      role="switch"
+      aria-checked={on}
+      onClick={() => set(!on)}
+    >
       <span>
         <strong>{title}</strong>
         <small>{text}</small>

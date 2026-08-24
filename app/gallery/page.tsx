@@ -17,7 +17,7 @@ export default function Gallery() {
         contract.
       </p>
       {address ? (
-        <EventGrid owner={address} />
+        <EventGrid owner={address} limit={6} mobileLimit={4} paginate />
       ) : (
         <div className="empty">
           <h3>Connect your wallet</h3>

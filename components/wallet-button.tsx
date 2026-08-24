@@ -69,6 +69,8 @@ export function WalletButton() {
   const [addressCopied, setAddressCopied] = useState(false);
   const [connectionError, setConnectionError] = useState("");
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const connectTriggerRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -85,13 +87,44 @@ export function WalletButton() {
     if (!isOpen) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !isPending) setIsOpen(false);
+    const inertTargets = document.querySelectorAll<HTMLElement>(
+      "main, footer, .mobile-nav",
+    );
+    inertTargets.forEach((element) => element.setAttribute("inert", ""));
+    const focusFrame = requestAnimationFrame(() => {
+      modalRef.current
+        ?.querySelector<HTMLElement>("button:not(:disabled)")
+        ?.focus();
+    });
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !isPending) {
+        setIsOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !modalRef.current) return;
+      const focusable = Array.from(
+        modalRef.current.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), a[href], input:not(:disabled), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    window.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("keydown", handleKey);
     return () => {
+      cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", closeOnEscape);
+      inertTargets.forEach((element) => element.removeAttribute("inert"));
+      window.removeEventListener("keydown", handleKey);
+      connectTriggerRef.current?.focus();
     };
   }, [isOpen, isPending]);
 
@@ -294,6 +327,8 @@ export function WalletButton() {
   return (
     <div className="wallet-connect">
       <button
+        ref={connectTriggerRef}
+        type="button"
         className="button"
         disabled={isPending || isReconnecting || isMiniApp === null}
         aria-haspopup="dialog"
@@ -322,6 +357,7 @@ export function WalletButton() {
             }}
           >
             <section
+              ref={modalRef}
               className="wallet-modal"
               role="dialog"
               aria-modal="true"
@@ -333,6 +369,7 @@ export function WalletButton() {
                   <h2 id="wallet-modal-title">Choose a wallet</h2>
                 </div>
                 <button
+                  type="button"
                   className="wallet-close"
                   aria-label="Close wallet dialog"
                   disabled={isPending}
@@ -351,6 +388,7 @@ export function WalletButton() {
                   )}
                   {walletOptions.map((connector) => (
                     <button
+                      type="button"
                       key={`${connector.id}-${connector.name}`}
                       disabled={isPending}
                       onClick={() => connectWallet(connector.id)}
@@ -384,7 +422,7 @@ export function WalletButton() {
                       >
                         MORE WALLETS
                       </span>
-                      <button disabled={isPending} onClick={openAllWallets}>
+                      <button type="button" disabled={isPending} onClick={openAllWallets}>
                         <span className="wallet-icon">
                           <img src="/walletconnect.svg" alt="" />
                         </span>

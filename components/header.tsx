@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { WalletButton } from "./wallet-button";
+import { ThemeToggle } from "./theme-toggle";
 const links = [
   ["/explore", "Explore"],
   ["/create", "Create"],
@@ -35,6 +36,7 @@ export function Header() {
           </span>
         </Link>
         {navigation("desktop-nav")}
+        <ThemeToggle />
         <WalletButton />
       </header>
       {navigation("mobile-nav")}

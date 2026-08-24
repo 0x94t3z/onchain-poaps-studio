@@ -8,6 +8,7 @@ import { chain, CONTRACT, ZERO_ROOT, explorer, opensea } from "@/lib/constants";
 import { decodeMetadata, deadline, remaining } from "@/lib/metadata";
 import { verifyProof } from "@/lib/merkle";
 import { isSignedPassFormat, verifySignedPass } from "@/lib/signed-pass";
+import { useCurrentTimestamp } from "@/hooks/use-current-timestamp";
 import { AddressIdentity } from "@/components/address-identity";
 import { TxButton } from "@/components/tx-button";
 import { Clock, ExternalLink, LockKeyhole, MapPin } from "lucide-react";
@@ -17,7 +18,9 @@ export default function EventPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const eventId = BigInt(id);
+  const validId = /^[1-9]\d*$/.test(id);
+  const eventId = BigInt(validId ? id : "0");
+  const now = useCurrentTimestamp();
   const { address } = useAccount();
   const balance = useBalance({
     address,
@@ -29,19 +32,21 @@ export default function EventPage({
     abi: poapAbi,
     functionName: "events",
     args: [eventId],
+    query: { enabled: validId },
   });
   const u = useReadContract({
     address: CONTRACT,
     abi: poapAbi,
     functionName: "uri",
     args: [eventId],
+    query: { enabled: validId },
   });
   const claimed = useReadContract({
     address: CONTRACT,
     abi: poapAbi,
     functionName: "hasClaimed",
     args: [eventId, address!],
-    query: { enabled: !!address },
+    query: { enabled: Boolean(validId && address) },
   });
   const [tab, setTab] = useState<"public" | "allowlist" | "signature">(
       "public",
@@ -61,6 +66,20 @@ export default function EventPage({
     }
   }, []);
   const eventCreator = e.data?.[6];
+  useEffect(() => {
+    if (!e.data) return;
+    const allowlistAvailable = e.data[4] !== ZERO_ROOT;
+    const publicAvailable = e.data[10];
+    const signedAvailable = now <= deadline(e.data[7], 37);
+    setTab((current) => {
+      if (current === "public" && publicAvailable) return current;
+      if (current === "allowlist" && allowlistAvailable) return current;
+      if (current === "signature" && signedAvailable) return current;
+      if (publicAvailable) return "public";
+      if (allowlistAvailable) return "allowlist";
+      return "signature";
+    });
+  }, [e.data, now]);
   const signatureValidationKey =
     address && eventCreator
       ? `${address.toLowerCase()}:${eventCreator.toLowerCase()}:${sig.trim()}`
@@ -93,6 +112,10 @@ export default function EventPage({
       active = false;
     };
   }, [address, eventCreator, eventId, sig, signatureValidationKey]);
+  if (!validId)
+    return (
+      <section className="page"><div className="empty">POAP not found.</div></section>
+    );
   if (e.isLoading || u.isLoading)
     return (
       <section className="page">
@@ -138,8 +161,8 @@ export default function EventPage({
     {
       id: "signature",
       label: "Signed pass",
-      available: Date.now() / 1000 <= sigEnd,
-      why: remaining(sigEnd),
+      available: now <= sigEnd,
+      why: remaining(sigEnd, now),
     },
   ] as const;
   let proofs: Hex[] = [];
@@ -165,7 +188,7 @@ export default function EventPage({
       </Link>
       <div className="event-layout">
         <div className="event-art">
-          <img src={meta.image} />
+          <img src={meta.image} alt={`${name} artwork`} />
           <span>#{id.padStart(3, "0")}</span>
         </div>
         <div className="event-info">
@@ -178,7 +201,14 @@ export default function EventPage({
             {eventDate > 0n && (
               <span>
                 <Clock />{" "}
-                {new Date(Number(eventDate) * 1000).toLocaleDateString()}
+                {new Date(Number(eventDate) * 1000).toLocaleString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  timeZoneName: "short",
+                })}
               </span>
             )}
             {location && (
@@ -231,6 +261,8 @@ export default function EventPage({
                 key={m.id}
                 type="button"
                 role="tab"
+                id={`mint-tab-${m.id}`}
+                aria-controls={`mint-panel-${m.id}`}
                 aria-selected={tab === m.id}
                 disabled={!m.available}
                 className={tab === m.id ? "active" : ""}
@@ -261,17 +293,22 @@ export default function EventPage({
             <div className="success big mint-status">
               This wallet already holds this POAP ✓
               <div>
-                <a href={opensea(eventId)} target="_blank">
+                <a href={opensea(eventId)} target="_blank" rel="noreferrer">
                   View on OpenSea ↗
                 </a>{" "}
                 ·{" "}
-                <a href={explorer(`token/${CONTRACT}?a=${id}`)} target="_blank">
+                <a href={explorer(`token/${CONTRACT}?a=${id}`)} target="_blank" rel="noreferrer">
                   Verify on BaseScan ↗
                 </a>
               </div>
             </div>
           ) : (
-            <div className="mint-action" role="tabpanel">
+            <div
+              className="mint-action"
+              role="tabpanel"
+              id={`mint-panel-${tab}`}
+              aria-labelledby={`mint-tab-${tab}`}
+            >
               {tab === "public" && (
                 <div>
                   <p>

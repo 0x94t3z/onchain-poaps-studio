@@ -7,11 +7,11 @@ const sections = [
     <>
       <p>
         Connect a wallet on Base Sepolia and open{" "}
-        <Link href="/create">Create</Link>. Add a name and raw SVG file, then
-        choose whether the token is soulbound and whether public minting starts
-        open. Description, location, event date, URL, and allowlist are
-        optional. The name is limited to 128 bytes, the description to 512, and
-        the location and URL to 128 each.
+        <Link href="/create">Create</Link>. Build artwork in the badge workshop
+        or upload/paste a self-contained SVG, then add the event details and
+        choose its distribution settings. Description, location, event date,
+        URL, and allowlist are optional. The name is limited to 128 bytes, the
+        description to 512, and the location and URL to 128 each.
       </p>
       <p>
         Registration calls{" "}
@@ -37,7 +37,7 @@ const sections = [
       <p>
         Use a square <code>viewBox</code>, avoid remote fonts/images/scripts,
         convert text to paths when exact typography matters, and optimize with{" "}
-        <a href="https://jakearchibald.github.io/svgomg/">SVGOMG</a>. Smaller
+        <a href="https://jakearchibald.github.io/svgomg/" target="_blank" rel="noreferrer">SVGOMG</a>. Smaller
         SVGs cost less gas.
       </p>
     </>,
@@ -71,6 +71,11 @@ const sections = [
         <code>allowlistMint</code>. The builder uses{" "}
         <code>keccak256(abi.encodePacked(address))</code> leaves and sorted
         pairs, matching the contract's OpenZeppelin verification.
+      </p>
+      <p>
+        Download the generated recipient-proof JSON before registering or
+        saving the root. The root is permanent, and each attendee needs the
+        proof generated specifically for their wallet.
       </p>
       <h3>Signed pass</h3>
       <p>
@@ -160,6 +165,14 @@ export default function Docs() {
           </a>
         ))}
       </aside>
+      <details className="docs-mobile-toc">
+        <summary>On this page</summary>
+        <nav aria-label="Documentation sections">
+          {sections.map(([id, title]) => (
+            <a key={id as string} href={`#${id}`}>{title}</a>
+          ))}
+        </nav>
+      </details>
       <div className="doc-body">
         {sections.map(([id, title, body], i) => (
           <article id={id as string} key={id as string}>

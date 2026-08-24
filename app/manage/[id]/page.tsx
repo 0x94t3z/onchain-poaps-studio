@@ -15,6 +15,8 @@ import { deadline, remaining } from "@/lib/metadata";
 import { buildTree } from "@/lib/merkle";
 import { signedPassMessageHash } from "@/lib/signed-pass";
 import { useResolvedAddressInput } from "@/hooks/use-resolved-address-input";
+import { useCurrentTimestamp } from "@/hooks/use-current-timestamp";
+import { downloadJson } from "@/lib/download";
 import { AddressIdentity } from "@/components/address-identity";
 import { TxButton } from "@/components/tx-button";
 export default function Manage({
@@ -23,13 +25,16 @@ export default function Manage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params),
-    eventId = BigInt(id),
+    validId = /^[1-9]\d*$/.test(id),
+    eventId = BigInt(validId ? id : "0"),
     { address, isReconnecting } = useAccount();
+  const now = useCurrentTimestamp();
   const query = useReadContract({
     address: CONTRACT,
     abi: poapAbi,
     functionName: "events",
     args: [eventId],
+    query: { enabled: validId },
   });
   const [list, setList] = useState(""),
     [recipient, setRecipient] = useState(""),
@@ -57,6 +62,10 @@ export default function Manage({
       return null;
     }
   }, [allowlistResolution]);
+  if (!validId || query.isError)
+    return (
+      <section className="page"><div className="empty">POAP not found.</div></section>
+    );
   if (!query.data || isReconnecting)
     return (
       <section className="page">
@@ -71,7 +80,7 @@ export default function Manage({
   const isCreator = address?.toLowerCase() === creator.toLowerCase(),
     controlEnd = deadline(createdAt, 30),
     signatureEnd = deadline(createdAt, 37),
-    controlOpen = Date.now() / 1000 <= controlEnd;
+    controlOpen = now <= controlEnd;
   const titleWords = name.trim().split(/\s+/),
     titleLead = titleWords.length > 1 ? titleWords[0] : "",
     titleTail = titleWords.length > 1 ? titleWords.slice(1).join(" ") : name;
@@ -141,9 +150,9 @@ export default function Manage({
       </h1>
       <div className="deadline-bar">
         <span>Creator controls close in</span>
-        <strong>{remaining(controlEnd)}</strong>
+        <strong>{remaining(controlEnd, now)}</strong>
         <span>Signed passes expire in</span>
-        <strong>{remaining(signatureEnd)}</strong>
+        <strong>{remaining(signatureEnd, now)}</strong>
       </div>
       <div className="manage-grid">
         <article className="panel public-mint-card">
@@ -173,7 +182,7 @@ export default function Manage({
             />
             <small>
               {controlOpen ? (
-                <>Editable for {remaining(controlEnd)}</>
+                <>Editable for {remaining(controlEnd, now)}</>
               ) : (
                 "Creator window closed"
               )}
@@ -239,20 +248,13 @@ export default function Manage({
               <button
                 className="button secondary"
                 onClick={() =>
-                  download(
-                    `${name}-allowlist.json`,
-                    JSON.stringify(
-                      {
-                        eventId: id,
-                        chainId: chain.id,
-                        contract: CONTRACT,
-                        root: tree.root,
-                        recipients: tree.entries,
-                      },
-                      null,
-                      2,
-                    ),
-                  )
+                  downloadJson(`${name}-allowlist.json`, {
+                    eventId: id,
+                    chainId: chain.id,
+                    contract: CONTRACT,
+                    root: tree.root,
+                    recipients: tree.entries,
+                  })
                 }
               >
                 Download recipient proofs
@@ -305,7 +307,7 @@ export default function Manage({
                 disabled={
                   !isCreator ||
                   !recipientAddress ||
-                  Date.now() / 1000 > signatureEnd ||
+                  now > signatureEnd ||
                   signer.isPending
                 }
                 onClick={sign}
@@ -446,12 +448,4 @@ function AddressResolutionStatus({
   }
 
   return <p className="address-resolution">{emptyLabel}</p>;
-}
-
-function download(name: string, data: string) {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(a.href);
 }

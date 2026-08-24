@@ -81,6 +81,7 @@ The following workflows were exercised through the production interface against 
 - View the POAPs held by the connected wallet as a collection.
 - Inspect artwork, metadata, distribution state, and deadlines before minting.
 - Verify registrations, mints, ownership, and token metadata through BaseScan and OpenSea.
+- Use the system-aware light or dark interface; an explicit choice persists across visits and also updates the wallet selector.
 
 ## Contract feature coverage
 

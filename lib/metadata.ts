@@ -25,8 +25,9 @@ export function deadline(createdAt: bigint, days: number) {
   return Number(createdAt) + days * 86400;
 }
 
-export function remaining(until: number) {
-  const seconds = until - Math.floor(Date.now() / 1000);
+export function remaining(until: number, now: number) {
+  if (!now) return "Checking…";
+  const seconds = until - now;
   if (seconds <= 0) return "Expired";
   const d = Math.floor(seconds / 86400);
   const h = Math.floor((seconds % 86400) / 3600);

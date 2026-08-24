@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useRef } from "react";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { ContractFunctionArgs, ContractFunctionName } from "viem";
 import { poapAbi } from "@/lib/abi";
@@ -24,11 +25,17 @@ export function TxButton<
 }) {
   const { writeContract, data, error, isPending } = useWriteContract();
   const receipt = useWaitForTransactionReceipt({ hash: data });
+  const notifiedHash = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!receipt.isSuccess || !data || notifiedHash.current === data) return;
+    notifiedHash.current = data;
+    onSuccess?.();
+  }, [data, onSuccess, receipt.isSuccess]);
   if (receipt.isSuccess)
     return (
       <div className="success">
         Confirmed onchain ·{" "}
-        <a target="_blank" href={explorer(`tx/${data}`)}>
+        <a target="_blank" rel="noreferrer" href={explorer(`tx/${data}`)}>
           View transaction ↗
         </a>
       </div>
@@ -36,23 +43,19 @@ export function TxButton<
   return (
     <div>
       <button
+        type="button"
         className={
           "button" +
           (wide ? " wide" : "") +
           (variant === "secondary" ? " secondary" : "")
         }
         disabled={disabled || isPending || receipt.isLoading}
-        onClick={() =>
-          writeContract(
-            {
-              address: CONTRACT,
-              abi: poapAbi,
-              functionName: name,
-              args,
-            } as any,
-            { onSuccess },
-          )
-        }
+        onClick={() => writeContract({
+          address: CONTRACT,
+          abi: poapAbi,
+          functionName: name,
+          args,
+        } as any)}
       >
         {isPending
           ? "Confirm in wallet"
