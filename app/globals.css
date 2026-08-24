@@ -1332,20 +1332,21 @@ code {
   margin-top: 26px;
 }
 .event-owner {
-  width: 100%;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
 }
 .event-creator-line {
   min-width: 0;
+  max-width: 100%;
   display: flex;
   align-items: baseline;
   gap: 0.35em;
   white-space: nowrap;
 }
 .event-owner .button.tiny {
+  flex: none;
   min-height: 36px;
   margin-left: 0;
   padding-inline: 14px;
