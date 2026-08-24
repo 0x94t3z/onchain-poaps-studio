@@ -901,28 +901,70 @@ code {
 }
 .mint-panel {
   display: grid;
-  grid-template-columns: 0.6fr 1fr;
-  gap: 35px;
+  grid-template-columns: minmax(230px, 0.48fr) minmax(0, 1.52fr);
+  align-items: start;
+  gap: clamp(32px, 5vw, 72px);
+}
+.mint-intro p {
+  max-width: 29ch;
+  margin: 18px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.mint-workflow {
+  min-width: 0;
+  display: grid;
+  gap: 24px;
 }
 .method-tabs {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
 }
 .method-tabs button {
-  padding: 15px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   text-align: left;
   background: transparent;
   border: 1px solid var(--line);
   font-weight: 700;
+  cursor: pointer;
 }
 .method-tabs button small {
   display: block;
+  margin-top: 2px;
   color: var(--muted);
   font-weight: 400;
 }
 .method-tabs button.active {
   border-color: var(--ink);
   box-shadow: 3px 3px 0 var(--lime);
+}
+.method-tabs button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.mint-action {
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.mint-action > div {
+  width: min(100%, 760px);
+}
+.mint-action p:first-child {
+  max-width: 62ch;
+  margin: 0 0 18px;
+  line-height: 1.5;
+}
+.mint-action textarea {
+  min-height: 120px;
+}
+.mint-status {
+  margin: 0;
 }
 .deadline-bar {
   background: var(--ink);

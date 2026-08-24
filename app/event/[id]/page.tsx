@@ -4,13 +4,7 @@ import Link from "next/link";
 import { useAccount, useBalance, useReadContract } from "wagmi";
 import type { Hex } from "viem";
 import { poapAbi } from "@/lib/abi";
-import {
-  chain,
-  CONTRACT,
-  ZERO_ROOT,
-  explorer,
-  opensea,
-} from "@/lib/constants";
+import { chain, CONTRACT, ZERO_ROOT, explorer, opensea } from "@/lib/constants";
 import { decodeMetadata, deadline, remaining } from "@/lib/metadata";
 import { verifyProof } from "@/lib/merkle";
 import { AddressIdentity } from "@/components/address-identity";
@@ -149,10 +143,10 @@ export default function EventPage({
           </div>
           <div className="event-meta-actions">
             <div className="event-owner">
-                <span className="event-creator-line">
-                  <span>Created by</span>
-                  <AddressIdentity address={creator} context="Creator" />
-                </span>
+              <span className="event-creator-line">
+                <span>Created by</span>
+                <AddressIdentity address={creator} context="Creator" />
+              </span>
               {address?.toLowerCase() === creator.toLowerCase() && (
                 <Link className="button tiny" href={`/manage/${id}`}>
                   Manage
@@ -173,134 +167,143 @@ export default function EventPage({
         </div>
       </div>
       <div className="mint-panel panel">
-        <div>
+        <div className="mint-intro">
           <span className="eyebrow">CHOOSE A MINT METHOD</span>
           <h2>Mint this POAP</h2>
+          <p>
+            Use the route shared by the organizer. Each wallet can collect this
+            POAP once.
+          </p>
         </div>
-        <div className="method-tabs">
-          {methods.map((m) => (
-            <button
-              key={m.id}
-              disabled={!m.available}
-              className={tab === m.id ? "active" : ""}
-              onClick={() => setTab(m.id)}
-            >
-              {m.label}
-              <small>{m.why}</small>
-            </button>
-          ))}
-        </div>
-        {needsTestEth && (
-          <div className="funding-note" role="status">
-            <strong>Base Sepolia test ETH required</strong>
-            <p>
-              This wallet has no test ETH to pay network gas. Test ETH has no
-              real-world value.
-            </p>
-            <a
-              href="https://docs.base.org/base-chain/network-information/network-faucets"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Find a Base Sepolia faucet ↗
-            </a>
+        <div className="mint-workflow">
+          <div className="method-tabs" role="tablist" aria-label="Mint method">
+            {methods.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                role="tab"
+                aria-selected={tab === m.id}
+                disabled={!m.available}
+                className={tab === m.id ? "active" : ""}
+                onClick={() => setTab(m.id)}
+              >
+                {m.label}
+                <small>{m.why}</small>
+              </button>
+            ))}
           </div>
-        )}
-        {claimed.data ? (
-          <div className="success big">
-            This wallet already holds this POAP ✓
-            <div>
-              <a href={opensea(eventId)} target="_blank">
-                View on OpenSea ↗
-              </a>{" "}
-              ·{" "}
-              <a href={explorer(`token/${CONTRACT}?a=${id}`)} target="_blank">
-                Verify on BaseScan ↗
+          {needsTestEth && (
+            <div className="funding-note" role="status">
+              <strong>Base Sepolia test ETH required</strong>
+              <p>
+                This wallet has no test ETH to pay network gas. Test ETH has no
+                real-world value.
+              </p>
+              <a
+                href="https://docs.base.org/base-chain/network-information/network-faucets"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Find a Base Sepolia faucet ↗
               </a>
             </div>
-          </div>
-        ) : (
-          <>
-            {tab === "public" && (
+          )}
+          {claimed.data ? (
+            <div className="success big mint-status">
+              This wallet already holds this POAP ✓
               <div>
-                <p>
-                  Anyone can mint while the creator keeps public minting open.
-                  The contract allows one token per wallet.
-                </p>
-                <TxButton
-                  name="mint"
-                  args={[eventId]}
-                  label="Mint public POAP"
-                  disabled={
-                    !address || !isPublic || isCheckingGas || needsTestEth
-                  }
-                />
+                <a href={opensea(eventId)} target="_blank">
+                  View on OpenSea ↗
+                </a>{" "}
+                ·{" "}
+                <a href={explorer(`token/${CONTRACT}?a=${id}`)} target="_blank">
+                  Verify on BaseScan ↗
+                </a>
               </div>
-            )}
-            {tab === "allowlist" && (
-              <div>
-                <p>
-                  Paste the proof supplied by the organizer. The contract checks
-                  it against the saved allowlist root.
-                </p>
-                <textarea
-                  className="mono"
-                  value={proof}
-                  onChange={(x) => setProof(x.target.value)}
-                  placeholder="0xabc… 0xdef…"
-                />
-                {proof.trim() && (
-                  <p
-                    className={proofIsValid ? "success" : "error"}
-                    role="status"
-                  >
-                    {proofIsValid
-                      ? "This proof matches the connected wallet."
-                      : "This proof belongs to a different wallet or is invalid. Ask the organizer for the proof generated for this wallet."}
+            </div>
+          ) : (
+            <div className="mint-action" role="tabpanel">
+              {tab === "public" && (
+                <div>
+                  <p>
+                    Anyone can mint while the creator keeps public minting open.
+                    The contract allows one token per wallet.
                   </p>
-                )}
-                <TxButton
-                  name="allowlistMint"
-                  args={[eventId, proofs]}
-                  label="Verify proof & mint"
-                  disabled={
-                    !address ||
-                    root === ZERO_ROOT ||
-                    !proofIsValid ||
-                    isCheckingGas ||
-                    needsTestEth
-                  }
-                />
-              </div>
-            )}
-            {tab === "signature" && (
-              <div>
-                <p>
-                  Paste the signature issued for this wallet. It cannot be used
-                  by another address and expires{" "}
-                  {new Date(sigEnd * 1000).toLocaleString()}.
-                </p>
-                <textarea
-                  className="mono"
-                  value={sig}
-                  onChange={(x) => setSig(x.target.value)}
-                  placeholder="0x signature"
-                />
-                <TxButton
-                  name="mintWithSignature"
-                  args={[eventId, sig as Hex]}
-                  label="Use signed pass & mint"
-                  disabled={
-                    !address ||
-                    !/^0x[0-9a-fA-F]{130}$/.test(sig) ||
-                    isCheckingGas ||
-                    needsTestEth
-                  }
-                />
-              </div>
-            )}
-          </>
-        )}
+                  <TxButton
+                    name="mint"
+                    args={[eventId]}
+                    label="Mint public POAP"
+                    disabled={
+                      !address || !isPublic || isCheckingGas || needsTestEth
+                    }
+                  />
+                </div>
+              )}
+              {tab === "allowlist" && (
+                <div>
+                  <p>
+                    Paste the proof supplied by the organizer. The contract
+                    checks it against the saved allowlist root.
+                  </p>
+                  <textarea
+                    className="mono"
+                    value={proof}
+                    onChange={(x) => setProof(x.target.value)}
+                    placeholder="0xabc… 0xdef…"
+                  />
+                  {proof.trim() && (
+                    <p
+                      className={proofIsValid ? "success" : "error"}
+                      role="status"
+                    >
+                      {proofIsValid
+                        ? "This proof matches the connected wallet."
+                        : "This proof belongs to a different wallet or is invalid. Ask the organizer for the proof generated for this wallet."}
+                    </p>
+                  )}
+                  <TxButton
+                    name="allowlistMint"
+                    args={[eventId, proofs]}
+                    label="Verify proof & mint"
+                    disabled={
+                      !address ||
+                      root === ZERO_ROOT ||
+                      !proofIsValid ||
+                      isCheckingGas ||
+                      needsTestEth
+                    }
+                  />
+                </div>
+              )}
+              {tab === "signature" && (
+                <div>
+                  <p>
+                    Paste the signature issued for this wallet. It cannot be
+                    used by another address and expires{" "}
+                    {new Date(sigEnd * 1000).toLocaleString()}.
+                  </p>
+                  <textarea
+                    className="mono"
+                    value={sig}
+                    onChange={(x) => setSig(x.target.value)}
+                    placeholder="0x signature"
+                  />
+                  <TxButton
+                    name="mintWithSignature"
+                    args={[eventId, sig as Hex]}
+                    label="Use signed pass & mint"
+                    disabled={
+                      !address ||
+                      !/^0x[0-9a-fA-F]{130}$/.test(sig) ||
+                      isCheckingGas ||
+                      needsTestEth
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
