@@ -408,7 +408,13 @@ export function WalletButton() {
                             : "Detected in this browser"}
                         </small>
                       </span>
-                      <b>{isPending ? "Waiting…" : "Connect →"}</b>
+                      <b>
+                        {isPending
+                          ? "Waiting…"
+                          : connector.id === "farcaster"
+                            ? "Use wallet →"
+                            : "Connect →"}
+                      </b>
                     </button>
                   ))}
                   {walletConnectConfigured && (
@@ -428,9 +434,9 @@ export function WalletButton() {
                         </span>
                         <span>
                           <strong>WalletConnect</strong>
-                          <small>Choose from all compatible EVM wallets</small>
+                          <small>Choose another EVM wallet</small>
                         </span>
-                        <b>Choose →</b>
+                        <b>Browse wallets →</b>
                       </button>
                     </>
                   )}

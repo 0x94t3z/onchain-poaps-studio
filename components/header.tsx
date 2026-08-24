@@ -36,8 +36,10 @@ export function Header() {
           </span>
         </Link>
         {navigation("desktop-nav")}
-        <ThemeToggle />
-        <WalletButton />
+        <div className="header-actions">
+          <ThemeToggle />
+          <WalletButton />
+        </div>
       </header>
       {navigation("mobile-nav")}
     </>

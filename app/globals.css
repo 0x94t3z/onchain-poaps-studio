@@ -145,6 +145,13 @@ nav a.active {
   color: var(--ink);
   border-color: var(--ink);
 }
+.header-actions {
+  min-width: 0;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 main {
   width: 100%;
   min-width: 0;
@@ -202,7 +209,7 @@ footer {
   background: transparent;
   color: var(--ink);
   cursor: pointer;
-  margin-left: auto;
+  margin-left: 0;
   transition: border-color 0.15s ease, background 0.15s ease,
     transform 0.15s ease;
 }
@@ -403,13 +410,20 @@ footer {
   text-align: left;
   cursor: pointer;
 }
-.wallet-list > button:hover {
+.wallet-list > button:hover,
+.wallet-list > button:focus-visible {
   border-color: var(--ink);
   background: var(--lime);
   color: var(--accent-ink);
+  outline: none;
 }
-.wallet-list > button:hover small {
+.wallet-list > button:hover small,
+.wallet-list > button:focus-visible small {
   color: var(--accent-ink);
+}
+.wallet-list > button:active {
+  transform: translateY(1px);
+  background: var(--hover);
 }
 .wallet-list > button:disabled {
   opacity: 0.55;
@@ -1881,12 +1895,25 @@ code {
   }
   .wallet-modal {
     width: 100%;
-    max-height: min(86dvh, 720px);
+    max-height: min(82dvh, 680px);
     border-width: 1px 0 0;
+    border-radius: 22px 22px 0 0;
     box-shadow: 0 -7px 0 var(--lime);
   }
-  .wallet-modal-header,
-  .wallet-list,
+  .wallet-modal-header {
+    padding: 18px 20px;
+  }
+  .wallet-modal-header h2 {
+    margin-top: 4px;
+    font-size: 30px;
+  }
+  .wallet-close {
+    width: 42px;
+    height: 42px;
+  }
+  .wallet-list {
+    padding: 18px 20px calc(18px + env(safe-area-inset-bottom));
+  }
   .wallet-help {
     padding: 20px;
   }
@@ -1895,6 +1922,22 @@ code {
   }
   .wallet-list {
     border-right: 0;
+  }
+  .wallet-section-label {
+    margin-bottom: 8px;
+  }
+  .wallet-section-label-separated {
+    margin-top: 18px;
+    padding-top: 16px;
+  }
+  .wallet-list > button {
+    min-height: 68px;
+    padding: 9px 8px;
+    gap: 11px;
+  }
+  .wallet-list > button > b {
+    text-align: right;
+    white-space: nowrap;
   }
   .wallet-help {
     display: none;
@@ -2042,6 +2085,10 @@ textarea {
     width: 38px;
     height: 38px;
     flex-basis: 38px;
+  }
+
+  .header-actions {
+    gap: 8px;
   }
 
   .mobile-nav {
