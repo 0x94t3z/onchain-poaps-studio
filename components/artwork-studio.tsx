@@ -65,6 +65,24 @@ const escapeXml = (value: string) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
 
+function fittedFontSize(
+  value: string,
+  preferredSize: number,
+  minimumSize: number,
+  maxWidth: number,
+  letterSpacing: number,
+) {
+  if (!value.length) return preferredSize;
+
+  // Arial bold uppercase averages roughly two-thirds of its font size per glyph.
+  // Keep enough room for letter spacing as well as the visible ticket frame.
+  const availableGlyphWidth =
+    maxWidth - Math.max(0, value.length - 1) * letterSpacing;
+  const fittedSize = Math.floor(availableGlyphWidth / (value.length * 0.66));
+
+  return Math.max(minimumSize, Math.min(preferredSize, fittedSize));
+}
+
 function makeSvg({
   style,
   palette,
@@ -117,10 +135,31 @@ function makeSvg({
   const center = marks[mark]
     .replaceAll("ACCENT", palette.accent)
     .replaceAll("INK", palette.ink);
+  const titleText = (title || "EVENT POAP").toUpperCase();
+  const detailText = (detail || "BASE · 2026").toUpperCase();
+  const titleLetterSpacing =
+    style !== "orbit" && titleText.length >= 20 ? 1.5 : 3;
+  const titleMaxWidth =
+    style === "split" ? 430 : style === "orbit" ? 400 : 360;
+  const detailMaxWidth = style === "ticket" ? 340 : 380;
+  const titleFontSize =
+    style === "orbit"
+      ? 25
+      : fittedFontSize(
+          titleText,
+          25,
+          17,
+          titleMaxWidth,
+          titleLetterSpacing,
+        );
+  const detailFontSize =
+    style === "orbit"
+      ? 18
+      : fittedFontSize(detailText, 18, 14, detailMaxWidth, 2);
   const labels =
     style === "orbit"
-      ? `<defs><path id="orbit-top" d="M91 256a165 165 0 0 1 330 0"/><path id="orbit-bottom" d="M91 256a165 165 0 0 0 330 0"/></defs><text text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="3" fill="${palette.ink}"><textPath href="#orbit-top" startOffset="50%">${escapeXml((title || "EVENT POAP").toUpperCase())}</textPath></text><text text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="${palette.ink}"><textPath href="#orbit-bottom" startOffset="50%">${escapeXml((detail || "BASE · 2026").toUpperCase())}</textPath></text>`
-      : `<text x="256" y="${layout.titleY}" text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="700" letter-spacing="3" fill="${layout.titleColor}">${escapeXml((title || "EVENT POAP").toUpperCase())}</text><text x="256" y="${layout.detailY}" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="2" fill="${palette.ink}">${escapeXml((detail || "BASE · 2026").toUpperCase())}</text>`;
+      ? `<defs><path id="orbit-top" d="M91 256a165 165 0 0 1 330 0"/><path id="orbit-bottom" d="M91 256a165 165 0 0 0 330 0"/></defs><text text-anchor="middle" font-family="Arial,sans-serif" font-size="${titleFontSize}" font-weight="700" letter-spacing="${titleLetterSpacing}" fill="${palette.ink}"><textPath href="#orbit-top" startOffset="50%">${escapeXml(titleText)}</textPath></text><text text-anchor="middle" font-family="Arial,sans-serif" font-size="${detailFontSize}" font-weight="700" letter-spacing="2" fill="${palette.ink}"><textPath href="#orbit-bottom" startOffset="50%">${escapeXml(detailText)}</textPath></text>`
+      : `<text x="256" y="${layout.titleY}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${titleFontSize}" font-weight="700" letter-spacing="${titleLetterSpacing}" fill="${layout.titleColor}">${escapeXml(titleText)}</text><text x="256" y="${layout.detailY}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${detailFontSize}" font-weight="700" letter-spacing="2" fill="${palette.ink}">${escapeXml(detailText)}</text>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="${palette.background}"/>${frame}<g transform="${layout.markTransform}">${center}</g>${labels}</svg>`;
 }
 

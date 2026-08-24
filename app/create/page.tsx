@@ -10,6 +10,7 @@ import { validateSvgSource } from "@/lib/svg";
 import { Check } from "lucide-react";
 import { parseEventLogs } from "viem";
 import { poapAbi } from "@/lib/abi";
+import { DateTimePicker } from "@/components/date-time-picker";
 const blank =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="256" fill="#171717"/><circle cx="256" cy="256" r="210" fill="none" stroke="#eeff41" stroke-width="12"/><text x="256" y="240" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="white">I WAS</text><text x="256" y="302" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="#eeff41">THERE</text></svg>';
 export default function Create() {
@@ -125,17 +126,13 @@ export default function Create() {
               )}
             </label>
             <div className="split">
-              <label>
-                Event date
-                <input
-                  type="datetime-local"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
+              <div className="field-group">
+                <label>Event date</label>
+                <DateTimePicker value={date} onChange={setDate} />
                 <small>
                   Interpreted in {Intl.DateTimeFormat().resolvedOptions().timeZone}.
                 </small>
-              </label>
+              </div>
               <label>
                 Location <b>{bytes(location)}/128</b>
                 <input

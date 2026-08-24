@@ -881,6 +881,223 @@ textarea {
   grid-template-columns: 1fr 1fr;
   gap: 15px;
 }
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 22px;
+}
+.field-group > label {
+  margin: 0;
+}
+.date-time-picker {
+  position: relative;
+  min-width: 0;
+}
+.date-time-trigger {
+  width: 100%;
+  min-height: 54px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  background: var(--field);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+.date-time-trigger svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+.date-time-trigger:hover,
+.date-time-trigger[aria-expanded="true"] {
+  border-color: var(--ink);
+}
+.date-time-trigger[aria-expanded="true"] {
+  box-shadow: 0 0 0 2px var(--focus-ring);
+}
+.date-time-popover {
+  position: fixed;
+  z-index: 45;
+  top: var(--picker-top, 0);
+  left: var(--picker-left, 0);
+  width: var(--picker-width, min(390px, calc(100vw - 24px)));
+  max-height: var(--picker-max-height, calc(100dvh - 24px));
+  padding: 16px;
+  overflow-y: auto;
+  border: 1px solid var(--ink);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 7px 7px 0 var(--lime);
+  visibility: hidden;
+  overscroll-behavior: contain;
+}
+.date-time-popover[data-placed="true"] {
+  visibility: visible;
+}
+.calendar-heading,
+.calendar-heading > div,
+.calendar-time,
+.calendar-actions {
+  display: flex;
+  align-items: center;
+}
+.calendar-heading {
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.calendar-heading > div {
+  gap: 4px;
+}
+.calendar-heading button,
+.calendar-actions button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+}
+.calendar-heading button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+}
+.calendar-heading button:hover,
+.calendar-actions button:hover {
+  border-color: var(--line);
+  background: var(--hover);
+}
+.calendar-heading svg {
+  width: 20px;
+  height: 20px;
+}
+.calendar-weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.calendar-weekdays {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.calendar-grid button {
+  min-height: 40px;
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+}
+.calendar-grid button:hover {
+  border-color: var(--ink);
+  background: var(--hover);
+}
+.calendar-grid button.outside {
+  color: var(--muted);
+  opacity: 0.55;
+}
+.calendar-grid button[data-today="true"] {
+  border-color: var(--violet);
+}
+.calendar-grid button.selected {
+  border-color: var(--primary-bg);
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  box-shadow: 3px 3px 0 var(--lime);
+  opacity: 1;
+}
+.calendar-time {
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.calendar-time > svg {
+  width: 18px;
+  height: 18px;
+}
+.calendar-time > span:first-of-type {
+  margin-right: auto;
+  font-weight: 700;
+}
+.calendar-time select {
+  min-height: 40px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--field);
+  color: var(--ink);
+  font: inherit;
+}
+.calendar-actions {
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+}
+.calendar-actions button {
+  min-height: 42px;
+  padding: 9px 14px;
+  font: inherit;
+  font-weight: 700;
+}
+.calendar-actions .calendar-done {
+  min-width: 96px;
+  border-color: var(--primary-bg);
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  box-shadow: 3px 3px 0 var(--lime);
+}
+
+@media (max-width: 850px) {
+  .date-time-popover {
+    padding: 12px;
+    box-shadow: 5px 5px 0 var(--lime);
+  }
+
+  .calendar-heading {
+    margin-bottom: 8px;
+  }
+
+  .calendar-heading button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .calendar-grid button {
+    min-height: 34px;
+    font-size: 14px;
+  }
+
+  .calendar-time {
+    margin-top: 10px;
+    padding-top: 10px;
+    font-size: 14px;
+  }
+
+  .calendar-time select {
+    min-height: 36px;
+    padding: 5px 7px;
+  }
+
+  .calendar-actions {
+    margin-top: 10px;
+  }
+
+  .calendar-actions button {
+    min-height: 38px;
+    padding-block: 7px;
+  }
+}
 .upload {
   border: 1px dashed var(--ink);
   padding: 25px;
