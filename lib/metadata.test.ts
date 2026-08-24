@@ -15,4 +15,19 @@ describe("decodeMetadata", () => {
 
     expect(decodeMetadata(uri)).toEqual(metadata);
   });
+
+  it("recovers immutable metadata containing raw control characters", () => {
+    const malformedJson =
+      '{"name":"Community POAP","description":"first line\nsecond line","image":"data:image/svg+xml;base64,PHN2Zy8+"}';
+    const uri = `data:application/json;base64,${Buffer.from(
+      malformedJson,
+      "utf8",
+    ).toString("base64")}`;
+
+    expect(decodeMetadata(uri)).toEqual({
+      name: "Community POAP",
+      description: "first line\nsecond line",
+      image: "data:image/svg+xml;base64,PHN2Zy8+",
+    });
+  });
 });

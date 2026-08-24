@@ -7,6 +7,10 @@ import { CONTRACT } from "@/lib/constants";
 import { decodeMetadata } from "@/lib/metadata";
 import { EventCard } from "./event-card";
 
+const metadataFallbackImage = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#171717"/><circle cx="256" cy="256" r="112" fill="none" stroke="#eaff2f" stroke-width="24"/><circle cx="256" cy="256" r="24" fill="#eaff2f"/></svg>',
+)}`;
+
 export function EventGrid({ owner, limit, mobileLimit, paginate = false, searchable = false }: {
   owner?: `0x${string}`; limit?: number; mobileLimit?: number; paginate?: boolean; searchable?: boolean;
 }) {
@@ -72,18 +76,52 @@ export function EventGrid({ owner, limit, mobileLimit, paginate = false, searcha
     <div className="empty" role="alert">POAPs could not be loaded from Base Sepolia. Check your connection and try again.</div>
   );
 
-  const cards = visibleIds.flatMap((id, index) => {
+  const cards = visibleIds.map((id, index) => {
+    const event = events.data?.[index]?.result;
+    const uri = uris.data?.[index]?.result;
+
+    if (!event || !uri) {
+      return {
+        key: `event-${id}`,
+        search: id.toString(),
+        node: (
+          <div className="event-card event-card-unavailable" role="status" key={id.toString()}>
+            <div className="card-copy">
+              <div className="eyebrow">EVENT #{id.toString().padStart(3, "0")}</div>
+              <h3>Temporarily unavailable</h3>
+              <p>This registration could not be read from Base Sepolia. Try refreshing the page.</p>
+            </div>
+          </div>
+        ),
+      };
+    }
+
     try {
-      const event = events.data?.[index]?.result;
-      const uri = uris.data?.[index]?.result;
-      if (!event || !uri) return [];
       const meta = decodeMetadata(uri as string);
-      return [{
+      return {
         key: `event-${id}`,
         search: `${id} ${JSON.stringify(meta)}`.toLowerCase(),
         node: <EventCard key={id.toString()} id={id} meta={meta} publicMint={(event as any)[10]} soulbound={(event as any)[9]} />,
-      }];
-    } catch { return []; }
+      };
+    } catch {
+      return {
+        key: `event-${id}`,
+        search: `${id} ${(event as any)[0]} ${(event as any)[1]} ${(event as any)[3]}`.toLowerCase(),
+        node: (
+          <EventCard
+            key={id.toString()}
+            id={id}
+            meta={{
+              name: (event as any)[0] || `Event #${id}`,
+              description: (event as any)[1] || "This registration has unreadable metadata.",
+              image: metadataFallbackImage,
+            }}
+            publicMint={(event as any)[10]}
+            soulbound={(event as any)[9]}
+          />
+        ),
+      };
+    }
   });
   const normalizedQuery = query.trim().toLowerCase();
   const filteredCards = normalizedQuery ? cards.filter((card) => card.search.includes(normalizedQuery)) : cards;

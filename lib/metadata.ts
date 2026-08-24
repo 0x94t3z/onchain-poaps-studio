@@ -8,6 +8,34 @@ export type Metadata = {
 
 const METADATA_PREFIX = "data:application/json;base64,";
 
+// A few immutable registrations contain literal control characters inside
+// JSON strings. Escape those characters while leaving valid JSON whitespace
+// outside strings untouched.
+function escapeControlCharacters(json: string) {
+  let escaped = "";
+  let inString = false;
+  let isEscaped = false;
+
+  for (const character of json) {
+    if (inString && character.charCodeAt(0) <= 0x1f) {
+      escaped += `\\u${character.charCodeAt(0).toString(16).padStart(4, "0")}`;
+      isEscaped = false;
+      continue;
+    }
+
+    escaped += character;
+    if (isEscaped) {
+      isEscaped = false;
+    } else if (character === "\\" && inString) {
+      isEscaped = true;
+    } else if (character === '"') {
+      inString = !inString;
+    }
+  }
+
+  return escaped;
+}
+
 export function decodeMetadata(uri: string): Metadata {
   if (!uri.startsWith(METADATA_PREFIX)) {
     throw new Error("Unsupported token metadata URI");
@@ -15,7 +43,13 @@ export function decodeMetadata(uri: string): Metadata {
 
   const binary = atob(uri.slice(METADATA_PREFIX.length));
   const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-  return JSON.parse(new TextDecoder().decode(bytes));
+  const json = new TextDecoder().decode(bytes);
+
+  try {
+    return JSON.parse(json);
+  } catch {
+    return JSON.parse(escapeControlCharacters(json));
+  }
 }
 
 export const short = (value: string, n = 5) =>
