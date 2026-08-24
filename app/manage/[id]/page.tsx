@@ -40,7 +40,9 @@ export default function Manage({
     [recipient, setRecipient] = useState(""),
     [batch, setBatch] = useState(""),
     [signature, setSignature] = useState<Hex>(),
-    [qr, setQr] = useState("");
+    [qr, setQr] = useState(""),
+    [claimUrl, setClaimUrl] = useState(""),
+    [copied, setCopied] = useState<"signature" | "link">();
   const signer = useSignMessage();
   const tree = useMemo(() => {
     try {
@@ -53,7 +55,9 @@ export default function Manage({
     return (
       <section className="page">
         <div className="empty">
-          {isReconnecting ? "Restoring wallet connection…" : "Loading creator controls…"}
+          {isReconnecting
+            ? "Restoring wallet connection…"
+            : "Loading creator controls…"}
         </div>
       </section>
     );
@@ -82,6 +86,7 @@ export default function Manage({
           const base =
             process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
           const url = `${base}/event/${id}?method=signature&signature=${sig}`;
+          setClaimUrl(url);
           setQr(
             await QRCode.toDataURL(url, {
               width: 420,
@@ -92,6 +97,11 @@ export default function Manage({
         },
       },
     );
+  }
+  async function copy(value: string, type: "signature" | "link") {
+    await navigator.clipboard.writeText(value);
+    setCopied(type);
+    window.setTimeout(() => setCopied(undefined), 1800);
   }
   if (!address)
     return (
@@ -242,37 +252,109 @@ export default function Manage({
               it before the 37-day deadline.
             </li>
           </ol>
-          <input
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
-            placeholder="Recipient 0x address"
-          />
-          <button
-            className="button"
-            disabled={
-              !isCreator ||
-              !isAddress(recipient) ||
-              Date.now() / 1000 > signatureEnd ||
-              signer.isPending
-            }
-            onClick={sign}
-          >
-            Generate signed pass
-          </button>
-          {signature && (
-            <div className="pass">
-              <code>{signature}</code>
-              {qr && <img src={qr} alt="Signed mint QR code" />}
+          <div className="pass-form">
+            <label htmlFor="pass-recipient">Attendee wallet</label>
+            <div className="pass-form-row">
+              <input
+                id="pass-recipient"
+                value={recipient}
+                onChange={(e) => {
+                  setRecipient(e.target.value);
+                  setSignature(undefined);
+                  setQr("");
+                  setClaimUrl("");
+                }}
+                placeholder="0x recipient address"
+                spellCheck={false}
+              />
               <button
-                className="button secondary"
-                onClick={() => navigator.clipboard.writeText(signature)}
+                className="button"
+                disabled={
+                  !isCreator ||
+                  !isAddress(recipient) ||
+                  Date.now() / 1000 > signatureEnd ||
+                  signer.isPending
+                }
+                onClick={sign}
               >
-                Copy signature
+                {signer.isPending ? "Confirm in wallet…" : "Generate pass"}
               </button>
-              <p className="note">
-                Because the signature is recipient-specific, a public poster
-                cannot grant every scanner a mint. Generate one QR per known
-                attendee. This limitation comes from the contract payload.
+            </div>
+            {recipient && !isAddress(recipient) && (
+              <p className="error" role="status">
+                Enter a complete EVM wallet address beginning with 0x.
+              </p>
+            )}
+          </div>
+          {signer.error && (
+            <p className="error" role="alert">
+              The pass was not generated. Approve the signature request in the
+              creator wallet and try again.
+            </p>
+          )}
+          {signature && (
+            <div className="pass-result" aria-live="polite">
+              <div className="pass-result-heading">
+                <div>
+                  <span className="eyebrow">PASS READY</span>
+                  <h3>Send it to this attendee</h3>
+                </div>
+                <span className="pass-status">Signed</span>
+              </div>
+              <div className="pass-result-grid">
+                {qr && (
+                  <figure className="pass-qr">
+                    <img src={qr} alt="Signed mint claim QR code" />
+                    <figcaption>Scan to open the private mint link</figcaption>
+                  </figure>
+                )}
+                <div className="pass-delivery">
+                  <div className="pass-detail">
+                    <span>Recipient</span>
+                    <AddressIdentity
+                      address={getAddress(recipient)}
+                      context="Recipient"
+                    />
+                  </div>
+                  <div className="pass-detail">
+                    <span>Signed pass</span>
+                    <code>{signature}</code>
+                  </div>
+                  <div className="pass-actions">
+                    <button
+                      className="button"
+                      onClick={() => copy(signature, "signature")}
+                    >
+                      {copied === "signature"
+                        ? "Signature copied ✓"
+                        : "Copy signature"}
+                    </button>
+                    {claimUrl && (
+                      <>
+                        <button
+                          className="button secondary"
+                          onClick={() => copy(claimUrl, "link")}
+                        >
+                          {copied === "link"
+                            ? "Link copied ✓"
+                            : "Copy mint link"}
+                        </button>
+                        <a
+                          className="text-link"
+                          href={claimUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Preview mint page ↗
+                        </a>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <p className="note pass-note">
+                This pass only works for the recipient above. Send it privately
+                and generate a separate pass for each attendee.
               </p>
             </div>
           )}

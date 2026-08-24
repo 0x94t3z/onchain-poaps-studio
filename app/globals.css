@@ -994,16 +994,146 @@ code {
 .manage-grid .button {
   margin-top: 14px;
 }
-.pass {
+.pass-form {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.pass-form > label {
+  display: block;
+  margin-bottom: 8px;
+  font: 700 14px "Space Grotesk";
+}
+.pass-form-row {
   display: grid;
-  gap: 15px;
-  margin-top: 20px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
 }
-.pass code {
+.pass-form-row .button {
+  min-width: 190px;
+  margin-top: 0;
+}
+.pass-form .error {
+  margin: 10px 0 0;
+}
+.pass-result {
+  margin-top: 28px;
+  border: 1px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--lime);
+  background: var(--paper);
+}
+.pass-result-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--line);
+}
+.pass-result-heading h3 {
+  margin: 5px 0 0;
+  font: 700 clamp(24px, 3vw, 34px) "Space Grotesk";
+}
+.pass-status {
+  padding: 7px 10px;
+  background: var(--lime);
+  color: var(--ink);
+  font: 700 12px "Space Grotesk";
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.pass-result-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 28px;
+  padding: 24px;
+  align-items: start;
+}
+.pass-qr {
+  margin: 0;
+  padding: 14px;
+  background: var(--lime);
+}
+.pass-qr img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+}
+.pass-qr figcaption {
+  padding-top: 10px;
+  color: var(--ink);
+  font: 700 12px "Space Grotesk";
+  text-align: center;
+}
+.pass-delivery {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.pass-detail {
+  display: grid;
+  gap: 7px;
+}
+.pass-detail > span {
+  color: var(--muted);
+  font: 700 11px "Space Grotesk";
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.pass-detail code {
+  display: block;
+  max-width: 100%;
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: #eeece3;
   overflow-wrap: anywhere;
+  line-height: 1.5;
 }
-.pass img {
-  width: min(100%, 420px);
+.pass-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.manage-grid .pass-actions .button {
+  margin-top: 0;
+}
+.pass-actions .text-link {
+  margin-left: 4px;
+}
+.pass-note {
+  margin: 0;
+  padding: 18px 24px;
+  border-top: 1px solid var(--line);
+  background: #fafbd8;
+}
+@media (max-width: 850px) {
+  .pass-form-row,
+  .pass-result-grid {
+    grid-template-columns: 1fr;
+  }
+  .pass-form-row .button,
+  .pass-actions .button {
+    width: 100%;
+  }
+  .pass-result-heading,
+  .pass-result-grid,
+  .pass-note {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .pass-qr {
+    width: min(100%, 300px);
+    justify-self: center;
+  }
+  .pass-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .pass-actions .text-link {
+    margin: 4px 0 0;
+    text-align: center;
+  }
 }
 .docs {
   display: grid;
