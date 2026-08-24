@@ -66,9 +66,9 @@ The supplied verified contract remains the source of truth. The app does not mod
 | Signed-pass mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x96491eedf018c7935b5a1def6389ee5bbde95799e11dbd6e8f1f0fa22f844c2a) |
 
 <p>
-  <a href="https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6#code"><strong>Verified contract</strong></a> ·
-  <a href="https://poaps.0x94t3z.site/event/7">Event #7</a> ·
-  <a href="https://farcaster.xyz/0x94t3z.eth/0x4dd9ea63">Launch cast</a>
+  <a href="https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6#code"><strong>Verified contract ↗</strong></a> ·
+  <a href="https://poaps.0x94t3z.site/event/7">Event #7 ↗</a> ·
+  <a href="https://farcaster.xyz/0x94t3z.eth/0x4dd9ea63">Launch cast ↗</a>
 </p>
 
 ## Product map

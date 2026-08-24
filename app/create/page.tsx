@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArtworkStudio } from "@/components/artwork-studio";
 import { TxButton } from "@/components/tx-button";
-import { ZERO_ROOT } from "@/lib/constants";
+import { explorer, ZERO_ROOT } from "@/lib/constants";
 import { buildTree, normalizeAddresses } from "@/lib/merkle";
 import { downloadJson } from "@/lib/download";
 import { validateSvgSource } from "@/lib/svg";
@@ -26,6 +26,7 @@ export default function Create() {
     [list, setList] = useState(""),
     [downloadedAllowlistRoot, setDownloadedAllowlistRoot] = useState(""),
     [createdEventId, setCreatedEventId] = useState<string | null>(null),
+    [createdTransactionHash, setCreatedTransactionHash] = useState<string | null>(null),
     [eventLinkCopied, setEventLinkCopied] = useState(false);
   const allowlist = useMemo(() => {
     try {
@@ -295,7 +296,9 @@ export default function Create() {
               ]}
               label="Register POAP on Base"
               disabled={!valid}
+              showSuccess={!createdEventId}
               onSuccess={(receipt) => {
+                setCreatedTransactionHash(receipt.transactionHash);
                 const eventLog = parseEventLogs({
                   abi: poapAbi,
                   eventName: "NewEvent",
@@ -315,30 +318,44 @@ export default function Create() {
                   can collect it.
                 </p>
                 <div className="creation-next-actions">
-                  <Link className="button" href={`/event/${createdEventId}`}>
-                    View and share POAP →
-                  </Link>
-                  <Link
-                    className="button secondary"
-                    href={`/manage/${createdEventId}`}
-                  >
-                    Manage distribution
-                  </Link>
-                  <button
-                    type="button"
-                    className="text-link"
-                    onClick={async () => {
-                      const eventUrl = `${window.location.origin}/event/${createdEventId}`;
-                      await navigator.clipboard.writeText(eventUrl);
-                      setEventLinkCopied(true);
-                      window.setTimeout(() => setEventLinkCopied(false), 1800);
-                    }}
-                  >
-                    {eventLinkCopied ? "Link copied ✓" : "Copy event link"}
-                  </button>
-                  <a className="text-link" href="/create">
-                    Create another
-                  </a>
+                  <div className="creation-next-buttons">
+                    <Link className="button" href={`/event/${createdEventId}`}>
+                      View and share POAP →
+                    </Link>
+                    <Link
+                      className="button secondary"
+                      href={`/manage/${createdEventId}`}
+                    >
+                      Manage distribution
+                    </Link>
+                  </div>
+                  <div className="creation-next-links">
+                    {createdTransactionHash && (
+                      <a
+                        className="text-link"
+                        href={explorer(`tx/${createdTransactionHash}`)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        View transaction ↗
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      className="text-link"
+                      onClick={async () => {
+                        const eventUrl = `${window.location.origin}/event/${createdEventId}`;
+                        await navigator.clipboard.writeText(eventUrl);
+                        setEventLinkCopied(true);
+                        window.setTimeout(() => setEventLinkCopied(false), 1800);
+                      }}
+                    >
+                      {eventLinkCopied ? "Link copied ✓" : "Copy event link"}
+                    </button>
+                    <a className="text-link" href="/create">
+                      Create another
+                    </a>
+                  </div>
                 </div>
               </div>
             )}

@@ -2117,10 +2117,21 @@ code {
 }
 .creation-next-actions {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  margin-top: 18px;
+}
+.creation-next-buttons,
+.creation-next-links {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 16px;
-  margin-top: 18px;
+}
+.creation-next-links {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
 }
 .source-controls .upload.compact {
   min-height: 100px;
@@ -2443,7 +2454,13 @@ textarea {
     flex-direction: column;
   }
 
-  .creation-next-actions .button {
+  .creation-next-buttons,
+  .creation-next-links {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .creation-next-buttons .button {
     width: 100%;
   }
 

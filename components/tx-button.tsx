@@ -15,6 +15,7 @@ export function TxButton<
   onSuccess,
   wide = true,
   variant = "primary",
+  showSuccess = true,
 }: {
   name: T;
   args: ContractFunctionArgs<typeof poapAbi, "nonpayable", T>;
@@ -23,6 +24,7 @@ export function TxButton<
   onSuccess?: (receipt: TransactionReceipt) => void;
   wide?: boolean;
   variant?: "primary" | "secondary";
+  showSuccess?: boolean;
 }) {
   const { writeContract, data, error, isPending } = useWriteContract();
   const receipt = useWaitForTransactionReceipt({ hash: data });
@@ -32,6 +34,7 @@ export function TxButton<
     notifiedHash.current = data;
     if (receipt.data) onSuccess?.(receipt.data);
   }, [data, onSuccess, receipt.data, receipt.isSuccess]);
+  if (receipt.isSuccess && !showSuccess) return null;
   if (receipt.isSuccess)
     return (
       <div className="success">
