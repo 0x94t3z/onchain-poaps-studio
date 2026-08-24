@@ -143,7 +143,11 @@ export default function Docs() {
     <section className="page docs">
       <div className="docs-title">
         <span className="eyebrow">DOCUMENTATION</span>
-        <h1>Using Onchain POAPs</h1>
+        <h1>
+          Using
+          <br />
+          <em>Onchain POAPs.</em>
+        </h1>
         <p>
           Instructions for event organizers and developers. This deployment uses
           Base Sepolia and test ETH; it is not Base mainnet.

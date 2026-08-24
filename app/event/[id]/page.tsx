@@ -146,19 +146,29 @@ export default function EventPage({
               <LockKeyhole /> {soulbound ? "Soulbound" : "Transferable"}
             </span>
           </div>
-          <div className="by">
-            Created by <CreatorAddress address={creator} />
-            {address?.toLowerCase() === creator.toLowerCase() && (
-              <Link className="button tiny" href={`/manage/${id}`}>
-                Manage
-              </Link>
+          <div className="event-meta-actions">
+            <div className="event-owner">
+              <span className="event-creator-line">
+                <span>Created by</span>
+                <CreatorAddress address={creator} />
+              </span>
+              {address?.toLowerCase() === creator.toLowerCase() && (
+                <Link className="button tiny" href={`/manage/${id}`}>
+                  Manage
+                </Link>
+              )}
+            </div>
+            {url && (
+              <a
+                className="text-link event-website"
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Event website <ExternalLink size={16} aria-hidden="true" />
+              </a>
             )}
           </div>
-          {url && (
-            <a className="text-link" href={url} target="_blank">
-              Event website <ExternalLink size={14} />
-            </a>
-          )}
         </div>
       </div>
       <div className="mint-panel panel">
