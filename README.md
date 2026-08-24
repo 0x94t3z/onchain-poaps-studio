@@ -1,7 +1,10 @@
 <div align="center">
   <a href="https://poaps.0x94t3z.site">
-    <img src="./public/readme-hero.svg" width="100%" alt="Onchain POAPs — proof you showed up" />
+    <img src="./public/icon.svg" width="112" height="112" alt="Onchain POAPs" />
   </a>
+
+  <h1>Onchain POAPs</h1>
+  <p>Create, distribute, and collect event credentials stored onchain.</p>
 
   <p>
     <a href="https://poaps.0x94t3z.site"><strong>Launch studio</strong></a> ·
@@ -12,16 +15,16 @@
 
   <p>
     <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-eeff41?style=flat-square&labelColor=171717" /></a>
-    <img alt="Base Sepolia" src="https://img.shields.io/badge/Base-Sepolia-0052ff?style=flat-square&logo=coinbase&logoColor=white" />
+    <img alt="Base Sepolia" src="https://img.shields.io/badge/Base-Sepolia-0052ff?style=flat-square" />
     <img alt="Farcaster Mini App" src="https://img.shields.io/badge/Farcaster-Mini_App-855dcd?style=flat-square" />
     <img alt="ERC-1155" src="https://img.shields.io/badge/token-ERC--1155-eeff41?style=flat-square&labelColor=171717" />
-    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript&logoColor=white" />
+    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square" />
   </p>
 </div>
 
 ## From event to wallet
 
-| 🎨 Design | ⛓️ Register | 🎟️ Distribute | ✓ Collect |
+| Design | Register | Distribute | Collect |
 | :---: | :---: | :---: | :---: |
 | Build or upload an SVG | Store it directly on Base | Choose the right mint route | Keep verifiable proof |
 
@@ -53,30 +56,30 @@ The supplied verified contract remains the source of truth. The app does not mod
 
 | Workflow | Status | Onchain record |
 | --- | :---: | --- |
-| Register event #7 | ✓ | [Transaction](https://sepolia.basescan.org/tx/0xac137763b73be0d727f7b2dd5532e757cbbe94ace2c2c254fcf6bc716ea9142f) |
-| Public mint and ownership | ✓ | [Token #7](https://sepolia.basescan.org/token/0xC3249356a483fbe17d5355D39105D2eA666d9de6?a=7) |
-| Close public mint | ✓ | [Transaction](https://sepolia.basescan.org/tx/0x1b73e554712fabed4d89e063c3370066bc36118ab49cd46896ffb4cd9611bd88) |
-| Reopen public mint | ✓ | [Transaction](https://sepolia.basescan.org/tx/0x288d1d865ed8d017e2ab8bd5c1991ac0c818649e8fed2676adb1569f6eb458f2) |
-| Creator drop | ✓ | [Transaction](https://sepolia.basescan.org/tx/0x27718c6f6637ee7c7e94f20154fbbfac352f29df002bbede6dc3bdfad82f626b) |
-| Lock allowlist root | ✓ | [Transaction](https://sepolia.basescan.org/tx/0xbeab4be9f094a04e0a8a16e68f757d68a9f3f20dd9003867e4d70e9e4d22f9bb) |
-| Allowlist mint | ✓ | [Transaction](https://sepolia.basescan.org/tx/0x50862fc6a3025a0c26bf07a27730a799b4a3e372dfef0eaed317c02eb041883b) |
-| Signed-pass mint | ✓ | [Transaction](https://sepolia.basescan.org/tx/0x96491eedf018c7935b5a1def6389ee5bbde95799e11dbd6e8f1f0fa22f844c2a) |
+| Register event #7 | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0xac137763b73be0d727f7b2dd5532e757cbbe94ace2c2c254fcf6bc716ea9142f) |
+| Public mint and ownership | Confirmed | [Token #7](https://sepolia.basescan.org/token/0xC3249356a483fbe17d5355D39105D2eA666d9de6?a=7) |
+| Close public mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x1b73e554712fabed4d89e063c3370066bc36118ab49cd46896ffb4cd9611bd88) |
+| Reopen public mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x288d1d865ed8d017e2ab8bd5c1991ac0c818649e8fed2676adb1569f6eb458f2) |
+| Creator drop | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x27718c6f6637ee7c7e94f20154fbbfac352f29df002bbede6dc3bdfad82f626b) |
+| Lock allowlist root | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0xbeab4be9f094a04e0a8a16e68f757d68a9f3f20dd9003867e4d70e9e4d22f9bb) |
+| Allowlist mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x50862fc6a3025a0c26bf07a27730a799b4a3e372dfef0eaed317c02eb041883b) |
+| Signed-pass mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x96491eedf018c7935b5a1def6389ee5bbde95799e11dbd6e8f1f0fa22f844c2a) |
 
 <p>
-  <a href="https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6#code"><strong>Verified contract ↗</strong></a> ·
-  <a href="https://poaps.0x94t3z.site/event/7">Event #7 ↗</a> ·
-  <a href="https://farcaster.xyz/0x94t3z.eth/0x4dd9ea63">Launch cast ↗</a>
+  <a href="https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6#code"><strong>Verified contract</strong></a> ·
+  <a href="https://poaps.0x94t3z.site/event/7">Event #7</a> ·
+  <a href="https://farcaster.xyz/0x94t3z.eth/0x4dd9ea63">Launch cast</a>
 </p>
 
 ## Product map
 
-| | Route | Purpose |
-| --- | --- | --- |
-| ◉ | [`/create`](https://poaps.0x94t3z.site/create) | Artwork studio and registration |
-| ⌕ | [`/explore`](https://poaps.0x94t3z.site/explore) | Searchable onchain events |
-| ◫ | `/event/[id]` | Event details and mint routes |
-| ⚙ | `/manage/[id]` | Creator drops, allowlists, passes, and QR codes |
-| ◇ | [`/gallery`](https://poaps.0x94t3z.site/gallery) | POAPs held by the connected wallet |
+| Route | Purpose |
+| --- | --- |
+| [`/create`](https://poaps.0x94t3z.site/create) | Artwork studio and registration |
+| [`/explore`](https://poaps.0x94t3z.site/explore) | Searchable onchain events |
+| `/event/[id]` | Event details and mint routes |
+| `/manage/[id]` | Creator drops, allowlists, passes, and QR codes |
+| [`/gallery`](https://poaps.0x94t3z.site/gallery) | POAPs held by the connected wallet |
 
 ## Architecture
 
@@ -113,8 +116,7 @@ FARCASTER_PAYLOAD=
 FARCASTER_SIGNATURE=
 ```
 
-<details>
-<summary><strong>Configuration notes</strong></summary>
+## Configuration notes
 
 - `NEXT_PUBLIC_APP_URL` must match the final HTTPS origin exactly.
 - `NEXT_PUBLIC_RPC_URL` should use a dedicated provider for production traffic.
@@ -122,10 +124,7 @@ FARCASTER_SIGNATURE=
 - The three Farcaster values are the account association generated for the production hostname.
 - Never place a private key, seed phrase, or server secret in a `NEXT_PUBLIC_` variable.
 
-</details>
-
-<details>
-<summary><strong>Protocol rules</strong></summary>
+## Protocol rules
 
 - One event token per wallet across all mint methods.
 - Artwork, metadata, and the soulbound setting are immutable after registration.
@@ -133,10 +132,7 @@ FARCASTER_SIGNATURE=
 - A non-zero allowlist root can be set only once.
 - Soulbound tokens cannot be transferred.
 
-</details>
-
-<details>
-<summary><strong>Cryptographic compatibility</strong></summary>
+## Cryptographic compatibility
 
 Signed pass:
 
@@ -151,8 +147,6 @@ keccak256(abi.encodePacked(address))
 ```
 
 Leaves and node pairs are sorted lexicographically. Addresses are checksummed and deduplicated before export.
-
-</details>
 
 ## Validate
 
