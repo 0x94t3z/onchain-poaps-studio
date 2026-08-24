@@ -43,11 +43,26 @@ Onchain POAPs is a production-oriented, open-source client for the verified Onch
 | Registration transaction | [BaseScan](https://sepolia.basescan.org/tx/0xac137763b73be0d727f7b2dd5532e757cbbe94ace2c2c254fcf6bc716ea9142f) |
 | Example token | [BaseScan](https://sepolia.basescan.org/token/0xC3249356a483fbe17d5355D39105D2eA666d9de6?a=7) · [OpenSea](https://testnets.opensea.io/assets/base_sepolia/0xC3249356a483fbe17d5355D39105D2eA666d9de6/7) |
 
+## Testnet evidence
+
+The following workflows were exercised through the production interface against the verified Base Sepolia contract. The links open the resulting onchain records directly.
+
+| Workflow | Result | Evidence |
+| --- | --- | --- |
+| Register event #7 with onchain SVG and metadata | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0xac137763b73be0d727f7b2dd5532e757cbbe94ace2c2c254fcf6bc716ea9142f) |
+| Public mint and ERC-1155 ownership | Confirmed | [Token balance](https://sepolia.basescan.org/token/0xC3249356a483fbe17d5355D39105D2eA666d9de6?a=7) · [Token metadata](https://testnets.opensea.io/assets/base_sepolia/0xC3249356a483fbe17d5355D39105D2eA666d9de6/7) |
+| Close public mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x1b73e554712fabed4d89e063c3370066bc36118ab49cd46896ffb4cd9611bd88) |
+| Reopen public mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x288d1d865ed8d017e2ab8bd5c1991ac0c818649e8fed2676adb1569f6eb458f2) |
+| Creator drop to an attendee wallet | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x27718c6f6637ee7c7e94f20154fbbfac352f29df002bbede6dc3bdfad82f626b) |
+| Lock a generated allowlist root | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0xbeab4be9f094a04e0a8a16e68f757d68a9f3f20dd9003867e4d70e9e4d22f9bb) |
+| Redeem a recipient-specific allowlist proof | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x50862fc6a3025a0c26bf07a27730a799b4a3e372dfef0eaed317c02eb041883b) |
+| Redeem a recipient-bound signed pass | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x96491eedf018c7935b5a1def6389ee5bbde95799e11dbd6e8f1f0fa22f844c2a) |
+
 ## What it does
 
 ### Create
 
-- Build compact, self-contained SVG artwork in the browser using three layouts, five palettes, and four vector marks.
+- Build compact, self-contained SVG artwork in the browser using four layouts, five preset palettes, custom colors, and four vector marks.
 - Upload or paste a custom raw SVG and preview its encoded byte size before registration.
 - Register every contract-supported field: name, SVG, soulbound state, public-mint state, allowlist root, description, location, event date, and project URL.
 - Review the final immutable artwork and metadata before sending the transaction.
@@ -252,24 +267,7 @@ npm test
 npm run build
 ```
 
-The automated suite verifies Merkle-tree compatibility. Contract transactions are tested against the actual Base Sepolia deployment rather than mocked. A release is not considered ready unless the production build completes and the manual transaction matrix below has been checked.
-
-### Release checklist
-
-- [x] The canonical HTTPS deployment, social image, and signed manifest return `200`.
-- [x] Registration and public minting have succeeded against the real contract.
-- [x] Registered artwork and metadata resolve from the contract.
-- [x] Minted ownership is verifiable through BaseScan and OpenSea.
-- [x] Type checking, tests, and the optimized production build pass locally.
-- [ ] Deploy the latest reviewed commit to the canonical domain.
-- [ ] Standalone wallet connection, refresh restoration, disconnect, and network switching work.
-- [ ] Registration succeeds with built-in and custom SVG artwork.
-- [ ] Public, allowlist, signed, and creator mint paths succeed against the real contract.
-- [ ] Creator-only actions remain unavailable to disconnected and non-creator wallets.
-- [ ] The signed Mini App manifest validates on the canonical domain.
-- [ ] The Mini App is tested inside Farcaster on iOS and Android-sized viewports.
-- [ ] Desktop layouts are checked in Chromium, Safari, and Firefox.
-- [ ] A Farcaster launch cast includes the Mini App, standalone app, and GitHub links.
+The automated suite verifies metadata handling, Merkle-tree compatibility, signed-pass validation, and address normalization. Contract transaction evidence comes from the actual Base Sepolia deployment rather than mocked writes.
 
 ## Security and operational notes
 

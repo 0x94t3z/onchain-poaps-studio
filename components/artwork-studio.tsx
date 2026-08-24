@@ -324,8 +324,10 @@ export function ArtworkStudio({
         ) : (
           <div className="source-controls">
             <label className="upload compact">
-              <Upload />
-              <strong>Choose an SVG file</strong>
+              <span className="source-upload-label">
+                <Upload size={24} aria-hidden="true" />
+                <strong>Choose an SVG file</strong>
+              </span>
               <input
                 hidden
                 type="file"

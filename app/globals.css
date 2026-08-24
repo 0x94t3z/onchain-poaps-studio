@@ -674,8 +674,14 @@ footer {
   border-radius: 50%;
   width: 25px;
   height: 25px;
+  min-width: 25px;
+  max-width: 25px;
+  flex: 0 0 25px;
+  aspect-ratio: 1;
+  box-sizing: border-box;
   display: grid;
   place-items: center;
+  line-height: 1;
 }
 .stepper .current,
 .stepper .done {
@@ -1700,6 +1706,19 @@ code {
 }
 .source-controls .upload.compact {
   min-height: 100px;
+  display: grid;
+  place-items: center;
+}
+.source-controls .source-upload-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--ink);
+}
+.source-controls .source-upload-label svg {
+  flex: 0 0 auto;
+  stroke-width: 2;
 }
 .source-controls > label > span {
   display: flex;
@@ -2123,13 +2142,13 @@ textarea {
     margin: 0;
     padding: 10px 4px;
     justify-content: center;
-    font-size: 12px;
-    gap: 6px;
+    font-size: 11px;
+    gap: 5px;
     overflow: hidden;
   }
 
   .stepper button:not(.current):not(.done) {
-    font-size: 12px;
+    font-size: 11px;
   }
 
   .create .form {
