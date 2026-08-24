@@ -297,7 +297,7 @@ export default function Manage({
                   setQr("");
                   setClaimUrl("");
                 }}
-                placeholder="0x address or name.eth"
+                placeholder="0x address or ENS name"
                 spellCheck={false}
               />
               <button

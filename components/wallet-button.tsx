@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ShieldCheck, WalletCards, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Copy,
+  LogOut,
+  ShieldCheck,
+  WalletCards,
+  X,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAppKit } from "@reown/appkit/react";
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
@@ -57,7 +65,10 @@ export function WalletButton() {
   const { switchChain } = useSwitchChain();
   const [isMiniApp, setIsMiniApp] = useState<boolean | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [addressCopied, setAddressCopied] = useState(false);
   const [connectionError, setConnectionError] = useState("");
+  const accountMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -83,6 +94,30 @@ export function WalletButton() {
       window.removeEventListener("keydown", closeOnEscape);
     };
   }, [isOpen, isPending]);
+
+  useEffect(() => {
+    if (!isAccountOpen) return;
+
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) {
+        setIsAccountOpen(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsAccountOpen(false);
+    };
+
+    window.addEventListener("pointerdown", closeOnOutsideClick);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.removeEventListener("pointerdown", closeOnOutsideClick);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isAccountOpen]);
+
+  useEffect(() => {
+    if (!address) setIsAccountOpen(false);
+  }, [address]);
 
   const walletOptions = useMemo(() => {
     // EIP-6963 wallets are exposed by Wagmi as injected EVM connectors.
@@ -195,6 +230,13 @@ export function WalletButton() {
     setIsOpen(true);
   }
 
+  async function copyAddress() {
+    if (!address) return;
+    await navigator.clipboard.writeText(address);
+    setAddressCopied(true);
+    window.setTimeout(() => setAddressCopied(false), 1800);
+  }
+
   if (isConnected && address) {
     return chainId !== chain.id ? (
       <button
@@ -204,18 +246,48 @@ export function WalletButton() {
         Switch to Base Sepolia
       </button>
     ) : (
-      <button
-        className="button secondary wallet-identity"
-        title={ensName ? `${ensName} · ${address}` : address}
-        aria-label={
-          ensName
-            ? `Connected as ${ensName}, ${address}`
-            : `Connected as ${address}`
-        }
-        onClick={() => disconnect()}
-      >
-        {ensName ? formatEnsName(ensName) : short(address)}
-      </button>
+      <div className="wallet-connect" ref={accountMenuRef}>
+        <button
+          className="button secondary wallet-identity"
+          title={ensName ? `${ensName} · ${address}` : address}
+          aria-label={
+            ensName
+              ? `Connected as ${ensName}. Open account menu.`
+              : `Connected as ${address}. Open account menu.`
+          }
+          aria-haspopup="menu"
+          aria-expanded={isAccountOpen}
+          onClick={() => setIsAccountOpen((open) => !open)}
+        >
+          <span>{ensName ? formatEnsName(ensName) : short(address)}</span>
+          <ChevronDown aria-hidden="true" />
+        </button>
+
+        {isAccountOpen && (
+          <div className="wallet-account-menu" role="menu">
+            <div className="wallet-account-summary">
+              <span className="eyebrow">CONNECTED WALLET</span>
+              {ensName && <strong>{formatEnsName(ensName, 30)}</strong>}
+              <code title={address}>{address}</code>
+            </div>
+            <button role="menuitem" onClick={copyAddress}>
+              {addressCopied ? <Check /> : <Copy />}
+              <span>{addressCopied ? "Address copied" : "Copy address"}</span>
+            </button>
+            <button
+              className="wallet-disconnect"
+              role="menuitem"
+              onClick={() => {
+                setIsAccountOpen(false);
+                disconnect();
+              }}
+            >
+              <LogOut />
+              <span>Disconnect</span>
+            </button>
+          </div>
+        )}
+      </div>
     );
   }
 

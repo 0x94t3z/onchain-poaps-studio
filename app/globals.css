@@ -150,6 +150,75 @@ footer {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+.wallet-identity > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wallet-identity > svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  transition: transform 0.15s ease;
+}
+.wallet-identity[aria-expanded="true"] > svg {
+  transform: rotate(180deg);
+}
+.wallet-account-menu {
+  position: absolute;
+  z-index: 45;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(320px, calc(100vw - 32px));
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 5px 5px 0 var(--lime);
+}
+.wallet-account-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 18px;
+  border-bottom: 1px solid var(--line);
+}
+.wallet-account-summary strong {
+  font-size: 17px;
+}
+.wallet-account-summary code {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.wallet-account-menu > button {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.wallet-account-menu > button:last-child {
+  border-bottom: 0;
+}
+.wallet-account-menu > button:hover,
+.wallet-account-menu > button:focus-visible {
+  background: #e9e6da;
+  outline: none;
+}
+.wallet-account-menu > button svg {
+  width: 17px;
+  height: 17px;
+}
+.wallet-account-menu > .wallet-disconnect {
+  color: #a8231b;
+}
 .wallet-error {
   position: absolute;
   top: calc(100% + 8px);
@@ -1797,6 +1866,34 @@ textarea {
 
   .wallet-connect {
     min-width: 0;
+  }
+
+  .wallet-account-menu {
+    width: min(280px, calc(100vw - 28px));
+  }
+
+  .wallet-account-summary {
+    gap: 5px;
+    padding: 14px;
+  }
+
+  .wallet-account-summary .eyebrow {
+    font-size: 9px;
+  }
+
+  .wallet-account-summary strong {
+    font-size: 15px;
+  }
+
+  .wallet-account-summary code {
+    font-size: 10px;
+  }
+
+  .wallet-account-menu > button {
+    min-height: 44px;
+    padding-inline: 14px;
+    gap: 9px;
+    font-size: 14px;
   }
 
   .hero {
