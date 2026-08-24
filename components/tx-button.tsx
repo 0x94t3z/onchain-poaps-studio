@@ -11,12 +11,16 @@ export function TxButton<
   label,
   disabled,
   onSuccess,
+  wide = true,
+  variant = "primary",
 }: {
   name: T;
   args: ContractFunctionArgs<typeof poapAbi, "nonpayable", T>;
   label: string;
   disabled?: boolean;
   onSuccess?: () => void;
+  wide?: boolean;
+  variant?: "primary" | "secondary";
 }) {
   const { writeContract, data, error, isPending } = useWriteContract();
   const receipt = useWaitForTransactionReceipt({ hash: data });
@@ -32,7 +36,11 @@ export function TxButton<
   return (
     <div>
       <button
-        className="button wide"
+        className={
+          "button" +
+          (wide ? " wide" : "") +
+          (variant === "secondary" ? " secondary" : "")
+        }
         disabled={disabled || isPending || receipt.isLoading}
         onClick={() =>
           writeContract(

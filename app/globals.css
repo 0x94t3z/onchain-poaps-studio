@@ -778,6 +778,22 @@ code {
   color: #b82020;
   overflow-wrap: anywhere;
 }
+.address-resolution {
+  min-height: 18px;
+  margin: 8px 0 2px;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.address-resolution.resolving {
+  color: var(--muted);
+}
+.address-resolution.resolved {
+  color: #27620f;
+}
+.address-resolution.error {
+  color: #b82020;
+}
 .funding-note {
   padding: 18px 20px;
   border: 1px solid #c89b16;
@@ -966,6 +982,16 @@ code {
 .mint-status {
   margin: 0;
 }
+.manage-title {
+  max-width: 100%;
+}
+.manage-title > span,
+.manage-title > em {
+  display: block;
+}
+.manage-title > span {
+  white-space: nowrap;
+}
 .deadline-bar {
   background: var(--ink);
   color: white;
@@ -993,6 +1019,70 @@ code {
 }
 .manage-grid .button {
   margin-top: 14px;
+}
+.public-mint-card {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+.public-mint-heading {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.public-mint-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  font: 700 11px "Space Grotesk";
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.public-mint-status::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+.public-mint-status.open {
+  border-color: #9abb66;
+  background: #dff0c4;
+  color: #31520c;
+}
+.public-mint-status.closed {
+  background: #eeece3;
+  color: var(--muted);
+}
+.public-mint-card > h2 {
+  margin-top: 18px;
+}
+.public-mint-card > p {
+  max-width: 58ch;
+}
+.public-control-action {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-top: 1px solid var(--line);
+}
+.public-control-action > div {
+  flex: 0 0 auto;
+}
+.manage-grid .public-control-action .button {
+  margin-top: 0;
+}
+.public-control-action small {
+  color: var(--muted);
+  text-align: right;
 }
 .pass-form {
   margin-top: 24px;
@@ -1108,6 +1198,16 @@ code {
   background: #fafbd8;
 }
 @media (max-width: 850px) {
+  .manage-title {
+    font-size: clamp(36px, 11.5vw, 52px) !important;
+  }
+  .public-control-action {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .public-control-action small {
+    text-align: left;
+  }
   .pass-form-row,
   .pass-result-grid {
     grid-template-columns: 1fr;

@@ -1,14 +1,7 @@
 "use client";
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useMemo, useState } from "react";
 import { useAccount, useReadContract, useSignMessage } from "wagmi";
-import {
-  encodePacked,
-  getAddress,
-  isAddress,
-  keccak256,
-  type Address,
-  type Hex,
-} from "viem";
+import { type Hex } from "viem";
 import QRCode from "qrcode";
 import { poapAbi } from "@/lib/abi";
 import {
@@ -19,7 +12,9 @@ import {
   ZERO_ROOT,
 } from "@/lib/constants";
 import { deadline, remaining } from "@/lib/metadata";
-import { buildTree, normalizeAddresses } from "@/lib/merkle";
+import { buildTree } from "@/lib/merkle";
+import { signedPassMessageHash } from "@/lib/signed-pass";
+import { useResolvedAddressInput } from "@/hooks/use-resolved-address-input";
 import { AddressIdentity } from "@/components/address-identity";
 import { TxButton } from "@/components/tx-button";
 export default function Manage({
@@ -44,13 +39,24 @@ export default function Manage({
     [claimUrl, setClaimUrl] = useState(""),
     [copied, setCopied] = useState<"signature" | "link">();
   const signer = useSignMessage();
+  const batchResolution = useResolvedAddressInput(batch),
+    allowlistResolution = useResolvedAddressInput(list),
+    recipientResolution = useResolvedAddressInput(recipient),
+    recipientAddress =
+      recipientResolution.status === "resolved" &&
+      recipientResolution.entryCount === 1
+        ? recipientResolution.addresses[0]
+        : undefined;
   const tree = useMemo(() => {
     try {
-      return list.trim() ? buildTree(normalizeAddresses(list)) : null;
+      return allowlistResolution.status === "resolved" &&
+        allowlistResolution.addresses.length
+        ? buildTree(allowlistResolution.addresses)
+        : null;
     } catch {
       return null;
     }
-  }, [list]);
+  }, [allowlistResolution]);
   if (!query.data || isReconnecting)
     return (
       <section className="page">
@@ -66,18 +72,13 @@ export default function Manage({
     controlEnd = deadline(createdAt, 30),
     signatureEnd = deadline(createdAt, 37),
     controlOpen = Date.now() / 1000 <= controlEnd;
-  let recipients: Address[] = [];
-  try {
-    recipients = normalizeAddresses(batch);
-  } catch {}
+  const titleWords = name.trim().split(/\s+/),
+    titleLead = titleWords.length > 1 ? titleWords[0] : "",
+    titleTail = titleWords.length > 1 ? titleWords.slice(1).join(" ") : name;
+  const recipients = batchResolution.addresses;
   async function sign() {
-    if (!isAddress(recipient)) return;
-    const hash = keccak256(
-      encodePacked(
-        ["uint256", "uint256", "address"],
-        [eventId, BigInt(chain.id), getAddress(recipient)],
-      ),
-    );
+    if (!recipientAddress) return;
+    const hash = signedPassMessageHash(eventId, chain.id, recipientAddress);
     signer.signMessage(
       { message: { raw: hash } },
       {
@@ -131,10 +132,17 @@ export default function Manage({
   return (
     <section className="page manage">
       <span className="eyebrow">EVENT SETTINGS · EVENT #{id}</span>
-      <h1>
-        Manage
-        <br />
-        <em>{name}</em>
+      <h1 className="manage-title">
+        <span>
+          Manage
+          {titleLead && (
+            <>
+              {" "}
+              <em>{titleLead}</em>
+            </>
+          )}
+        </span>
+        <em>{titleTail}</em>
       </h1>
       <div className="deadline-bar">
         <span>Creator controls close in</span>
@@ -143,19 +151,39 @@ export default function Manage({
         <strong>{remaining(signatureEnd)}</strong>
       </div>
       <div className="manage-grid">
-        <article className="panel">
-          <span className="eyebrow">PUBLIC MINT</span>
-          <h2>{isPublic ? "Public mint is open" : "Public mint is closed"}</h2>
+        <article className="panel public-mint-card">
+          <div className="public-mint-heading">
+            <span className="eyebrow">PUBLIC MINT</span>
+            <span
+              className={"public-mint-status " + (isPublic ? "open" : "closed")}
+            >
+              {isPublic ? "Open" : "Closed"}
+            </span>
+          </div>
+          <h2>Public mint</h2>
           <p>
-            You can toggle this status only during the 30-day creator window.
+            {isPublic
+              ? "Anyone can collect this POAP while public minting remains open."
+              : "Public collection is paused. Other configured mint methods still work."}{" "}
             Existing mints are never affected.
           </p>
-          <TxButton
-            name="updateEventPublic"
-            args={[eventId, !isPublic]}
-            label={isPublic ? "Close public mint" : "Open public mint"}
-            disabled={!isCreator || !controlOpen}
-          />
+          <div className="public-control-action">
+            <TxButton
+              name="updateEventPublic"
+              args={[eventId, !isPublic]}
+              label={isPublic ? "Close public mint" : "Open public mint"}
+              disabled={!isCreator || !controlOpen}
+              wide={false}
+              variant={isPublic ? "secondary" : "primary"}
+            />
+            <small>
+              {controlOpen ? (
+                <>Editable for {remaining(controlEnd)}</>
+              ) : (
+                "Creator window closed"
+              )}
+            </small>
+          </div>
         </article>
         <article className="panel">
           <span className="eyebrow">CREATOR DROP</span>
@@ -168,9 +196,13 @@ export default function Manage({
             className="mono"
             value={batch}
             onChange={(e) => setBatch(e.target.value)}
-            placeholder="One address per line"
+            placeholder="One 0x address or ENS name per line"
           />
-          <small>{recipients.length}/101 valid unique addresses</small>
+          <AddressResolutionStatus
+            resolution={batchResolution}
+            emptyLabel="0/101 resolved recipients"
+            resolvedLabel={`${recipients.length}/101 resolved unique recipients`}
+          />
           <TxButton
             name="creatorMint"
             args={[eventId, recipients]}
@@ -178,6 +210,7 @@ export default function Manage({
             disabled={
               !isCreator ||
               !controlOpen ||
+              batchResolution.status !== "resolved" ||
               !recipients.length ||
               recipients.length > 101
             }
@@ -187,15 +220,20 @@ export default function Manage({
           <span className="eyebrow">ALLOWLIST BUILDER</span>
           <h2>Build an allowlist</h2>
           <p>
-            Paste one wallet per line. Download the JSON before saving the root;
-            each recipient needs their proof to mint. The root can only be set
-            once.
+            Paste one address or ENS name per line. Download the JSON before
+            saving the root; each recipient needs their proof to mint. The root
+            can only be set once.
           </p>
           <textarea
             className="mono tall"
             value={list}
             onChange={(e) => setList(e.target.value)}
-            placeholder="0x123…\n0x456…"
+            placeholder="alice.eth\n0x456…"
+          />
+          <AddressResolutionStatus
+            resolution={allowlistResolution}
+            emptyLabel="Add addresses or ENS names to build the tree."
+            resolvedLabel={`${allowlistResolution.addresses.length} unique recipients resolved`}
           />
           {tree && (
             <>
@@ -264,14 +302,14 @@ export default function Manage({
                   setQr("");
                   setClaimUrl("");
                 }}
-                placeholder="0x recipient address"
+                placeholder="0x address or name.eth"
                 spellCheck={false}
               />
               <button
                 className="button"
                 disabled={
                   !isCreator ||
-                  !isAddress(recipient) ||
+                  !recipientAddress ||
                   Date.now() / 1000 > signatureEnd ||
                   signer.isPending
                 }
@@ -280,11 +318,20 @@ export default function Manage({
                 {signer.isPending ? "Confirm in wallet…" : "Generate pass"}
               </button>
             </div>
-            {recipient && !isAddress(recipient) && (
-              <p className="error" role="status">
-                Enter a complete EVM wallet address beginning with 0x.
-              </p>
-            )}
+            <AddressResolutionStatus
+              resolution={recipientResolution}
+              emptyLabel="Enter one EVM address or ENS name."
+              resolvedLabel={
+                recipientAddress
+                  ? recipientResolution.ensCount
+                    ? `Resolved to ${recipientAddress}`
+                    : "Recipient address ready"
+                  : "Enter exactly one recipient."
+              }
+              forceError={
+                recipientResolution.status === "resolved" && !recipientAddress
+              }
+            />
           </div>
           {signer.error && (
             <p className="error" role="alert">
@@ -312,7 +359,7 @@ export default function Manage({
                   <div className="pass-detail">
                     <span>Recipient</span>
                     <AddressIdentity
-                      address={getAddress(recipient)}
+                      address={recipientAddress!}
                       context="Recipient"
                     />
                   </div>
@@ -363,6 +410,49 @@ export default function Manage({
     </section>
   );
 }
+
+type AddressResolution = ReturnType<typeof useResolvedAddressInput>;
+
+function AddressResolutionStatus({
+  resolution,
+  emptyLabel,
+  resolvedLabel,
+  forceError = false,
+}: {
+  resolution: AddressResolution;
+  emptyLabel: string;
+  resolvedLabel: string;
+  forceError?: boolean;
+}) {
+  if (resolution.status === "error" || forceError) {
+    return (
+      <p className="error address-resolution" role="status">
+        {resolution.error || resolvedLabel}
+      </p>
+    );
+  }
+
+  if (resolution.status === "resolving") {
+    return (
+      <p className="address-resolution resolving" role="status">
+        Resolving wallet names…
+      </p>
+    );
+  }
+
+  if (resolution.status === "resolved") {
+    return (
+      <p className="address-resolution resolved" role="status">
+        {resolvedLabel}
+        {resolution.ensCount > 0 &&
+          ` · ${resolution.ensCount} ENS ${resolution.ensCount === 1 ? "name" : "names"}`}
+      </p>
+    );
+  }
+
+  return <p className="address-resolution">{emptyLabel}</p>;
+}
+
 function download(name: string, data: string) {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
