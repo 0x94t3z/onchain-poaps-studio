@@ -1543,23 +1543,56 @@ code {
   opacity: 0.65;
 }
 .event-share-menu {
-  position: absolute;
-  z-index: 30;
-  right: 0;
-  top: calc(100% + 12px);
-  width: min(340px, calc(100vw - 32px));
+  position: fixed;
+  z-index: 45;
+  top: var(--share-top, 0);
+  left: var(--share-left, 0);
+  width: var(--share-width, min(360px, calc(100vw - 24px)));
+  max-height: var(--share-max-height, calc(100dvh - 24px));
   padding: 10px;
+  overflow-y: auto;
   border: 1px solid var(--ink);
   background: var(--surface);
   color: var(--ink);
   box-shadow: 7px 7px 0 var(--lime);
+  visibility: hidden;
+  overscroll-behavior: contain;
+}
+.event-share-menu[data-placed="true"] {
+  visibility: visible;
+}
+.event-share-menu-heading {
+  min-height: 48px;
+  padding: 0 2px 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 .event-share-menu-label {
   display: block;
-  padding: 8px 10px 10px;
   color: var(--muted);
   font: 800 12px/1 var(--font-mono);
   letter-spacing: 0.14em;
+}
+.event-share-menu-close {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.event-share-menu-close:hover {
+  background: var(--surface-muted);
+}
+.event-share-menu-close:focus-visible {
+  outline: 3px solid var(--purple);
+  outline-offset: 2px;
 }
 .event-share-menu > button {
   width: 100%;
@@ -1586,7 +1619,8 @@ code {
   flex: 0 0 28px;
 }
 .share-brand-icon-x {
-  border: 1px solid color-mix(in srgb, var(--ink) 24%, transparent);
+  width: 28px;
+  height: 28px;
 }
 .event-share-menu > button:hover {
   background: var(--surface-muted);
@@ -1854,12 +1888,11 @@ code {
     width: 44px;
   }
   .event-share-menu {
-    position: fixed;
-    right: 16px;
-    bottom: calc(16px + env(safe-area-inset-bottom));
-    top: auto;
-    left: 16px;
-    width: auto;
+    padding: 8px;
+    box-shadow: 5px 5px 0 var(--lime);
+  }
+  .event-share-menu > button {
+    min-height: 64px;
   }
   .event-share-actions .button {
     width: 100%;

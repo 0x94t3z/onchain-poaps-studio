@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Check, Copy, Settings2, Share2 } from "lucide-react";
+import { Check, Copy, Settings2, Share2, X } from "lucide-react";
 
 function FarcasterIcon({ size = 28 }: { size?: number }) {
   return (
@@ -30,14 +30,16 @@ function XIcon({ size = 28 }: { size?: number }) {
       aria-hidden="true"
       width={size}
       height={size}
-      viewBox="0 0 28 28"
+      viewBox="0 0 24 24"
       fill="none"
     >
-      <rect width="28" height="28" rx="6" fill="#050505" />
-      <path
-        d="M7.4 7h4.55l3.22 4.3L18.84 7h1.77l-4.63 5.43L21 19h-4.54l-3.55-4.67L8.93 19H7.16l4.94-5.8L7.4 7Zm3.68 1.55h-1.2l7.44 8.9h1.18l-7.42-8.9Z"
-        fill="white"
-      />
+      <rect width="24" height="24" rx="4" fill="#050505" />
+      <g transform="translate(3.5 3.5) scale(.7083)">
+        <path
+          d="M18.244 2.25h3.308l-7.227 8.26 8.499 11.24h-6.657l-5.214-6.817-5.964 6.817H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"
+          fill="white"
+        />
+      </g>
     </svg>
   );
 }
@@ -82,7 +84,10 @@ export function EventShareActions({
     null,
   );
   const menuId = useId();
+  const menuLabelId = `${menuId}-label`;
   const shareActionsRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -102,6 +107,63 @@ export function EventShareActions({
     return () => {
       document.removeEventListener("pointerdown", closeOnOutsideClick);
       document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [isOpen]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+
+    const trigger = triggerRef.current;
+    const menu = menuRef.current;
+    if (!trigger || !menu) return;
+
+    function placeMenu() {
+      const viewport = window.visualViewport;
+      const viewportTop = viewport?.offsetTop ?? 0;
+      const viewportLeft = viewport?.offsetLeft ?? 0;
+      const viewportWidth = viewport?.width ?? window.innerWidth;
+      const viewportHeight = viewport?.height ?? window.innerHeight;
+      const mobile = viewportWidth <= 850;
+      const edge = 12;
+      const bottomGuard = mobile ? 76 : edge;
+      const topEdge = viewportTop + edge;
+      const bottomEdge = viewportTop + viewportHeight - bottomGuard;
+      const triggerRect = trigger!.getBoundingClientRect();
+      const width = Math.min(mobile ? 340 : 360, viewportWidth - edge * 2);
+      const availableHeight = Math.max(240, bottomEdge - topEdge);
+      const height = Math.min(menu!.scrollHeight, availableHeight);
+      const roomBelow = bottomEdge - triggerRect.bottom - 8;
+      const roomAbove = triggerRect.top - topEdge - 8;
+      const placeAbove = roomBelow < height && roomAbove > roomBelow;
+      const top = placeAbove
+        ? Math.max(topEdge, triggerRect.top - height - 8)
+        : Math.min(triggerRect.bottom + 8, bottomEdge - height);
+      const preferredLeft = mobile
+        ? triggerRect.right - width
+        : triggerRect.left;
+      const left = Math.min(
+        Math.max(preferredLeft, viewportLeft + edge),
+        viewportLeft + viewportWidth - width - edge,
+      );
+
+      menu!.style.setProperty("--share-top", `${top}px`);
+      menu!.style.setProperty("--share-left", `${left}px`);
+      menu!.style.setProperty("--share-width", `${width}px`);
+      menu!.style.setProperty("--share-max-height", `${availableHeight}px`);
+      menu!.dataset.placed = "true";
+    }
+
+    placeMenu();
+    window.addEventListener("resize", placeMenu);
+    window.addEventListener("scroll", placeMenu, true);
+    window.visualViewport?.addEventListener("resize", placeMenu);
+    window.visualViewport?.addEventListener("scroll", placeMenu);
+
+    return () => {
+      window.removeEventListener("resize", placeMenu);
+      window.removeEventListener("scroll", placeMenu, true);
+      window.visualViewport?.removeEventListener("resize", placeMenu);
+      window.visualViewport?.removeEventListener("scroll", placeMenu);
     };
   }, [isOpen]);
 
@@ -166,11 +228,12 @@ export function EventShareActions({
         </Link>
       )}
       <button
+        ref={triggerRef}
         type="button"
         className={compact ? "event-share-icon" : "button"}
         onClick={() => setIsOpen((open) => !open)}
         aria-label={`Share ${eventName || `POAP #${eventId}`}`}
-        aria-haspopup="menu"
+        aria-haspopup="dialog"
         aria-expanded={isOpen}
         aria-controls={menuId}
         title="Share POAP"
@@ -184,24 +247,41 @@ export function EventShareActions({
       </button>
 
       {isOpen && (
-        <div className="event-share-menu" id={menuId} role="menu">
-          <span className="event-share-menu-label">SHARE POAP</span>
+        <div
+          ref={menuRef}
+          className="event-share-menu"
+          id={menuId}
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby={menuLabelId}
+        >
+          <div className="event-share-menu-heading">
+            <span className="event-share-menu-label" id={menuLabelId}>
+              SHARE POAP
+            </span>
+            <button
+              type="button"
+              className="event-share-menu-close"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close share options"
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
+          </div>
           <button
             type="button"
-            role="menuitem"
             onClick={shareOnFarcaster}
             disabled={sharingTarget !== null}
           >
             <FarcasterIcon />
             <span>
               <strong>Farcaster</strong>
-              <small>Open the cast composer</small>
+              <small>Click to cast</small>
             </span>
             <b>{sharingTarget === "farcaster" ? "Opening…" : "Share →"}</b>
           </button>
           <button
             type="button"
-            role="menuitem"
             onClick={shareOnX}
             disabled={sharingTarget !== null}
           >
@@ -212,7 +292,7 @@ export function EventShareActions({
             </span>
             <b>{sharingTarget === "x" ? "Opening…" : "Share →"}</b>
           </button>
-          <button type="button" role="menuitem" onClick={copyClaimLink}>
+          <button type="button" onClick={copyClaimLink}>
             {copied ? (
               <Check size={18} aria-hidden="true" />
             ) : (
