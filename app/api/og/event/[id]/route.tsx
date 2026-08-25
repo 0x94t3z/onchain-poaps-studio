@@ -21,7 +21,7 @@ export async function GET(
   if (validId) {
     try {
       const eventId = BigInt(id);
-      const [event, uri] = await Promise.all([
+      const [eventResult, uriResult] = await Promise.allSettled([
         publicClient.readContract({
           address: CONTRACT,
           abi: poapAbi,
@@ -35,16 +35,31 @@ export async function GET(
           args: [eventId],
         }),
       ]);
-      const metadata = decodeMetadata(uri);
-      name = metadata.name || event[0] || name;
-      description = metadata.description || event[1] || description;
-      artwork = metadata.image;
-      soulbound = event[9];
-      publicMint = event[10];
+
+      if (eventResult.status === "fulfilled") {
+        const event = eventResult.value;
+        name = event[0] || name;
+        description = event[1] || description;
+        soulbound = event[9];
+        publicMint = event[10];
+      }
+
+      if (uriResult.status === "fulfilled") {
+        try {
+          const metadata = decodeMetadata(uriResult.value);
+          name = metadata.name || name;
+          description = metadata.description || description;
+          artwork = metadata.image || artwork;
+        } catch {
+          // Event data still provides a useful card when token metadata is malformed.
+        }
+      }
     } catch {
       // The branded fallback remains shareable during a transient RPC failure.
     }
   }
+
+  const titleSize = name.length > 44 ? 46 : name.length > 28 ? 54 : 64;
 
   return new ImageResponse(
     (
@@ -53,60 +68,67 @@ export async function GET(
           width: "100%",
           height: "100%",
           display: "flex",
-          background: "#171717",
-          color: "#f4f2e9",
-          padding: 58,
-          fontFamily: "sans-serif",
+          background: "#f4f2e9",
+          color: "#171717",
+          padding: 64,
+          fontFamily: "Arial, sans-serif",
+          alignItems: "center",
+          gap: 64,
         }}
       >
         <div
           style={{
-            width: 684,
+            width: 500,
+            height: 500,
             display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            padding: "18px 54px 14px 20px",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#faf9f4",
+            border: "2px solid #171717",
+            boxShadow: "14px 14px 0 #eeff41",
+            overflow: "hidden",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+          {artwork ? (
+            <img src={artwork} alt="" width="500" height="500" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          ) : (
             <div
               style={{
-                width: 42,
-                height: 42,
-                border: "5px solid #eeff41",
+                width: 210,
+                height: 210,
+                border: "22px solid #171717",
                 borderRadius: 999,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <div
-                style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 999,
-                  background: "#eeff41",
-                  display: "flex",
-                }}
-              />
+              <div style={{ width: 40, height: 40, borderRadius: 999, background: "#171717", display: "flex" }} />
             </div>
-            <div style={{ display: "flex", fontSize: 22, fontWeight: 800, letterSpacing: 2 }}>
-              ONCHAIN POAPS
-            </div>
-          </div>
+          )}
+        </div>
+        <div
+          style={{
+            flex: 1,
+            height: 500,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", color: "#eeff41", fontSize: 20, fontWeight: 800, letterSpacing: 2 }}>
-              {publicMint ? "OPEN MINT" : "GATED"} · {soulbound ? "SOULBOUND" : "TRANSFERABLE"}
+            <div style={{ display: "flex", color: "#7357ff", fontSize: 19, fontWeight: 700, letterSpacing: 2 }}>
+              {publicMint ? "OPEN MINT" : "GATED"} · BASE SEPOLIA · {soulbound ? "SOULBOUND" : "TRANSFERABLE"}
             </div>
             <div
               style={{
                 display: "flex",
-                fontSize: name.length > 32 ? 48 : 62,
-                lineHeight: 1.02,
+                fontSize: titleSize,
+                lineHeight: 1.04,
                 fontWeight: 800,
                 letterSpacing: -2,
-                marginTop: 18,
-                maxHeight: 190,
+                marginTop: 20,
+                maxHeight: 205,
                 overflow: "hidden",
               }}
             >
@@ -115,58 +137,22 @@ export async function GET(
             <div
               style={{
                 display: "flex",
-                color: "#bdbdb5",
-                fontSize: 24,
+                color: "#69685f",
+                fontSize: 23,
                 lineHeight: 1.35,
-                marginTop: 22,
-                maxHeight: 68,
+                marginTop: 24,
+                maxHeight: 94,
                 overflow: "hidden",
               }}
             >
               {description}
             </div>
           </div>
-          <div style={{ display: "flex", fontSize: 20, fontWeight: 800 }}>
-            VIEW & MINT POAP #{id.padStart(3, "0")} →
-          </div>
-        </div>
-        <div
-          style={{
-            width: 400,
-            height: 400,
-            alignSelf: "center",
-            background: "#242424",
-            border: "1px solid #484842",
-            boxShadow: "14px 14px 0 #7357ff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
-          }}
-        >
-          {artwork ? (
-            <img
-              src={artwork}
-              alt=""
-              width="400"
-              height="400"
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
-            />
-          ) : (
-            <div
-              style={{
-                width: 210,
-                height: 210,
-                borderRadius: 999,
-                border: "22px solid #eeff41",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <div style={{ width: 40, height: 40, borderRadius: 999, background: "#eeff41", display: "flex" }} />
+          <div style={{ display: "flex", marginTop: 38, alignItems: "center", gap: 18 }}>
+            <div style={{ display: "flex", background: "#171717", color: "#fff", padding: "18px 26px", fontSize: 19, fontWeight: 800, boxShadow: "7px 7px 0 #eeff41" }}>
+              VIEW &amp; MINT POAP #{id.padStart(3, "0")} →
             </div>
-          )}
+          </div>
         </div>
       </div>
     ),
@@ -174,7 +160,7 @@ export async function GET(
       width: 1200,
       height: 800,
       headers: {
-        "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
+        "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
       },
     },
   );

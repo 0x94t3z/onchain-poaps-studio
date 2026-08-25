@@ -34,21 +34,42 @@ export async function generateMetadata({
   const { id } = await params;
   const validId = /^[1-9]\d*$/.test(id);
   const eventUrl = `${appUrl}/event/${id}`;
-  const imageUrl = `${appUrl}/api/og/event/${id}`;
+  const imageUrl = `${appUrl}/api/og/event/${id}?v=3`;
   let name = `POAP #${id}`;
   let description = "View and mint this fully onchain POAP on Base.";
 
   if (validId) {
     try {
-      const uri = await publicClient.readContract({
-        address: CONTRACT,
-        abi: poapAbi,
-        functionName: "uri",
-        args: [BigInt(id)],
-      });
-      const eventMetadata = decodeMetadata(uri);
-      name = eventMetadata.name || name;
-      description = eventMetadata.description || description;
+      const eventId = BigInt(id);
+      const [eventResult, uriResult] = await Promise.allSettled([
+        publicClient.readContract({
+          address: CONTRACT,
+          abi: poapAbi,
+          functionName: "events",
+          args: [eventId],
+        }),
+        publicClient.readContract({
+          address: CONTRACT,
+          abi: poapAbi,
+          functionName: "uri",
+          args: [eventId],
+        }),
+      ]);
+
+      if (eventResult.status === "fulfilled") {
+        name = eventResult.value[0] || name;
+        description = eventResult.value[1] || description;
+      }
+
+      if (uriResult.status === "fulfilled") {
+        try {
+          const eventMetadata = decodeMetadata(uriResult.value);
+          name = eventMetadata.name || name;
+          description = eventMetadata.description || description;
+        } catch {
+          // Contract event data remains available when token metadata is malformed.
+        }
+      }
     } catch {
       // Keep a useful share card even if the public RPC is briefly unavailable.
     }
