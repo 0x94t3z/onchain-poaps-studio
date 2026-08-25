@@ -19,6 +19,7 @@ import { useCurrentTimestamp } from "@/hooks/use-current-timestamp";
 import { downloadJson } from "@/lib/download";
 import { AddressIdentity } from "@/components/address-identity";
 import { TxButton } from "@/components/tx-button";
+import { EventShareActions } from "@/components/event-share-actions";
 export default function Manage({
   params,
 }: {
@@ -148,6 +149,18 @@ export default function Manage({
         </span>
         <em>{titleTail}</em>
       </h1>
+      <div className="manage-share-panel">
+        <div>
+          <span className="eyebrow">ATTENDEE CLAIM LINK</span>
+          <h2>Share this POAP</h2>
+          <p>
+            Share this event page with attendees. Public minting works directly;
+            allowlisted and signed-pass claims still require their matching
+            credential.
+          </p>
+        </div>
+        <EventShareActions eventId={id} eventName={name} />
+      </div>
       <div className="deadline-bar">
         <span>Creator controls close in</span>
         <strong>{remaining(controlEnd, now)}</strong>

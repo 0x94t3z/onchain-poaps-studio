@@ -11,6 +11,7 @@ import { Check } from "lucide-react";
 import { parseEventLogs } from "viem";
 import { poapAbi } from "@/lib/abi";
 import { DateTimePicker } from "@/components/date-time-picker";
+import { EventShareActions } from "@/components/event-share-actions";
 const blank =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="256" fill="#171717"/><circle cx="256" cy="256" r="210" fill="none" stroke="#eeff41" stroke-width="12"/><text x="256" y="240" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="white">I WAS</text><text x="256" y="302" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="#eeff41">THERE</text></svg>';
 export default function Create() {
@@ -26,8 +27,7 @@ export default function Create() {
     [list, setList] = useState(""),
     [downloadedAllowlistRoot, setDownloadedAllowlistRoot] = useState(""),
     [createdEventId, setCreatedEventId] = useState<string | null>(null),
-    [createdTransactionHash, setCreatedTransactionHash] = useState<string | null>(null),
-    [eventLinkCopied, setEventLinkCopied] = useState(false);
+    [createdTransactionHash, setCreatedTransactionHash] = useState<string | null>(null);
   const allowlist = useMemo(() => {
     try {
       if (!list.trim()) return { tree: null, error: "" };
@@ -314,14 +314,15 @@ export default function Create() {
                 <span className="eyebrow">POAP REGISTERED</span>
                 <h3>Ready to share.</h3>
                 <p>
-                  Open the event page to share its mint, or manage how attendees
-                  can collect it.
+                  Send the claim link to attendees now, or open the creator
+                  controls to change how they can collect it.
                 </p>
                 <div className="creation-next-actions">
                   <div className="creation-next-buttons">
-                    <Link className="button" href={`/event/${createdEventId}`}>
-                      View and share POAP →
-                    </Link>
+                    <EventShareActions
+                      eventId={createdEventId}
+                      eventName={name}
+                    />
                     <Link
                       className="button secondary"
                       href={`/manage/${createdEventId}`}
@@ -340,18 +341,12 @@ export default function Create() {
                         View transaction ↗
                       </a>
                     )}
-                    <button
-                      type="button"
+                    <Link
                       className="text-link"
-                      onClick={async () => {
-                        const eventUrl = `${window.location.origin}/event/${createdEventId}`;
-                        await navigator.clipboard.writeText(eventUrl);
-                        setEventLinkCopied(true);
-                        window.setTimeout(() => setEventLinkCopied(false), 1800);
-                      }}
+                      href={`/event/${createdEventId}`}
                     >
-                      {eventLinkCopied ? "Link copied ✓" : "Copy event link"}
-                    </button>
+                      Open claim page ↗
+                    </Link>
                     <a className="text-link" href="/create">
                       Create another
                     </a>

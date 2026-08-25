@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "@/lib/metadata";
+import { EventShareActions } from "@/components/event-share-actions";
 export function EventCard({
   id,
   meta,
@@ -12,19 +13,26 @@ export function EventCard({
   soulbound: boolean;
 }) {
   return (
-    <Link href={`/event/${id}`} className="event-card">
-      <div className="art">
-        <img src={meta.image} alt={meta.name} />
-        <span className="id">#{id.toString().padStart(3, "0")}</span>
-      </div>
-      <div className="card-copy">
-        <div className="eyebrow">
-          {publicMint ? "OPEN MINT" : "GATED"} ·{" "}
-          {soulbound ? "SOULBOUND" : "TRANSFERABLE"}
+    <article className="event-card">
+      <Link href={`/event/${id}`} className="event-card-link">
+        <div className="art">
+          <img src={meta.image} alt={meta.name} />
+          <span className="id">#{id.toString().padStart(3, "0")}</span>
         </div>
-        <h3>{meta.name}</h3>
-        <p>{meta.description || "No description provided."}</p>
-      </div>
-    </Link>
+        <div className="card-copy">
+          <div className="eyebrow">
+            {publicMint ? "OPEN MINT" : "GATED"} ·{" "}
+            {soulbound ? "SOULBOUND" : "TRANSFERABLE"}
+          </div>
+          <h3>{meta.name}</h3>
+          <p>{meta.description || "No description provided."}</p>
+        </div>
+      </Link>
+      <EventShareActions
+        compact
+        eventId={id.toString()}
+        eventName={meta.name}
+      />
+    </article>
   );
 }

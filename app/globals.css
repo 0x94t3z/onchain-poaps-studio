@@ -658,9 +658,16 @@ button.text-link {
   gap: 22px;
 }
 .event-card {
+  position: relative;
   border: 1px solid var(--line);
   background: var(--surface);
   transition: 0.2s;
+}
+.event-card-link {
+  display: block;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
 }
 .event-card:hover {
   transform: translateY(-5px);
@@ -1460,6 +1467,67 @@ code {
   gap: 20px;
   margin-bottom: 25px;
 }
+.manage-share-panel {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+.manage-share-panel h2 {
+  margin: 5px 0 4px;
+  font-size: clamp(24px, 2.5vw, 34px);
+}
+.manage-share-panel p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.event-share-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+}
+.event-share-actions-compact {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  right: 12px;
+}
+.event-share-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 4px 4px 0 var(--lime);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.event-share-icon:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 6px 6px 0 var(--lime);
+}
+.event-share-icon:focus-visible {
+  outline: 3px solid var(--purple);
+  outline-offset: 3px;
+}
+.event-share-icon:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.creation-next-buttons > .event-share-actions {
+  flex-wrap: wrap;
+}
 .deadline-bar strong {
   color: var(--lime);
   margin-right: 30px;
@@ -1660,6 +1728,25 @@ code {
 @media (max-width: 850px) {
   .manage-title {
     font-size: clamp(36px, 11.5vw, 52px) !important;
+  }
+  .manage-share-panel {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .event-share-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .event-share-actions-compact {
+    align-items: center;
+    flex-direction: row;
+  }
+  .event-share-actions-compact .event-share-icon {
+    width: 44px;
+  }
+  .event-share-actions .button {
+    width: 100%;
   }
   .public-control-action {
     align-items: flex-start;

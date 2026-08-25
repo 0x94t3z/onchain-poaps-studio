@@ -155,7 +155,7 @@ export function GET() {
       width: 1200,
       height: 800,
       headers: {
-        "Cache-Control": "public, max-age=0, s-maxage=86400",
+        "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
       },
     },
   );

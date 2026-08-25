@@ -11,6 +11,7 @@ import { isSignedPassFormat, verifySignedPass } from "@/lib/signed-pass";
 import { useCurrentTimestamp } from "@/hooks/use-current-timestamp";
 import { AddressIdentity } from "@/components/address-identity";
 import { TxButton } from "@/components/tx-button";
+import { EventShareActions } from "@/components/event-share-actions";
 import { Clock, ExternalLink, LockKeyhole, MapPin } from "lucide-react";
 export default function EventPage({
   params,
@@ -242,6 +243,7 @@ export default function EventPage({
                 Event website <ExternalLink size={16} aria-hidden="true" />
               </a>
             )}
+            <EventShareActions eventId={id} eventName={name} />
           </div>
         </div>
       </div>

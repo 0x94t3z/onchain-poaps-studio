@@ -20,12 +20,26 @@ export const metadata: Metadata = {
   },
   other: {
     "fc:miniapp": JSON.stringify({
-      version: "next",
+      version: "1",
       imageUrl: `${appUrl}/api/og`,
       button: {
         title: "Open Onchain POAPs",
         action: {
           type: "launch_miniapp",
+          name: "Onchain POAPs",
+          url: appUrl,
+          splashImageUrl: `${appUrl}/splash-v2.png`,
+          splashBackgroundColor: "#eeff41",
+        },
+      },
+    }),
+    "fc:frame": JSON.stringify({
+      version: "1",
+      imageUrl: `${appUrl}/api/og`,
+      button: {
+        title: "Open Onchain POAPs",
+        action: {
+          type: "launch_frame",
           name: "Onchain POAPs",
           url: appUrl,
           splashImageUrl: `${appUrl}/splash-v2.png`,
