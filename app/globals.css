@@ -1335,30 +1335,25 @@ code {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 16px;
-  margin-top: 26px;
-}
-.event-owner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  width: 100%;
   gap: 12px;
+  margin-top: 26px;
 }
 .event-creator-line {
   min-width: 0;
   max-width: 100%;
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 0.35em;
-  white-space: nowrap;
 }
-.event-owner .button.tiny {
-  flex: none;
-  min-height: 36px;
-  margin-left: 0;
-  padding-inline: 14px;
+.event-manage-button {
+  box-shadow: 3px 3px 0 var(--lime);
 }
 .event-website {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   min-height: 32px;
 }
 .creator-address {
@@ -1488,16 +1483,38 @@ code {
   line-height: 1.5;
 }
 .event-share-actions {
+  position: relative;
   display: flex;
   flex: 0 0 auto;
   align-items: center;
   gap: 10px;
+}
+.event-share-actions:not(.event-share-actions-compact) .button {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+}
+.event-share-actions:not(.event-share-actions-compact) .button.secondary {
+  box-shadow: 3px 3px 0 var(--lime);
+}
+.event-share-actions:not(.event-share-actions-compact) .button.secondary:hover {
+  box-shadow: 5px 5px 0 var(--lime);
 }
 .event-share-actions-compact {
   position: absolute;
   z-index: 2;
   top: 12px;
   right: 12px;
+}
+.event-meta-actions > .event-share-actions:not(.event-share-actions-compact) {
+  display: grid;
+  width: min(100%, 240px);
+  grid-template-columns: minmax(0, 1fr);
+}
+.event-meta-actions
+  > .event-share-actions-with-manage:not(.event-share-actions-compact) {
+  width: min(100%, 480px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .event-share-icon {
   width: 44px;
@@ -1524,6 +1541,87 @@ code {
 .event-share-icon:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+.event-share-menu {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  top: calc(100% + 12px);
+  width: min(340px, calc(100vw - 32px));
+  padding: 10px;
+  border: 1px solid var(--ink);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 7px 7px 0 var(--lime);
+}
+.event-share-menu-label {
+  display: block;
+  padding: 8px 10px 10px;
+  color: var(--muted);
+  font: 800 12px/1 var(--font-mono);
+  letter-spacing: 0.14em;
+}
+.event-share-menu > button {
+  width: 100%;
+  min-height: 68px;
+  padding: 12px 10px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+.event-share-menu > button > svg {
+  justify-self: center;
+}
+.share-brand-icon {
+  display: block;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+}
+.share-brand-icon-x {
+  border: 1px solid color-mix(in srgb, var(--ink) 24%, transparent);
+}
+.event-share-menu > button:hover {
+  background: var(--surface-muted);
+}
+.event-share-menu > button:focus-visible {
+  outline: 3px solid var(--purple);
+  outline-offset: -3px;
+}
+.event-share-menu > button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+.event-share-menu > button span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.event-share-menu > button strong,
+.event-share-menu > button small,
+.event-share-menu > button b {
+  display: block;
+}
+.event-share-menu > button strong {
+  font-size: 15px;
+}
+.event-share-menu > button small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.event-share-menu > button b {
+  font-size: 12px;
+  white-space: nowrap;
 }
 .creation-next-buttons > .event-share-actions {
   flex-wrap: wrap;
@@ -1738,6 +1836,16 @@ code {
     align-items: stretch;
     flex-direction: column;
   }
+  .event-meta-actions > .event-share-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .event-meta-actions
+    > .event-share-actions-with-manage:not(.event-share-actions-compact) {
+    grid-template-columns: 1fr;
+  }
   .event-share-actions-compact {
     align-items: center;
     flex-direction: row;
@@ -1745,8 +1853,19 @@ code {
   .event-share-actions-compact .event-share-icon {
     width: 44px;
   }
+  .event-share-menu {
+    position: fixed;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    top: auto;
+    left: 16px;
+    width: auto;
+  }
   .event-share-actions .button {
     width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding-inline: 14px;
   }
   .public-control-action {
     align-items: flex-start;
@@ -2441,6 +2560,7 @@ textarea {
     height: calc(64px + env(safe-area-inset-top));
     padding: env(safe-area-inset-top) 16px 0;
     gap: 12px;
+    background: var(--paper);
     backdrop-filter: none;
   }
 
@@ -2760,7 +2880,8 @@ textarea {
   }
 
   .event-info h1 {
-    font-size: clamp(42px, 14vw, 62px);
+    font-size: clamp(40px, 11.5vw, 52px);
+    line-height: 0.94;
     overflow-wrap: anywhere;
   }
 
@@ -3018,6 +3139,12 @@ textarea {
     grid-row: 3;
     justify-self: start;
     padding: 2px 0 0;
+  }
+}
+
+@media (max-width: 390px) {
+  .event-meta-actions > .event-share-actions {
+    grid-template-columns: 1fr;
   }
 }
 

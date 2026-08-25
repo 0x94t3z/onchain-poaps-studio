@@ -222,17 +222,10 @@ export default function EventPage({
             </span>
           </div>
           <div className="event-meta-actions">
-            <div className="event-owner">
-              <span className="event-creator-line">
-                <span>Created by</span>
-                <AddressIdentity address={creator} context="Creator" />
-              </span>
-              {address?.toLowerCase() === creator.toLowerCase() && (
-                <Link className="button tiny" href={`/manage/${id}`}>
-                  Manage
-                </Link>
-              )}
-            </div>
+            <span className="event-creator-line">
+              <span>Created by</span>
+              <AddressIdentity address={creator} context="Creator" />
+            </span>
             {url && (
               <a
                 className="text-link event-website"
@@ -243,7 +236,15 @@ export default function EventPage({
                 Event website <ExternalLink size={16} aria-hidden="true" />
               </a>
             )}
-            <EventShareActions eventId={id} eventName={name} />
+            <EventShareActions
+              eventId={id}
+              eventName={name}
+              manageHref={
+                address?.toLowerCase() === creator.toLowerCase()
+                  ? `/manage/${id}`
+                  : undefined
+              }
+            />
           </div>
         </div>
       </div>
