@@ -29,7 +29,7 @@ export default function Explore() {
           </a>
         </aside>
       </div>
-      <EventGrid limit={6} mobileLimit={4} paginate searchable />
+      <EventGrid limit={6} mobileLimit={4} paginate searchable filterable prioritizeClaimable />
     </section>
   );
 }

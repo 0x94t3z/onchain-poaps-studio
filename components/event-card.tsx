@@ -6,11 +6,15 @@ export function EventCard({
   meta,
   publicMint,
   soulbound,
+  claimsClosed = false,
+  showShare = false,
 }: {
   id: bigint;
   meta: Metadata;
   publicMint: boolean;
   soulbound: boolean;
+  claimsClosed?: boolean;
+  showShare?: boolean;
 }) {
   return (
     <article className="event-card">
@@ -21,18 +25,20 @@ export function EventCard({
         </div>
         <div className="card-copy">
           <div className="eyebrow">
-            {publicMint ? "OPEN MINT" : "GATED"} ·{" "}
+            {claimsClosed ? "CLAIMS CLOSED" : publicMint ? "OPEN MINT" : "GATED"} ·{" "}
             {soulbound ? "SOULBOUND" : "TRANSFERABLE"}
           </div>
           <h3>{meta.name}</h3>
           <p>{meta.description || "No description provided."}</p>
         </div>
       </Link>
-      <EventShareActions
-        compact
-        eventId={id.toString()}
-        eventName={meta.name}
-      />
+      {showShare && (
+        <EventShareActions
+          compact
+          eventId={id.toString()}
+          eventName={meta.name}
+        />
+      )}
     </article>
   );
 }

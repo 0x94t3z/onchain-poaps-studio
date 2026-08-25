@@ -3096,6 +3096,40 @@ textarea {
   white-space: nowrap;
 }
 
+.event-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -8px 0 24px;
+}
+
+.event-filters button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  font: 700 13px "Space Grotesk";
+  cursor: pointer;
+}
+
+.event-filters button:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.event-filters button[aria-pressed="true"] {
+  border-color: var(--primary-bg);
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  box-shadow: 3px 3px 0 var(--accent);
+}
+
+.event-filters button:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 2px;
+}
+
 .event-pagination {
   margin-top: 32px;
   padding-top: 20px;
