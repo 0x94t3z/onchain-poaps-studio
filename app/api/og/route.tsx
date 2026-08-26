@@ -1,6 +1,17 @@
 import { ImageResponse } from "next/og";
+import { loadOgFonts } from "@/lib/og-fonts";
+
 export const runtime = "edge";
-export function GET() {
+
+export async function GET() {
+  const fonts = await loadOgFonts();
+  const displayFont = fonts.some((font) => font.name === "Space Grotesk")
+    ? "Space Grotesk"
+    : "Arial";
+  const bodyFont = fonts.some((font) => font.name === "DM Sans")
+    ? "DM Sans"
+    : "Arial";
+
   return new ImageResponse(
     (
       <div
@@ -13,7 +24,7 @@ export function GET() {
           color: "white",
           padding: "72px 88px",
           position: "relative",
-          fontFamily: "sans-serif",
+          fontFamily: bodyFont,
           overflow: "hidden",
         }}
       >
@@ -56,6 +67,7 @@ export function GET() {
               display: "flex",
               alignItems: "center",
               gap: 18,
+              fontFamily: displayFont,
               fontSize: 24,
               fontWeight: 700,
               letterSpacing: 2,
@@ -103,8 +115,9 @@ export function GET() {
           <div
             style={{
               display: "flex",
+              fontFamily: displayFont,
               fontSize: 92,
-              fontWeight: 800,
+              fontWeight: 700,
               lineHeight: 1,
               letterSpacing: -4,
             }}
@@ -131,8 +144,9 @@ export function GET() {
               color: "#171717",
               padding: "18px 28px",
               marginTop: 46,
+              fontFamily: displayFont,
               fontSize: 24,
-              fontWeight: 800,
+              fontWeight: 700,
               boxShadow: "9px 9px 0 #7357ff",
             }}
           >
@@ -154,6 +168,7 @@ export function GET() {
     {
       width: 1200,
       height: 800,
+      fonts,
       headers: {
         "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800",
       },

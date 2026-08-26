@@ -6,61 +6,15 @@ import { Resvg } from "@resvg/resvg-js";
 import { poapAbi } from "@/lib/abi";
 import { CONTRACT } from "@/lib/constants";
 import { decodeMetadata } from "@/lib/metadata";
+import { loadOgFonts, type OgFont } from "@/lib/og-fonts";
 import { publicClient } from "@/lib/public-client";
 
 export const runtime = "nodejs";
-
-const fontSources = {
-  display:
-    "https://raw.githubusercontent.com/floriankarsten/space-grotesk/master/fonts/ttf/static/SpaceGrotesk-Bold.ttf",
-  body:
-    "https://raw.githubusercontent.com/googlefonts/dm-fonts/main/Sans/fonts/ttf/DMSans-Regular.ttf",
-} as const;
-
-type OgFont = {
-  name: string;
-  data: ArrayBuffer;
-  weight: 400 | 700;
-  style: "normal";
-};
 
 let rasterFontFilesCache: {
   key: string;
   promise: Promise<string[]>;
 } | null = null;
-
-async function fetchFont(url: string) {
-  const response = await fetch(url, { next: { revalidate: 604800 } });
-  if (!response.ok) throw new Error(`Unable to load OG font: ${response.status}`);
-  return response.arrayBuffer();
-}
-
-async function loadFonts(): Promise<OgFont[]> {
-  const [display, body] = await Promise.allSettled([
-    fetchFont(fontSources.display),
-    fetchFont(fontSources.body),
-  ]);
-  const fonts: OgFont[] = [];
-
-  if (display.status === "fulfilled") {
-    fonts.push({
-      name: "Space Grotesk",
-      data: display.value,
-      weight: 700,
-      style: "normal",
-    });
-  }
-  if (body.status === "fulfilled") {
-    fonts.push({
-      name: "DM Sans",
-      data: body.value,
-      weight: 400,
-      style: "normal",
-    });
-  }
-
-  return fonts;
-}
 
 async function rasterFontFiles(fonts: OgFont[]) {
   const key = fonts.map((font) => font.name).sort().join("|");
@@ -191,7 +145,7 @@ export async function GET(
     }
   }
 
-  const fonts = await loadFonts();
+  const fonts = await loadOgFonts();
   const renderedArtwork = await rasterizeArtwork(artwork, fonts);
   const hasDisplayFont = fonts.some((font) => font.name === "Space Grotesk");
   const hasBodyFont = fonts.some((font) => font.name === "DM Sans");

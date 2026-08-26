@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import { Header } from "@/components/header";
 import { MiniAppReady } from "@/components/miniapp-ready";
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const homeEmbedImage = `${appUrl}/api/og?v=2`;
 const themeScript = `(()=>{try{const key="onchain-poaps-theme";const saved=localStorage.getItem(key);const theme=saved==="light"||saved==="dark"?saved:"light";document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;document.querySelector("#theme-favicon")?.setAttribute("href",theme==="dark"?"/icon-dark.svg":"/icon.svg");document.querySelector('meta[name="theme-color"]')?.setAttribute("content",theme==="dark"?"#11120f":"#f4f2e9")}catch{document.documentElement.dataset.theme="light"}})()`;
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
@@ -16,12 +17,12 @@ export const metadata: Metadata = {
     title: "Onchain POAPs",
     description:
       "Create and distribute ERC-1155 attendance tokens with SVG artwork stored on Base.",
-    images: ["/api/og"],
+    images: [homeEmbedImage],
   },
   other: {
     "fc:miniapp": JSON.stringify({
       version: "1",
-      imageUrl: `${appUrl}/api/og`,
+      imageUrl: homeEmbedImage,
       button: {
         title: "Open Onchain POAPs",
         action: {
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
     }),
     "fc:frame": JSON.stringify({
       version: "1",
-      imageUrl: `${appUrl}/api/og`,
+      imageUrl: homeEmbedImage,
       button: {
         title: "Open Onchain POAPs",
         action: {
