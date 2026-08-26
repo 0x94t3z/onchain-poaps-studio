@@ -296,7 +296,7 @@ export function WalletButton() {
           aria-expanded={isAccountOpen}
           onClick={() => setIsAccountOpen((open) => !open)}
         >
-          <span>{ensName ? formatEnsName(ensName) : short(address)}</span>
+          <span>{ensName ? formatEnsName(ensName) : short(address, 3)}</span>
           <ChevronDown aria-hidden="true" />
         </button>
 
