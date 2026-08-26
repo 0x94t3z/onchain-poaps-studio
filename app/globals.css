@@ -812,6 +812,12 @@ button.text-link {
   color: var(--muted);
   grid-column: 1/-1;
 }
+.empty p {
+  margin: 0;
+}
+.empty-retry {
+  margin-top: 20px;
+}
 .panel {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -3120,9 +3126,6 @@ textarea {
 }
 
 .gallery-tabs {
-  width: min(100%, 360px);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 30px 0;
 }
 
@@ -3208,6 +3211,27 @@ textarea {
   gap: 10px 18px;
   font: 700 11px "Space Grotesk";
   letter-spacing: 0.06em;
+}
+
+.gallery-overview-retry {
+  margin-top: 14px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: 700 12px "Space Grotesk";
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.gallery-overview-retry:hover {
+  color: var(--violet);
+}
+
+.gallery-overview-retry:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 4px;
 }
 
 .gallery-overview-footer span {
@@ -3326,6 +3350,8 @@ textarea {
 
   .gallery-tabs {
     width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     margin: 30px 0 22px;
   }
 

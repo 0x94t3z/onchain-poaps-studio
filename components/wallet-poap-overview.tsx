@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { useReadContract, useReadContracts } from "wagmi";
 import type { Address } from "viem";
+import { useCreatedEventIds } from "@/hooks/use-created-event-ids";
 import { poapAbi } from "@/lib/abi";
 import { CONTRACT } from "@/lib/constants";
 import { hasPartialContractResults } from "@/lib/event-ownership";
@@ -30,20 +30,7 @@ export function WalletPoapOverview({ owner }: { owner: Address }) {
     ),
     query: { enabled: count > 0 },
   });
-  const created = useQuery({
-    queryKey: ["created-event-ids", owner],
-    staleTime: 30_000,
-    queryFn: async () => {
-      const response = await fetch(`/api/events/created/${owner}`);
-      const payload = (await response.json()) as {
-        eventIds?: string[];
-        error?: string;
-      };
-      if (!response.ok || !payload.eventIds)
-        throw new Error(payload.error || "Created POAPs could not be loaded.");
-      return payload.eventIds.map(BigInt);
-    },
-  });
+  const created = useCreatedEventIds(owner);
   const collectedCount = balances.data?.filter(
     (balance) => balance.status === "success" && (balance.result ?? 0n) > 0n,
   ).length;
@@ -76,6 +63,21 @@ export function WalletPoapOverview({ owner }: { owner: Address }) {
           </dd>
         </div>
       </dl>
+      {(collectedFailed || createdFailed) && (
+        <button
+          className="gallery-overview-retry"
+          type="button"
+          onClick={() => {
+            if (collectedFailed) {
+              void total.refetch();
+              void balances.refetch();
+            }
+            if (createdFailed) void created.refetch();
+          }}
+        >
+          Retry unavailable counts →
+        </button>
+      )}
       <div className="gallery-overview-footer">
         <span>BASE SEPOLIA · ONCHAIN</span>
         <Link href="/create">Create a POAP →</Link>

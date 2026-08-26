@@ -36,6 +36,7 @@ export async function GET(
     const response = await fetch(`${BLOCKSCOUT_API}?${query}`, {
       cache: "no-store",
       headers: { accept: "application/json" },
+      signal: AbortSignal.timeout(8_000),
     });
     if (!response.ok) throw new Error(`Blockscout returned ${response.status}`);
 
@@ -45,8 +46,9 @@ export async function GET(
 
     const eventIds = createdEventIdsFromLogs(payload.result).map(String);
     return NextResponse.json({ eventIds });
-  } catch (error) {
-    console.error("Created POAP lookup failed", error);
+  } catch {
+    // Blockscout is an optional indexer. Return a recoverable API error without
+    // surfacing an expected upstream outage in Next.js's development overlay.
     return NextResponse.json(
       { error: "Created POAPs could not be indexed right now." },
       { status: 502 },

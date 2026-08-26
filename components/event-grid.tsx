@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useReadContract, useReadContracts } from "wagmi";
-import { useQuery } from "@tanstack/react-query";
 import { Search, X } from "lucide-react";
+import { useCreatedEventIds } from "@/hooks/use-created-event-ids";
 import { poapAbi } from "@/lib/abi";
 import { CONTRACT, SIGNATURE_WINDOW, ZERO_ROOT } from "@/lib/constants";
 import { decodeMetadata } from "@/lib/metadata";
@@ -72,22 +72,10 @@ export function EventGrid({
   const count = Number(total.data ?? 0n);
   const allIds = Array.from({ length: count }, (_, index) => BigInt(count - index));
   const ownership = owner ? ownerFilter ?? "collected" : undefined;
-  const createdIds = useQuery({
-    queryKey: ["created-event-ids", owner],
-    enabled: Boolean(owner && ownership === "created"),
-    staleTime: 30_000,
-    queryFn: async () => {
-      const response = await fetch(`/api/events/created/${owner}`);
-      const payload = (await response.json()) as {
-        eventIds?: string[];
-        error?: string;
-      };
-      if (!response.ok || !payload.eventIds) {
-        throw new Error(payload.error || "Created POAPs could not be loaded.");
-      }
-      return payload.eventIds.map(BigInt);
-    },
-  });
+  const createdIds = useCreatedEventIds(
+    owner,
+    ownership === "created",
+  );
   const balances = useReadContracts({
     contracts: owner && ownership === "collected" ? allIds.map((id) => ({
       address: CONTRACT, abi: poapAbi, functionName: "balanceOf", args: [owner, id],
@@ -132,10 +120,25 @@ export function EventGrid({
     events.isError ||
     uris.isError
   ) {
+    const retry = () => {
+      if (total.isError) void total.refetch();
+      if (ownership === "collected" && balances.isError)
+        void balances.refetch();
+      if (ownership === "created" && createdIds.isError)
+        void createdIds.refetch();
+      if (events.isError) void events.refetch();
+      if (uris.isError) void uris.refetch();
+    };
+
     return (
       <div className="empty" role="alert">
-        POAPs could not be loaded from Base Sepolia. Check your connection and
-        try again.
+        <p>
+          POAPs could not be loaded from Base Sepolia. Check your connection and
+          try again.
+        </p>
+        <button className="button secondary empty-retry" type="button" onClick={retry}>
+          Try again
+        </button>
       </div>
     );
   }

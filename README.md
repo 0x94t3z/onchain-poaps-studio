@@ -46,9 +46,9 @@ flowchart LR
 
 ## Built around the contract
 
-| Onchain artwork | Four mint routes | Creator controls | Wallet gallery |
+| Onchain artwork | Four mint routes | Creator controls | Wallet archive |
 | --- | --- | --- | --- |
-| Self-contained SVG and event metadata | Public, allowlist, signed pass, and batch drop | Public-mint status, Merkle root, QR passes | Read ERC-1155 ownership from Base |
+| Self-contained SVG and event metadata | Public, allowlist, signed pass, and batch drop | Public-mint status, Merkle root, QR passes | Browse collected POAPs and created events |
 
 The supplied verified contract remains the source of truth. The app does not modify, proxy, or wrap it.
 
@@ -79,7 +79,7 @@ The supplied verified contract remains the source of truth. The app does not mod
 | [`/explore`](https://poaps.0x94t3z.site/explore) | Searchable onchain events |
 | `/event/[id]` | Event details and mint routes |
 | `/manage/[id]` | Creator drops, allowlists, passes, and QR codes |
-| [`/gallery`](https://poaps.0x94t3z.site/gallery) | POAPs held by the connected wallet |
+| [`/gallery`](https://poaps.0x94t3z.site/gallery) | Searchable Collected and Created views for the connected wallet |
 
 ## Architecture
 
@@ -88,9 +88,12 @@ flowchart TB
     U[Web browser or Farcaster] --> N[Next.js 15 + React 19]
     N --> W[Wagmi + Viem]
     N --> M[Farcaster Mini App SDK]
+    N -. creator event discovery .-> I[Blockscout logs API]
     W --> C[Verified ERC-1155 contract]
     C --> B[(Base Sepolia)]
 ```
+
+Collected ownership, event details, and metadata are read from the contract. The Created view uses Blockscout only to discover matching `NewEvent` logs, then verifies event data against the contract. Indexer outages remain retryable and do not affect onchain records.
 
 No custody layer. No application database. No server-held signing key.
 
