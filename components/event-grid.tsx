@@ -50,7 +50,10 @@ export function EventGrid({
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
-  useEffect(() => setPage(0), [isMobile, owner, ownerFilter]);
+  useEffect(() => {
+    setPage(0);
+    setQuery("");
+  }, [isMobile, owner, ownerFilter]);
   useEffect(() => setNow(Math.floor(Date.now() / 1000)), []);
   useEffect(() => {
     if (!restorePosition.current) return;
@@ -225,6 +228,9 @@ export function EventGrid({
   const currentPage = paginate ? Math.min(page, pageCount - 1) : 0;
   const visibleCards = filteredCards.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
   const displayCount = filteredCards.length;
+  const displayNoun = ownership === "created"
+    ? displayCount === 1 ? "event" : "events"
+    : displayCount === 1 ? "POAP" : "POAPs";
   function goToPage(next: number) {
     restorePosition.current = true;
     setPage(next);
@@ -245,13 +251,15 @@ export function EventGrid({
       )}
       {searchable && (
         <div className="event-search">
-          <label htmlFor="event-search">Search POAPs</label>
+          <label htmlFor="event-search">
+            {ownership === "created" ? "Search created events" : "Search collected POAPs"}
+          </label>
           <div className="event-search-field">
             <Search size={19} aria-hidden="true" />
-            <input id="event-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(0); }} placeholder="Name, event ID or location" autoComplete="off" />
+            <input id="event-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(0); }} placeholder={ownership === "created" ? "Event name or ID" : "POAP name or ID"} autoComplete="off" />
             {query && <button type="button" aria-label="Clear search" onClick={() => { setQuery(""); setPage(0); }}><X size={19} aria-hidden="true" /></button>}
           </div>
-          <span aria-live="polite">{displayCount} {displayCount === 1 ? "POAP" : "POAPs"}</span>
+          <span aria-live="polite">{displayCount} {displayNoun}</span>
         </div>
       )}
       {filterable && (
@@ -262,7 +270,7 @@ export function EventGrid({
         </div>
       )}
       {visibleCards.length ? <div className="grid event-grid">{visibleCards.map((card) => card.node)}</div> : (
-        <div className="empty">{query ? `No POAPs match “${query.trim()}”.` : claimFilter !== "all" ? `No ${claimFilter === "claimable" ? "claimable POAPs" : "POAPs with closed claims"} found.` : ownership === "created" ? "This wallet has not created any POAPs yet." : ownership === "collected" ? "This wallet has not collected any POAPs yet." : "No POAPs found here yet."}</div>
+        <div className="empty">{query ? `No ${ownership === "created" ? "created events" : "POAPs"} match “${query.trim()}”.` : claimFilter !== "all" ? `No ${claimFilter === "claimable" ? "claimable POAPs" : "POAPs with closed claims"} found.` : ownership === "created" ? "This wallet has not created any POAPs yet." : ownership === "collected" ? "This wallet has not collected any POAPs yet." : "No POAPs found here yet."}</div>
       )}
       {filteredCards.length > 0 && paginate && pageCount > 1 && (
         <nav className="event-pagination" aria-label="POAP collection pages">

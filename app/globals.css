@@ -3130,6 +3130,94 @@ textarea {
   margin: 0 0 24px;
 }
 
+.gallery-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: end;
+}
+
+.gallery-intro-with-overview {
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+  gap: clamp(48px, 8vw, 140px);
+}
+
+.gallery-intro > div {
+  min-width: 0;
+}
+
+.gallery-intro h1 {
+  font: 700 clamp(54px, 7vw, 100px) / 0.79 "Space Grotesk";
+  letter-spacing: -0.07em;
+  margin: 20px 0 24px;
+}
+
+.gallery-intro h1 em {
+  color: var(--violet);
+  font-style: normal;
+}
+
+.gallery-intro .lead {
+  max-width: 600px;
+  margin-bottom: 0;
+  font-size: 18px;
+}
+
+.gallery-overview {
+  min-width: 0;
+  padding: 10px 0 10px 32px;
+  border-left: 1px solid var(--line);
+}
+
+.gallery-overview h2 {
+  margin: 8px 0 24px;
+  font: 700 clamp(24px, 2.5vw, 36px) "Space Grotesk";
+  letter-spacing: -0.04em;
+}
+
+.gallery-overview dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+  border-block: 1px solid var(--line);
+}
+
+.gallery-overview dl div {
+  padding: 18px 0;
+}
+
+.gallery-overview dl div + div {
+  padding-left: 20px;
+  border-left: 1px solid var(--line);
+}
+
+.gallery-overview dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.gallery-overview dd {
+  margin: 5px 0 0;
+  font: 700 32px/1 "Space Grotesk";
+}
+
+.gallery-overview-footer {
+  padding-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px 18px;
+  font: 700 11px "Space Grotesk";
+  letter-spacing: 0.06em;
+}
+
+.gallery-overview-footer span {
+  color: var(--muted);
+}
+
+.gallery-overview-footer a {
+  color: var(--ink);
+}
+
 .event-filters button {
   min-height: 40px;
   padding: 8px 14px;
@@ -3196,6 +3284,61 @@ textarea {
 }
 
 @media (max-width: 850px) {
+  .gallery-intro {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 32px;
+  }
+
+  .gallery-intro h1 {
+    margin: 16px 0 22px;
+    font-size: clamp(42px, 13vw, 58px);
+    line-height: 0.9;
+  }
+
+  .gallery-intro .lead {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .gallery-overview {
+    padding: 24px 0 0;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .gallery-overview h2 {
+    margin-bottom: 18px;
+    font-size: 25px;
+  }
+
+  .gallery-overview dl div {
+    padding: 14px 0;
+  }
+
+  .gallery-overview dd {
+    font-size: 28px;
+  }
+
+  .gallery-overview-footer {
+    align-items: center;
+  }
+
+  .gallery-tabs {
+    width: 100%;
+    margin: 30px 0 22px;
+  }
+
+  .gallery-tabs button {
+    min-height: 52px;
+    padding-inline: 10px;
+  }
+
+  .gallery-page .event-search {
+    width: 100%;
+    margin-bottom: 22px;
+  }
+
   .grid.event-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 18px;

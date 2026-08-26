@@ -3,21 +3,29 @@ import { useState } from "react";
 import { useAccount } from "wagmi";
 import { EventGrid } from "@/components/event-grid";
 import { WalletButton } from "@/components/wallet-button";
+import { WalletPoapOverview } from "@/components/wallet-poap-overview";
 export default function Gallery() {
   const { address } = useAccount();
   const [view, setView] = useState<"collected" | "created">("collected");
   return (
     <section className="page gallery-page">
-      <span className="eyebrow">YOUR POAPS</span>
-      <h1>
-        Collected and
-        <br />
-        <em>created.</em>
-      </h1>
-      <p className="lead">
-        See the POAPs this wallet owns and the events it registered. Ownership
-        and event details are verified from onchain contract data.
-      </p>
+      <div
+        className={`gallery-intro${address ? " gallery-intro-with-overview" : ""}`}
+      >
+        <div>
+          <span className="eyebrow">YOUR POAPS</span>
+          <h1>
+            Collected and
+            <br />
+            <em>created.</em>
+          </h1>
+          <p className="lead">
+            See the POAPs this wallet owns and the events it registered.
+            Ownership and event details are verified from onchain contract data.
+          </p>
+        </div>
+        {address && <WalletPoapOverview owner={address} />}
+      </div>
       {address ? (
         <>
           <div
@@ -57,6 +65,7 @@ export default function Gallery() {
               limit={6}
               mobileLimit={4}
               paginate
+              searchable
             />
           </div>
         </>
