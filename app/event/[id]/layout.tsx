@@ -34,7 +34,7 @@ export async function generateMetadata({
   const { id } = await params;
   const validId = /^[1-9]\d*$/.test(id);
   const eventUrl = `${appUrl}/event/${id}`;
-  const imageUrl = `${appUrl}/api/og/event/${id}?v=3`;
+  const imageUrl = `${appUrl}/api/og/event/${id}?v=5`;
   let name = `POAP #${id}`;
   let description = "View and mint this fully onchain POAP on Base.";
 

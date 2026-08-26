@@ -1,10 +1,84 @@
 import { ImageResponse } from "next/og";
+import sharp from "sharp";
 import { poapAbi } from "@/lib/abi";
 import { CONTRACT } from "@/lib/constants";
 import { decodeMetadata } from "@/lib/metadata";
 import { publicClient } from "@/lib/public-client";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
+
+const fontSources = {
+  display:
+    "https://raw.githubusercontent.com/floriankarsten/space-grotesk/master/fonts/ttf/static/SpaceGrotesk-Bold.ttf",
+  body:
+    "https://raw.githubusercontent.com/googlefonts/dm-fonts/main/Sans/fonts/ttf/DMSans-Regular.ttf",
+} as const;
+
+type OgFont = {
+  name: string;
+  data: ArrayBuffer;
+  weight: 400 | 700;
+  style: "normal";
+};
+
+async function fetchFont(url: string) {
+  const response = await fetch(url, { next: { revalidate: 604800 } });
+  if (!response.ok) throw new Error(`Unable to load OG font: ${response.status}`);
+  return response.arrayBuffer();
+}
+
+async function loadFonts(): Promise<OgFont[]> {
+  const [display, body] = await Promise.allSettled([
+    fetchFont(fontSources.display),
+    fetchFont(fontSources.body),
+  ]);
+  const fonts: OgFont[] = [];
+
+  if (display.status === "fulfilled") {
+    fonts.push({
+      name: "Space Grotesk",
+      data: display.value,
+      weight: 700,
+      style: "normal",
+    });
+  }
+  if (body.status === "fulfilled") {
+    fonts.push({
+      name: "DM Sans",
+      data: body.value,
+      weight: 400,
+      style: "normal",
+    });
+  }
+
+  return fonts;
+}
+
+async function rasterizeArtwork(image: string | null) {
+  const prefix = "data:image/svg+xml;base64,";
+  if (!image?.startsWith(prefix)) return image;
+
+  try {
+    const svg = Buffer.from(image.slice(prefix.length), "base64");
+    const png = await sharp(svg)
+      .resize(548, 548, { fit: "contain" })
+      .png()
+      .toBuffer();
+    return `data:image/png;base64,${png.toString("base64")}`;
+  } catch {
+    return image;
+  }
+}
+
+function formatEventDate(timestamp: bigint) {
+  if (timestamp <= 0n) return "";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Number(timestamp) * 1000));
+}
 
 export async function GET(
   _request: Request,
@@ -17,6 +91,9 @@ export async function GET(
   let artwork: string | null = null;
   let publicMint = false;
   let soulbound = true;
+  let eventDate = 0n;
+  let location = "";
+  let loadedEvent = false;
 
   if (validId) {
     try {
@@ -40,8 +117,11 @@ export async function GET(
         const event = eventResult.value;
         name = event[0] || name;
         description = event[1] || description;
+        eventDate = event[2];
+        location = event[3];
         soulbound = event[9];
         publicMint = event[10];
+        loadedEvent = true;
       }
 
       if (uriResult.status === "fulfilled") {
@@ -59,7 +139,21 @@ export async function GET(
     }
   }
 
-  const titleSize = name.length > 44 ? 46 : name.length > 28 ? 54 : 64;
+  const [fonts, renderedArtwork] = await Promise.all([
+    loadFonts(),
+    rasterizeArtwork(artwork),
+  ]);
+  const hasDisplayFont = fonts.some((font) => font.name === "Space Grotesk");
+  const hasBodyFont = fonts.some((font) => font.name === "DM Sans");
+  const displayFont = hasDisplayFont ? "Space Grotesk" : "Arial";
+  const bodyFont = hasBodyFont ? "DM Sans" : "Arial";
+  const titleSize = name.length > 50 ? 48 : name.length > 32 ? 56 : 68;
+  const date = formatEventDate(eventDate);
+  const facts = [
+    date,
+    location,
+    soulbound ? "Soulbound" : "Transferable",
+  ].filter(Boolean);
 
   return new ImageResponse(
     (
@@ -70,65 +164,94 @@ export async function GET(
           display: "flex",
           background: "#f4f2e9",
           color: "#171717",
-          padding: 64,
-          fontFamily: "Arial, sans-serif",
+          padding: 40,
+          fontFamily: bodyFont,
           alignItems: "center",
-          gap: 64,
+          gap: 58,
         }}
       >
         <div
           style={{
-            width: 500,
-            height: 500,
+            width: 548,
+            height: 548,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "#faf9f4",
-            border: "2px solid #171717",
-            boxShadow: "14px 14px 0 #eeff41",
+            position: "relative",
+            background: "#171717",
             overflow: "hidden",
           }}
         >
-          {artwork ? (
-            <img src={artwork} alt="" width="500" height="500" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          {renderedArtwork ? (
+            <img
+              src={renderedArtwork}
+              alt=""
+              width="548"
+              height="548"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+            />
           ) : (
             <div
               style={{
                 width: 210,
                 height: 210,
-                border: "22px solid #171717",
+                border: "22px solid #eeff41",
                 borderRadius: 999,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <div style={{ width: 40, height: 40, borderRadius: 999, background: "#171717", display: "flex" }} />
+              <div style={{ width: 40, height: 40, borderRadius: 999, background: "#eeff41", display: "flex" }} />
             </div>
           )}
+          <div
+            style={{
+              position: "absolute",
+              left: 18,
+              bottom: 18,
+              display: "flex",
+              padding: "8px 11px",
+              background: "#eeff41",
+              color: "#171717",
+              fontFamily: bodyFont,
+              fontSize: 19,
+            }}
+          >
+            #{id.padStart(3, "0")}
+          </div>
         </div>
         <div
           style={{
             flex: 1,
-            height: 500,
+            height: 548,
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
           }}
         >
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", color: "#7357ff", fontSize: 19, fontWeight: 700, letterSpacing: 2 }}>
-              {publicMint ? "OPEN MINT" : "GATED"} · BASE SEPOLIA · {soulbound ? "SOULBOUND" : "TRANSFERABLE"}
+            <div
+              style={{
+                display: "flex",
+                fontFamily: displayFont,
+                fontSize: 18,
+                fontWeight: 700,
+                letterSpacing: 2.2,
+              }}
+            >
+              {publicMint ? "OPEN MINT" : "GATED"} · BASE SEPOLIA
             </div>
             <div
               style={{
                 display: "flex",
+                fontFamily: displayFont,
                 fontSize: titleSize,
-                lineHeight: 1.04,
-                fontWeight: 800,
-                letterSpacing: -2,
-                marginTop: 20,
-                maxHeight: 205,
+                lineHeight: 0.93,
+                fontWeight: 700,
+                letterSpacing: -3,
+                marginTop: 28,
+                maxHeight: 196,
                 overflow: "hidden",
               }}
             >
@@ -138,19 +261,50 @@ export async function GET(
               style={{
                 display: "flex",
                 color: "#69685f",
-                fontSize: 23,
+                fontFamily: bodyFont,
+                fontSize: 21,
                 lineHeight: 1.35,
-                marginTop: 24,
-                maxHeight: 94,
+                marginTop: 28,
+                maxHeight: 84,
                 overflow: "hidden",
               }}
             >
               {description}
             </div>
           </div>
-          <div style={{ display: "flex", marginTop: 38, alignItems: "center", gap: 18 }}>
-            <div style={{ display: "flex", background: "#171717", color: "#fff", padding: "18px 26px", fontSize: 19, fontWeight: 800, boxShadow: "7px 7px 0 #eeff41" }}>
-              VIEW &amp; MINT POAP #{id.padStart(3, "0")} →
+          {facts.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                color: "#3f3f3b",
+                fontFamily: bodyFont,
+                fontSize: 16,
+                marginTop: 30,
+                gap: 11,
+              }}
+            >
+              {facts.map((fact, index) => (
+                <div key={fact} style={{ display: "flex" }}>
+                  {index > 0 ? `· ${fact}` : fact}
+                </div>
+              ))}
+            </div>
+          )}
+          <div style={{ display: "flex", marginTop: 34, alignItems: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                background: "#171717",
+                color: "#fff",
+                padding: "16px 24px",
+                fontFamily: displayFont,
+                fontSize: 17,
+                fontWeight: 700,
+                boxShadow: "6px 6px 0 #eeff41",
+              }}
+            >
+              VIEW &amp; MINT POAP →
             </div>
           </div>
         </div>
@@ -159,8 +313,11 @@ export async function GET(
     {
       width: 1200,
       height: 800,
+      fonts,
       headers: {
-        "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+        "Cache-Control": loadedEvent && renderedArtwork
+          ? "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400"
+          : "no-store, max-age=0",
       },
     },
   );
