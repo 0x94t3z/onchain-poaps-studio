@@ -82,6 +82,7 @@ export default function Create() {
           <button
             type="button"
             onClick={() => i + 1 <= step && setStep(i + 1)}
+            disabled={createdEventId !== null}
             className={step === i + 1 ? "current" : step > i + 1 ? "done" : ""}
             aria-current={step === i + 1 ? "step" : undefined}
             aria-label={`${x}, step ${i + 1} of 4${step > i + 1 ? ", completed" : ""}`}
@@ -347,9 +348,6 @@ export default function Create() {
                     >
                       Open claim page ↗
                     </Link>
-                    <a className="text-link" href="/create">
-                      Create another
-                    </a>
                   </div>
                 </div>
               </div>
@@ -370,7 +368,11 @@ export default function Create() {
         </div>
       )}
       <div className="form-nav">
-        {step > 1 && (
+        {createdEventId ? (
+          <a className="button secondary" href="/create">
+            Create another POAP
+          </a>
+        ) : step > 1 ? (
           <button
             type="button"
             className="button secondary"
@@ -378,8 +380,8 @@ export default function Create() {
           >
             Back
           </button>
-        )}
-        {step < 4 && (
+        ) : null}
+        {!createdEventId && step < 4 && (
           <button
             type="button"
             className="button"

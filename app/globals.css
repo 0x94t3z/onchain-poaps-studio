@@ -816,6 +816,10 @@ button.text-link {
   align-items: center;
   color: var(--muted);
 }
+.stepper button:disabled {
+  cursor: default;
+  opacity: 1;
+}
 .stepper button span {
   border: 1px solid;
   border-radius: 50%;
