@@ -5,6 +5,7 @@ import type { ContractFunctionArgs, ContractFunctionName } from "viem";
 import type { TransactionReceipt } from "viem";
 import { poapAbi } from "@/lib/abi";
 import { CONTRACT, explorer } from "@/lib/constants";
+import { friendlyTransactionError } from "@/lib/transaction-error";
 export function TxButton<
   T extends ContractFunctionName<typeof poapAbi, "nonpayable">,
 >({
@@ -26,16 +27,34 @@ export function TxButton<
   variant?: "primary" | "secondary";
   showSuccess?: boolean;
 }) {
-  const { writeContract, data, error, isPending } = useWriteContract();
+  const { writeContract, data, error, isPending, reset } = useWriteContract();
   const receipt = useWaitForTransactionReceipt({ hash: data });
   const notifiedHash = useRef<string | undefined>(undefined);
+  const transactionSucceeded =
+    receipt.isSuccess && receipt.data?.status === "success";
+  const transactionReverted =
+    receipt.isSuccess && receipt.data?.status === "reverted";
+  const receiptIsUncertain = Boolean(data) && receipt.isError;
+
   useEffect(() => {
-    if (!receipt.isSuccess || !data || notifiedHash.current === data) return;
+    if (!transactionSucceeded || !data || notifiedHash.current === data) return;
     notifiedHash.current = data;
     if (receipt.data) onSuccess?.(receipt.data);
-  }, [data, onSuccess, receipt.data, receipt.isSuccess]);
-  if (receipt.isSuccess && !showSuccess) return null;
-  if (receipt.isSuccess)
+  }, [data, onSuccess, receipt.data, transactionSucceeded]);
+
+  function submit() {
+    reset();
+    notifiedHash.current = undefined;
+    writeContract({
+      address: CONTRACT,
+      abi: poapAbi,
+      functionName: name,
+      args,
+    } as any);
+  }
+
+  if (transactionSucceeded && !showSuccess) return null;
+  if (transactionSucceeded)
     return (
       <div className="success">
         Confirmed onchain ·{" "}
@@ -53,41 +72,42 @@ export function TxButton<
           (wide ? " wide" : "") +
           (variant === "secondary" ? " secondary" : "")
         }
-        disabled={disabled || isPending || receipt.isLoading}
-        onClick={() => writeContract({
-          address: CONTRACT,
-          abi: poapAbi,
-          functionName: name,
-          args,
-        } as any)}
+        disabled={
+          disabled || isPending || receipt.isLoading || receiptIsUncertain
+        }
+        onClick={submit}
       >
         {isPending
           ? "Confirm in wallet"
           : receipt.isLoading
             ? "Confirming…"
-            : label}
+            : receiptIsUncertain
+              ? "Check transaction status"
+              : label}
       </button>
-      {error && <p className="error">{friendlyTransactionError(error)}</p>}
+      {transactionReverted && (
+        <p className="error" role="alert">
+          The transaction reverted onchain and no change was made. Review the
+          details and try again.{" "}
+          <a target="_blank" rel="noreferrer" href={explorer(`tx/${data}`)}>
+            View transaction ↗
+          </a>
+        </p>
+      )}
+      {receiptIsUncertain && (
+        <p className="error" role="alert">
+          The transaction was submitted, but its status could not be confirmed.
+          Check it before submitting again.{" "}
+          <a target="_blank" rel="noreferrer" href={explorer(`tx/${data}`)}>
+            Check transaction ↗
+          </a>
+        </p>
+      )}
+      {error && (
+        <p className="error" role="alert">
+          {friendlyTransactionError(error, name)}
+        </p>
+      )}
     </div>
   );
-}
-
-function friendlyTransactionError(error: Error) {
-  const candidate = error as Error & {
-    shortMessage?: string;
-    details?: string;
-  };
-  const message =
-    candidate.shortMessage || candidate.details || error.message || "";
-
-  if (/insufficient funds|exceeds.*balance|not enough funds/i.test(message))
-    return "This wallet does not have enough Base Sepolia ETH to pay network gas.";
-  if (/user rejected|user denied|rejected the request/i.test(message))
-    return "Transaction cancelled in the wallet.";
-  if (/already claimed|already minted/i.test(message))
-    return "This wallet has already claimed this POAP.";
-  if (/contract function .* reverted|execution reverted/i.test(message))
-    return "The contract rejected this transaction. Check the wallet's eligibility and the selected mint method.";
-
-  return message.split("\n")[0] || "The transaction could not be prepared.";
 }
