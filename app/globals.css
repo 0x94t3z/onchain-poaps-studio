@@ -2884,10 +2884,6 @@ textarea {
     order: 1;
   }
 
-  .create .preview img {
-    max-height: 68vw;
-  }
-
   .form-layout,
   .form-layout > *,
   .panel,
