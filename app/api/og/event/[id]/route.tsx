@@ -1,5 +1,8 @@
 import { ImageResponse } from "next/og";
-import sharp from "sharp";
+import { writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { Resvg } from "@resvg/resvg-js";
 import { poapAbi } from "@/lib/abi";
 import { CONTRACT } from "@/lib/constants";
 import { decodeMetadata } from "@/lib/metadata";
@@ -20,6 +23,11 @@ type OgFont = {
   weight: 400 | 700;
   style: "normal";
 };
+
+let rasterFontFilesCache: {
+  key: string;
+  promise: Promise<string[]>;
+} | null = null;
 
 async function fetchFont(url: string) {
   const response = await fetch(url, { next: { revalidate: 604800 } });
@@ -54,16 +62,60 @@ async function loadFonts(): Promise<OgFont[]> {
   return fonts;
 }
 
-async function rasterizeArtwork(image: string | null) {
+async function rasterFontFiles(fonts: OgFont[]) {
+  const key = fonts.map((font) => font.name).sort().join("|");
+  if (!rasterFontFilesCache || rasterFontFilesCache.key !== key) {
+    const promise = Promise.all(
+      fonts.map(async (font) => {
+        const filename =
+          font.name === "Space Grotesk"
+            ? "onchain-poaps-space-grotesk-bold.ttf"
+            : "onchain-poaps-dm-sans-regular.ttf";
+        const path = join(tmpdir(), filename);
+        await writeFile(path, new Uint8Array(font.data));
+        return path;
+      }),
+    ).catch((reason) => {
+      rasterFontFilesCache = null;
+      throw reason;
+    });
+    rasterFontFilesCache = { key, promise };
+  }
+
+  return rasterFontFilesCache.promise;
+}
+
+async function rasterizeArtwork(image: string | null, fonts: OgFont[]) {
   const prefix = "data:image/svg+xml;base64,";
   if (!image?.startsWith(prefix)) return image;
+  if (fonts.length === 0) return image;
 
   try {
-    const svg = Buffer.from(image.slice(prefix.length), "base64");
-    const png = await sharp(svg)
-      .resize(548, 548, { fit: "contain" })
-      .png()
-      .toBuffer();
+    const preferredFont = fonts.some((font) => font.name === "Space Grotesk")
+      ? "Space Grotesk"
+      : fonts[0].name;
+    const svg = Buffer.from(image.slice(prefix.length), "base64")
+      .toString("utf8")
+      .replace(
+        /font-family=(["'])Arial,sans-serif\1/g,
+        `font-family="${preferredFont}"`,
+      )
+      .replace(
+        /font-family=(["'])sans-serif\1/g,
+        `font-family="${preferredFont}"`,
+      );
+    const fontFiles = await rasterFontFiles(fonts);
+    const png = new Resvg(svg, {
+      fitTo: { mode: "width", value: 548 },
+      font: {
+        fontFiles,
+        loadSystemFonts: false,
+        defaultFontFamily: preferredFont,
+        sansSerifFamily: preferredFont,
+      },
+    })
+      .render()
+      .asPng();
     return `data:image/png;base64,${png.toString("base64")}`;
   } catch {
     return image;
@@ -139,10 +191,8 @@ export async function GET(
     }
   }
 
-  const [fonts, renderedArtwork] = await Promise.all([
-    loadFonts(),
-    rasterizeArtwork(artwork),
-  ]);
+  const fonts = await loadFonts();
+  const renderedArtwork = await rasterizeArtwork(artwork, fonts);
   const hasDisplayFont = fonts.some((font) => font.name === "Space Grotesk");
   const hasBodyFont = fonts.some((font) => font.name === "DM Sans");
   const displayFont = hasDisplayFont ? "Space Grotesk" : "Arial";
