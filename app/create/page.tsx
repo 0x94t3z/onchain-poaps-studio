@@ -139,7 +139,7 @@ export default function Create() {
                 <input
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Jakarta · Online"
+                  placeholder="Farcaster · Online"
                 />
                 {bytes(location) > 128 && (
                   <small className="field-error">
