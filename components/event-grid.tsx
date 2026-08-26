@@ -1,13 +1,16 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useReadContract, useReadContracts } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
 import { Search, X } from "lucide-react";
 import { poapAbi } from "@/lib/abi";
 import { CONTRACT, SIGNATURE_WINDOW, ZERO_ROOT } from "@/lib/constants";
 import { decodeMetadata } from "@/lib/metadata";
+import { hasPartialContractResults } from "@/lib/event-ownership";
 import { EventCard } from "./event-card";
 
 type ClaimFilter = "all" | "claimable" | "closed";
+type OwnerFilter = "collected" | "created";
 
 const metadataFallbackImage = `data:image/svg+xml,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#171717"/><circle cx="256" cy="256" r="112" fill="none" stroke="#eaff2f" stroke-width="24"/><circle cx="256" cy="256" r="24" fill="#eaff2f"/></svg>',
@@ -15,6 +18,7 @@ const metadataFallbackImage = `data:image/svg+xml,${encodeURIComponent(
 
 export function EventGrid({
   owner,
+  ownerFilter,
   limit,
   mobileLimit,
   paginate = false,
@@ -23,6 +27,7 @@ export function EventGrid({
   prioritizeClaimable = false,
 }: {
   owner?: `0x${string}`;
+  ownerFilter?: OwnerFilter;
   limit?: number;
   mobileLimit?: number;
   paginate?: boolean;
@@ -45,7 +50,7 @@ export function EventGrid({
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
-  useEffect(() => setPage(0), [isMobile, owner]);
+  useEffect(() => setPage(0), [isMobile, owner, ownerFilter]);
   useEffect(() => setNow(Math.floor(Date.now() / 1000)), []);
   useEffect(() => {
     if (!restorePosition.current) return;
@@ -63,36 +68,79 @@ export function EventGrid({
   const total = useReadContract({ address: CONTRACT, abi: poapAbi, functionName: "totalEvents" });
   const count = Number(total.data ?? 0n);
   const allIds = Array.from({ length: count }, (_, index) => BigInt(count - index));
+  const ownership = owner ? ownerFilter ?? "collected" : undefined;
+  const createdIds = useQuery({
+    queryKey: ["created-event-ids", owner],
+    enabled: Boolean(owner && ownership === "created"),
+    staleTime: 30_000,
+    queryFn: async () => {
+      const response = await fetch(`/api/events/created/${owner}`);
+      const payload = (await response.json()) as {
+        eventIds?: string[];
+        error?: string;
+      };
+      if (!response.ok || !payload.eventIds) {
+        throw new Error(payload.error || "Created POAPs could not be loaded.");
+      }
+      return payload.eventIds.map(BigInt);
+    },
+  });
   const balances = useReadContracts({
-    contracts: owner ? allIds.map((id) => ({
+    contracts: owner && ownership === "collected" ? allIds.map((id) => ({
       address: CONTRACT, abi: poapAbi, functionName: "balanceOf", args: [owner, id],
     }) as const) : [],
-    query: { enabled: Boolean(owner && count) },
+    query: { enabled: Boolean(owner && ownership === "collected" && count) },
   });
-  const collectionIds = owner
-    ? allIds.filter((_, index) => (balances.data?.[index]?.result ?? 0n) > 0n)
-    : allIds;
+  const candidateIds =
+    ownership === "collected"
+      ? allIds.filter((_, index) => (balances.data?.[index]?.result ?? 0n) > 0n)
+      : ownership === "created"
+        ? createdIds.data ?? []
+        : allIds;
   const events = useReadContracts({
-    contracts: collectionIds.map((id) => ({
+    contracts: candidateIds.map((id) => ({
       address: CONTRACT, abi: poapAbi, functionName: "events", args: [id],
     }) as const),
-    query: { enabled: collectionIds.length > 0 },
+    query: { enabled: candidateIds.length > 0 },
   });
+  const selectedEntries = candidateIds.map((id, index) => ({
+    id,
+    event: events.data?.[index]?.result,
+  }));
+  const collectionIds = selectedEntries.map(({ id }) => id);
   const uris = useReadContracts({
     contracts: collectionIds.map((id) => ({
       address: CONTRACT, abi: poapAbi, functionName: "uri", args: [id],
     }) as const),
     query: { enabled: collectionIds.length > 0 },
   });
-  const loading = now === 0 || total.isLoading || (Boolean(owner) && balances.isLoading) ||
-    (collectionIds.length > 0 && (events.isLoading || uris.isLoading));
+  const loading =
+    now === 0 ||
+    total.isLoading ||
+    (ownership === "collected" && balances.isLoading) ||
+    (ownership === "created" && createdIds.isLoading) ||
+    (candidateIds.length > 0 && events.isLoading) ||
+    (collectionIds.length > 0 && uris.isLoading);
   if (loading) return <div className="empty">Loading POAPs from Base Sepolia…</div>;
-  if (total.isError || balances.isError || events.isError || uris.isError) return (
-    <div className="empty" role="alert">POAPs could not be loaded from Base Sepolia. Check your connection and try again.</div>
-  );
+  if (
+    total.isError ||
+    (ownership === "collected" && balances.isError) ||
+    (ownership === "created" && createdIds.isError) ||
+    events.isError ||
+    uris.isError
+  ) {
+    return (
+      <div className="empty" role="alert">
+        POAPs could not be loaded from Base Sepolia. Check your connection and
+        try again.
+      </div>
+    );
+  }
+  const hasPartialResults =
+    hasPartialContractResults(events.data) ||
+    hasPartialContractResults(uris.data);
 
-  const cards = collectionIds.map((id, index) => {
-    const event = events.data?.[index]?.result;
+  const cards = selectedEntries.map(({ id, event }, index) => {
     const uri = uris.data?.[index]?.result;
 
     if (!event || !uri) {
@@ -133,7 +181,7 @@ export function EventGrid({
             publicMint={publicMint}
             soulbound={event[9]}
             claimsClosed={!claimable}
-            showShare={Boolean(owner)}
+            manageHref={ownership === "created" ? `/manage/${id}` : undefined}
           />
         ),
       };
@@ -155,7 +203,7 @@ export function EventGrid({
             publicMint={publicMint}
             soulbound={event[9]}
             claimsClosed={!claimable}
-            showShare={Boolean(owner)}
+            manageHref={ownership === "created" ? `/manage/${id}` : undefined}
           />
         ),
       };
@@ -189,6 +237,12 @@ export function EventGrid({
 
   return (
     <div className="event-collection" ref={collectionRef} role="region" aria-label="POAP collection" tabIndex={-1}>
+      {hasPartialResults && (
+        <div className="warning event-partial-warning" role="status">
+          Some POAP details could not be read from Base Sepolia. The available
+          results are shown; refresh to try the missing items again.
+        </div>
+      )}
       {searchable && (
         <div className="event-search">
           <label htmlFor="event-search">Search POAPs</label>
@@ -208,7 +262,7 @@ export function EventGrid({
         </div>
       )}
       {visibleCards.length ? <div className="grid event-grid">{visibleCards.map((card) => card.node)}</div> : (
-        <div className="empty">{query ? `No POAPs match “${query.trim()}”.` : claimFilter === "all" ? "No POAPs found here yet." : `No ${claimFilter === "claimable" ? "claimable POAPs" : "POAPs with closed claims"} found.`}</div>
+        <div className="empty">{query ? `No POAPs match “${query.trim()}”.` : claimFilter !== "all" ? `No ${claimFilter === "claimable" ? "claimable POAPs" : "POAPs with closed claims"} found.` : ownership === "created" ? "This wallet has not created any POAPs yet." : ownership === "collected" ? "This wallet has not collected any POAPs yet." : "No POAPs found here yet."}</div>
       )}
       {filteredCards.length > 0 && paginate && pageCount > 1 && (
         <nav className="event-pagination" aria-label="POAP collection pages">

@@ -1,20 +1,19 @@
 import Link from "next/link";
 import type { Metadata } from "@/lib/metadata";
-import { EventShareActions } from "@/components/event-share-actions";
 export function EventCard({
   id,
   meta,
   publicMint,
   soulbound,
   claimsClosed = false,
-  showShare = false,
+  manageHref,
 }: {
   id: bigint;
   meta: Metadata;
   publicMint: boolean;
   soulbound: boolean;
   claimsClosed?: boolean;
-  showShare?: boolean;
+  manageHref?: string;
 }) {
   return (
     <article className="event-card">
@@ -32,12 +31,10 @@ export function EventCard({
           <p>{meta.description || "No description provided."}</p>
         </div>
       </Link>
-      {showShare && (
-        <EventShareActions
-          compact
-          eventId={id.toString()}
-          eventName={meta.name}
-        />
+      {manageHref && (
+        <Link className="event-card-manage" href={manageHref}>
+          Manage event →
+        </Link>
       )}
     </article>
   );

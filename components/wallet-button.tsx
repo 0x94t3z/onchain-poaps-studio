@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -8,8 +9,8 @@ import {
   ChevronDown,
   Copy,
   LogOut,
-  Images,
   ShieldCheck,
+  Ticket,
   WalletCards,
   X,
 } from "lucide-react";
@@ -53,6 +54,7 @@ function formatEnsName(name: string, maxLength = 24) {
 }
 
 export function WalletButton() {
+  const pathname = usePathname();
   const { address, isConnected, isReconnecting, chainId } = useAccount();
   const { data: ensName } = useQuery({
     queryKey: ["ens-primary-name", address],
@@ -305,14 +307,21 @@ export function WalletButton() {
               {ensName && <strong>{formatEnsName(ensName, 30)}</strong>}
               <code title={address}>{address}</code>
             </div>
-            <Link
-              href="/gallery"
-              role="menuitem"
-              onClick={() => setIsAccountOpen(false)}
-            >
-              <Images />
-              <span>View my POAPs</span>
-            </Link>
+            {pathname === "/gallery" ? (
+              <button role="menuitem" onClick={() => setIsAccountOpen(false)}>
+                <Ticket />
+                <span>My POAPs</span>
+              </button>
+            ) : (
+              <Link
+                href="/gallery"
+                role="menuitem"
+                onClick={() => setIsAccountOpen(false)}
+              >
+                <Ticket />
+                <span>My POAPs</span>
+              </Link>
+            )}
             <button role="menuitem" onClick={copyAddress}>
               {addressCopied ? <Check /> : <Copy />}
               <span>{addressCopied ? "Address copied" : "Copy address"}</span>

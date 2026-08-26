@@ -659,13 +659,15 @@ button.text-link {
 }
 .event-card {
   position: relative;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--line);
   background: var(--surface);
   transition: 0.2s;
 }
 .event-card-link {
   display: block;
-  height: 100%;
+  flex: 1;
   color: inherit;
   text-decoration: none;
 }
@@ -697,6 +699,20 @@ button.text-link {
   border: 1px solid;
   padding: 5px 8px;
   font: 700 12px "Space Grotesk";
+}
+.event-card-manage {
+  min-height: 48px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font: 700 13px "Space Grotesk";
+  text-decoration: none;
+}
+.event-card-manage:hover {
+  background: var(--primary-bg);
+  color: var(--primary-text);
 }
 .card-copy {
   padding: 20px;
@@ -3103,6 +3119,17 @@ textarea {
   margin: -8px 0 24px;
 }
 
+.gallery-tabs {
+  width: min(100%, 360px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 30px 0;
+}
+
+.event-partial-warning {
+  margin: 0 0 24px;
+}
+
 .event-filters button {
   min-height: 40px;
   padding: 8px 14px;
@@ -3118,7 +3145,8 @@ textarea {
   color: var(--ink);
 }
 
-.event-filters button[aria-pressed="true"] {
+.event-filters button[aria-pressed="true"],
+.event-filters button[aria-selected="true"] {
   border-color: var(--primary-bg);
   background: var(--primary-bg);
   color: var(--primary-text);
