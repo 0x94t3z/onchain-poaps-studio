@@ -234,6 +234,18 @@ export function EventGrid({
   const displayNoun = ownership === "created"
     ? displayCount === 1 ? "event" : "events"
     : displayCount === 1 ? "POAP" : "POAPs";
+  const searchLabel =
+    ownership === "created"
+      ? "Search created events"
+      : ownership === "collected"
+        ? "Search collected POAPs"
+        : "Search POAPs";
+  const searchPlaceholder =
+    ownership === "created"
+      ? "Event name or ID"
+      : ownership === "collected"
+        ? "POAP name or ID"
+        : "Name, event ID, or location";
   function goToPage(next: number) {
     restorePosition.current = true;
     setPage(next);
@@ -254,12 +266,10 @@ export function EventGrid({
       )}
       {searchable && (
         <div className="event-search">
-          <label htmlFor="event-search">
-            {ownership === "created" ? "Search created events" : "Search collected POAPs"}
-          </label>
+          <label htmlFor="event-search">{searchLabel}</label>
           <div className="event-search-field">
             <Search size={19} aria-hidden="true" />
-            <input id="event-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(0); }} placeholder={ownership === "created" ? "Event name or ID" : "POAP name or ID"} autoComplete="off" />
+            <input id="event-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(0); }} placeholder={searchPlaceholder} autoComplete="off" />
             {query && <button type="button" aria-label="Clear search" onClick={() => { setQuery(""); setPage(0); }}><X size={19} aria-hidden="true" /></button>}
           </div>
           <span aria-live="polite">{displayCount} {displayNoun}</span>
@@ -268,12 +278,12 @@ export function EventGrid({
       {filterable && (
         <div className="event-filters" role="group" aria-label="Filter POAPs by claim status">
           <button type="button" aria-pressed={claimFilter === "all"} onClick={() => updateFilter("all")}>All</button>
-          <button type="button" aria-pressed={claimFilter === "claimable"} onClick={() => updateFilter("claimable")}>Claimable</button>
-          <button type="button" aria-pressed={claimFilter === "closed"} onClick={() => updateFilter("closed")}>Claims closed</button>
+          <button type="button" aria-pressed={claimFilter === "claimable"} onClick={() => updateFilter("claimable")}>Live</button>
+          <button type="button" aria-pressed={claimFilter === "closed"} onClick={() => updateFilter("closed")}>Ended</button>
         </div>
       )}
       {visibleCards.length ? <div className="grid event-grid">{visibleCards.map((card) => card.node)}</div> : (
-        <div className="empty">{query ? `No ${ownership === "created" ? "created events" : "POAPs"} match “${query.trim()}”.` : claimFilter !== "all" ? `No ${claimFilter === "claimable" ? "claimable POAPs" : "POAPs with closed claims"} found.` : ownership === "created" ? "This wallet has not created any POAPs yet." : ownership === "collected" ? "This wallet has not collected any POAPs yet." : "No POAPs found here yet."}</div>
+        <div className="empty">{query ? `No ${ownership === "created" ? "created events" : "POAPs"} match “${query.trim()}”.` : claimFilter !== "all" ? `No ${claimFilter === "claimable" ? "live POAPs" : "ended POAPs"} found.` : ownership === "created" ? "This wallet has not created any POAPs yet." : ownership === "collected" ? "This wallet has not collected any POAPs yet." : "No POAPs found here yet."}</div>
       )}
       {filteredCards.length > 0 && paginate && pageCount > 1 && (
         <nav className="event-pagination" aria-label="POAP collection pages">

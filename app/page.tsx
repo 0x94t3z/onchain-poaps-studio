@@ -6,7 +6,7 @@ export default function Home() {
     <>
       <section className="hero">
         <div className="hero-copy">
-          <div className="pill">● TESTING ON BASE SEPOLIA</div>
+          <div className="pill">TESTNET · BASE SEPOLIA</div>
           <h1>
             PROOF
             <br />
