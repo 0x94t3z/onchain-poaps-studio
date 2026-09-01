@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { loadOgFonts } from "@/lib/og-fonts";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export async function GET() {
   const fonts = await loadOgFonts();

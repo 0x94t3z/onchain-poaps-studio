@@ -183,6 +183,11 @@ export default function Create() {
       {step === 3 && (
         <div className="panel form narrow">
           <h2>How can people collect it?</h2>
+          <p className="note">
+            Pick the routes attendees will use. Public mint needs the event
+            link. Allowlist mint needs a proof for each wallet. Signed passes
+            and QR links can be issued later from Manage.
+          </p>
           <Toggle
             title="Soulbound"
             text="Permanent proof tied to the recipient wallet. It cannot be transferred."
@@ -249,8 +254,9 @@ export default function Create() {
             </p>
           )}
           <p className="note">
-            Signed mints do not need setup now. The creator can sign
-            recipient-specific passes for 37 days after registration.
+            Creator drops, signed passes, and QR links live in Manage after
+            registration. Creator controls stay open for 30 days. Signed passes
+            stay redeemable for 37 days.
           </p>
         </div>
       )}

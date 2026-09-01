@@ -1,17 +1,49 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { CONTRACT, explorer } from "@/lib/constants";
-const sections = [
+
+const sections: Array<[string, string, ReactNode]> = [
+  [
+    "quick-start",
+    "Quick start",
+    <>
+      <h3>For organizers</h3>
+      <ol>
+        <li>Create the artwork and event details.</li>
+        <li>Choose whether the POAP is soulbound or transferable.</li>
+        <li>
+          Choose the claim routes: public link, allowlist proof, signed pass, or
+          creator drop.
+        </li>
+        <li>
+          Register the event on Base Sepolia. After this, the artwork,
+          metadata, and soulbound setting are permanent.
+        </li>
+        <li>
+          Share the claim page, send allowlist proofs, generate signed-pass QR
+          codes, or mint directly to attendee wallets from Manage.
+        </li>
+      </ol>
+      <h3>For collectors</h3>
+      <p>
+        Open the event page, connect the wallet that should hold the POAP, and
+        use the mint route the organizer gave you. Public mints only need the
+        page link. Allowlist mints need your proof. Signed passes need the QR,
+        private link, or signature issued for your wallet.
+      </p>
+    </>,
+  ],
   [
     "creating",
     "Creating a POAP",
     <>
       <p>
         Connect a wallet on Base Sepolia and open{" "}
-        <Link href="/create">Create</Link>. Build artwork in the badge workshop
-        or upload/paste a self-contained SVG, then add the event details and
-        choose its distribution settings. Description, location, event date,
-        URL, and allowlist are optional. The name is limited to 128 bytes, the
-        description to 512, and the location and URL to 128 each.
+        <Link href="/create">Create</Link>. Build artwork in the studio or
+        upload a self-contained SVG. Then add event details and pick the claim
+        routes. Description, location, event date, URL, and allowlist are
+        optional. The name is limited to 128 bytes, the description to 512, and
+        the location and URL to 128 each.
       </p>
       <p>
         Registration calls{" "}
@@ -21,6 +53,12 @@ const sections = [
         </code>
         . The flags record whether transfers and public minting are enabled.
         Event details cannot be edited after registration.
+      </p>
+      <p>
+        If you add an allowlist during creation, download the proof file before
+        registering. The app blocks review until that file is downloaded. The
+        contract keeps only the root, so the exported file is what lets you hand
+        each attendee their proof later.
       </p>
     </>,
   ],
@@ -37,8 +75,14 @@ const sections = [
       <p>
         Use a square <code>viewBox</code>, avoid remote fonts/images/scripts,
         convert text to paths when exact typography matters, and optimize with{" "}
-        <a href="https://jakearchibald.github.io/svgomg/" target="_blank" rel="noreferrer">SVGOMG</a>. Smaller
-        SVGs cost less gas.
+        <a
+          href="https://jakearchibald.github.io/svgomg/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          SVGOMG
+        </a>
+        . Smaller SVGs cost less gas.
       </p>
     </>,
   ],
@@ -51,17 +95,31 @@ const sections = [
         POAPs can be sent to another wallet. This setting cannot be changed
         after registration.
       </p>
+      <p>
+        Use soulbound when the wallet is the attendance record. Use
+        transferable only when it is acceptable for the POAP to move to a
+        different wallet later.
+      </p>
     </>,
   ],
   [
     "distribution",
     "Distribution methods",
     <>
+      <p>
+        Every route mints the same ERC-1155 event token. The route only changes
+        who can claim and what they must provide. A wallet can hold one token
+        per event, even if multiple routes are open.
+      </p>
       <h3>Public mint</h3>
       <p>
         When open, any wallet can call <code>mint</code>. Creators can open or
         close it during the first 30 days; public minting itself has no
         automatic expiry.
+      </p>
+      <p>
+        Use this for open events or a single public QR code. The attendee only
+        needs the event page link and Base Sepolia test ETH for gas.
       </p>
       <h3>Allowlist mint</h3>
       <p>
@@ -77,17 +135,48 @@ const sections = [
         saving the root. The root is permanent, and each attendee needs the
         proof generated specifically for their wallet.
       </p>
+      <p>
+        Plain version: the root is the public fingerprint of the attendee list.
+        A proof is the private receipt for one wallet. Do not send the whole
+        proof file to everyone; send each recipient only their own proof.
+      </p>
       <h3>Signed pass</h3>
       <p>
         The creator signs the packed hash of{" "}
         <code>(eventId, chainId, recipient)</code>. The contract applies
-        Ethereum’s signed-message prefix and recovers the creator. Each pass is
+        Ethereum's signed-message prefix and recovers the creator. Each pass is
         valid for one wallet and expires 37 days after registration.
+      </p>
+      <p>
+        Use this for live check-in or private invites. Enter the attendee
+        wallet in Manage, sign in the creator wallet, then send that attendee
+        the generated private link, QR code, or signature.
       </p>
       <h3>Creator drop</h3>
       <p>
         During the first 30 days, creators may mint directly to batches of at
         most 101 recipients. Already-claimed wallets are skipped.
+      </p>
+      <p>
+        Use this when you already have attendee wallets and want to deliver
+        POAPs without asking each attendee to mint.
+      </p>
+    </>,
+  ],
+  [
+    "proofs",
+    "Generating allowlist proofs",
+    <>
+      <p>
+        Paste one wallet address or ENS name per line in Create or Manage. The
+        app resolves ENS names, removes duplicates, builds the allowlist root,
+        and exports JSON containing the root plus one proof per recipient.
+      </p>
+      <p>
+        Keep the JSON file. The contract stores the root, not the attendee list.
+        To help one attendee mint, find their wallet entry in the JSON and send
+        only that proof. The attendee pastes it into the Allowlist tab on the
+        event page.
       </p>
     </>,
   ],
@@ -106,6 +195,10 @@ const sections = [
         link directly to the event page. Use allowlist proofs for a
         pre-registered attendee list.
       </p>
+      <p>
+        A signed-pass QR is not a reusable public ticket. It is a private claim
+        link for one wallet. If another wallet scans it, the pass fails.
+      </p>
     </>,
   ],
   [
@@ -116,8 +209,9 @@ const sections = [
         <li>One claim per event per wallet across every mint route.</li>
         <li>
           Creator: set allowlist once, toggle public status, and creator-mint
-          during days 0–30.
+          during days 0-30.
         </li>
+        <li>Creator drop: maximum 101 recipients in one transaction.</li>
         <li>Signed mint: available through day 37.</li>
         <li>Public and allowlist mint: no contract expiry.</li>
         <li>Soulbound and all metadata: immutable.</li>
@@ -130,6 +224,34 @@ const sections = [
     </>,
   ],
   [
+    "glossary",
+    "Plain-language glossary",
+    <>
+      <ul>
+        <li>
+          Smart contract: the Base Sepolia program that stores events, checks
+          claim rules, and records ownership.
+        </li>
+        <li>
+          Metadata: the token name, description, event details, and artwork
+          returned by <code>uri(id)</code>.
+        </li>
+        <li>
+          Merkle root: a compact fingerprint of an allowlist. It lets the
+          contract check membership without storing every wallet.
+        </li>
+        <li>
+          Allowlist proof: the short set of hashes one wallet submits to prove
+          it is on the allowlist.
+        </li>
+        <li>
+          Signed pass: a creator-approved private claim for one event, one
+          chain, and one recipient wallet.
+        </li>
+      </ul>
+    </>,
+  ],
+  [
     "verify",
     "Verify a mint",
     <>
@@ -137,12 +259,15 @@ const sections = [
         After the transaction confirms, open it on BaseScan or view the token on
         OpenSea. Gallery checks <code>balanceOf(wallet, eventId)</code>{" "}
         directly. You can also inspect{" "}
-        <a href={explorer(`address/${CONTRACT}#code`)}>the verified contract</a>
+        <a href={explorer(`address/${CONTRACT}#code`)}>
+          the verified contract
+        </a>
         , call <code>uri(id)</code>, and decode the Base64 JSON.
       </p>
     </>,
   ],
 ];
+
 export default function Docs() {
   return (
     <section className="page docs">
@@ -160,7 +285,7 @@ export default function Docs() {
       </div>
       <aside>
         {sections.map(([id, title]) => (
-          <a key={id as string} href={`#${id}`}>
+          <a key={id} href={`#${id}`}>
             {title}
           </a>
         ))}
@@ -169,13 +294,15 @@ export default function Docs() {
         <summary>On this page</summary>
         <nav aria-label="Documentation sections">
           {sections.map(([id, title]) => (
-            <a key={id as string} href={`#${id}`}>{title}</a>
+            <a key={id} href={`#${id}`}>
+              {title}
+            </a>
           ))}
         </nav>
       </details>
       <div className="doc-body">
         {sections.map(([id, title, body], i) => (
-          <article id={id as string} key={id as string}>
+          <article id={id} key={id}>
             <span>{String(i + 1).padStart(2, "0")}</span>
             <h2>{title}</h2>
             {body}

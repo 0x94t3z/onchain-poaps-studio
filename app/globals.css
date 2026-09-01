@@ -2001,10 +2001,18 @@ code {
 .doc-body h2 {
   font: 700 34px "Space Grotesk";
 }
+.doc-body h3 {
+  margin: 28px 0 8px;
+  font: 700 20px "Space Grotesk";
+}
 .doc-body p,
 .doc-body li {
   line-height: 1.7;
   color: var(--muted);
+}
+.doc-body ul,
+.doc-body ol {
+  padding-left: 22px;
 }
 .doc-body code {
   background: var(--code-bg);
