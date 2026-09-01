@@ -46,11 +46,12 @@ flowchart LR
 
 ## Built around the contract
 
-| Onchain artwork | Four mint routes | Creator controls | Wallet archive |
+| Onchain artwork | Four mint routes | Creator controls | Wallet collection |
 | --- | --- | --- | --- |
 | Self-contained SVG and event metadata | Public, allowlist, signed pass, and batch drop | Public-mint status, Merkle root, QR passes | Browse collected POAPs and created events |
 
 The supplied verified contract remains the source of truth. The app does not modify, proxy, or wrap it.
+The frontend calls the supplied methods directly: `registerEvent`, `mint`, `allowlistMint`, `mintWithSignature`, `creatorMint`, `updateAllowlistRoot`, and `updateEventPublic`.
 
 ## Live proof
 
@@ -61,7 +62,7 @@ The supplied verified contract remains the source of truth. The app does not mod
 | Close public mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x1b73e554712fabed4d89e063c3370066bc36118ab49cd46896ffb4cd9611bd88) |
 | Reopen public mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x288d1d865ed8d017e2ab8bd5c1991ac0c818649e8fed2676adb1569f6eb458f2) |
 | Creator drop | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x27718c6f6637ee7c7e94f20154fbbfac352f29df002bbede6dc3bdfad82f626b) |
-| Lock allowlist root | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0xbeab4be9f094a04e0a8a16e68f757d68a9f3f20dd9003867e4d70e9e4d22f9bb) |
+| Set allowlist root | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0xbeab4be9f094a04e0a8a16e68f757d68a9f3f20dd9003867e4d70e9e4d22f9bb) |
 | Allowlist mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x50862fc6a3025a0c26bf07a27730a799b4a3e372dfef0eaed317c02eb041883b) |
 | Signed-pass mint | Confirmed | [Transaction](https://sepolia.basescan.org/tx/0x96491eedf018c7935b5a1def6389ee5bbde95799e11dbd6e8f1f0fa22f844c2a) |
 
@@ -124,7 +125,7 @@ FARCASTER_SIGNATURE=
 - `NEXT_PUBLIC_APP_URL` must match the final HTTPS origin exactly.
 - `NEXT_PUBLIC_RPC_URL` should use a dedicated provider for production traffic.
 - A [WalletConnect project ID](https://dashboard.walletconnect.com/) enables the external-wallet chooser.
-- The three Farcaster values are the account association generated for the production hostname.
+- `FARCASTER_HEADER`, `FARCASTER_PAYLOAD`, and `FARCASTER_SIGNATURE` populate `/.well-known/farcaster.json` for Mini App domain/account association.
 - Never place a private key, seed phrase, or server secret in a `NEXT_PUBLIC_` variable.
 
 ## Protocol rules
