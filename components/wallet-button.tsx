@@ -328,7 +328,7 @@ export function WalletButton() {
             )}
             <button role="menuitem" onClick={copyAddress}>
               {addressCopied ? <Check /> : <Copy />}
-              <span>{addressCopied ? "Address copied" : "Copy address"}</span>
+              <span>{addressCopied ? "Address Copied" : "Copy Address"}</span>
             </button>
             <button
               className="wallet-disconnect"
