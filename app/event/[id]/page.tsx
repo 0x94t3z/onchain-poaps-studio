@@ -13,7 +13,7 @@ import { useMintCount } from "@/hooks/use-mint-count";
 import { AddressIdentity } from "@/components/address-identity";
 import { TxButton } from "@/components/tx-button";
 import { EventShareActions } from "@/components/event-share-actions";
-import { Clock, ExternalLink, LockKeyhole, MapPin, Users } from "lucide-react";
+import { CalendarX, Clock, ExternalLink, LockKeyhole, MapPin, Users } from "lucide-react";
 export default function EventPage({
   searchParams,
   params,
@@ -227,12 +227,20 @@ export default function EventPage({
                 <MapPin /> {location}
               </span>
             )}
+            {eventDate === 0n && !location && (
+              <span>
+                <CalendarX /> No date or location provided
+              </span>
+            )}
             <span>
               <LockKeyhole /> {soulbound ? "Soulbound" : "Transferable"}
             </span>
             {typeof mintCount.data === "number" && (
               <span>
-                <Users /> {mintCount.data.toLocaleString()} minted
+                <Users />{" "}
+                {mintCount.data === 0
+                  ? "No mints yet"
+                  : `${mintCount.data.toLocaleString()} minted`}
               </span>
             )}
           </div>
