@@ -25,6 +25,7 @@ export function EventGrid({
   searchable = false,
   filterable = false,
   prioritizeClaimable = false,
+  source,
 }: {
   owner?: `0x${string}`;
   ownerFilter?: OwnerFilter;
@@ -34,6 +35,7 @@ export function EventGrid({
   searchable?: boolean;
   filterable?: boolean;
   prioritizeClaimable?: boolean;
+  source?: "home";
 }) {
   const [page, setPage] = useState(0);
   const [query, setQuery] = useState("");
@@ -89,7 +91,9 @@ export function EventGrid({
         ? createdIds.data ?? []
         : allIds;
   const eventSourceHref =
-    ownership === "collected"
+    source === "home"
+      ? "home"
+      : ownership === "collected"
       ? "gallery"
       : ownership === "created"
         ? "created"

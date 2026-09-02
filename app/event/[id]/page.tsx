@@ -187,9 +187,16 @@ export default function EventPage({
     signatureCheck.key === signatureValidationKey
       ? signatureCheck.status
       : "checking";
-  const backHref = from === "gallery" || from === "created" ? "/gallery" : "/explore";
+  const backHref =
+    from === "home"
+      ? "/"
+      : from === "gallery" || from === "created"
+        ? "/gallery"
+        : "/explore";
   const backLabel =
-    from === "gallery" || from === "created"
+    from === "home"
+      ? "← Back to home"
+      : from === "gallery" || from === "created"
       ? "← Back to My POAPs"
       : "← Back to collection";
   return (

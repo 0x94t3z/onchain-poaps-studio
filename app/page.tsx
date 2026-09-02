@@ -46,7 +46,7 @@ export default function Home() {
           ONCHAIN ARTWORK ✦ SOULBOUND OR TRANSFERABLE ✦ FOUR WAYS TO MINT ✦
         </span>
         <span className="marquee-mobile">
-          ONCHAIN ARTWORK ✦ FLEXIBLE MINTS ✦ STORED ON BASE
+          ONCHAIN ART ✦ FLEXIBLE MINTS ✦ BASE
         </span>
       </section>
       <section className="section home-latest">
@@ -58,7 +58,7 @@ export default function Home() {
           </div>
           <Link href="/explore">View all →</Link>
         </div>
-        <EventGrid limit={3} mobileLimit={2} prioritizeClaimable />
+        <EventGrid limit={3} mobileLimit={2} prioritizeClaimable source="home" />
       </section>
       <section className="features">
         <article>

@@ -2805,10 +2805,10 @@ textarea {
 
   .marquee {
     padding: 13px 18px;
-    font-size: 13px;
-    line-height: 1.4;
+    font-size: clamp(11px, 3.2vw, 13px);
+    line-height: 1;
     text-align: center;
-    white-space: normal;
+    white-space: nowrap;
   }
 
   .marquee-desktop {
