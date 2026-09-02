@@ -53,6 +53,10 @@ function formatEnsName(name: string, maxLength = 24) {
   return `${name.slice(0, headLength)}…${name.slice(-tailLength)}`;
 }
 
+function formatAccountAddress(value: `0x${string}`) {
+  return `${value.slice(0, 6)}…${value.slice(-4)}`;
+}
+
 export function WalletButton() {
   const pathname = usePathname();
   const { address, isConnected, isReconnecting, chainId } = useAccount();
@@ -305,7 +309,7 @@ export function WalletButton() {
             <div className="wallet-account-summary">
               <span className="eyebrow">CONNECTED WALLET</span>
               {ensName && <strong>{formatEnsName(ensName, 30)}</strong>}
-              <code title={address}>{address}</code>
+              <code title={address}>{formatAccountAddress(address)}</code>
             </div>
             {pathname === "/gallery" ? (
               <button role="menuitem" onClick={() => setIsAccountOpen(false)}>
