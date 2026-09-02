@@ -14,11 +14,14 @@ import { TxButton } from "@/components/tx-button";
 import { EventShareActions } from "@/components/event-share-actions";
 import { Clock, ExternalLink, LockKeyhole, MapPin } from "lucide-react";
 export default function EventPage({
+  searchParams,
   params,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const { id } = use(params);
+  const { from } = use(searchParams);
   const validId = /^[1-9]\d*$/.test(id);
   const eventId = BigInt(validId ? id : "0");
   const now = useCurrentTimestamp();
@@ -182,10 +185,15 @@ export default function EventPage({
     signatureCheck.key === signatureValidationKey
       ? signatureCheck.status
       : "checking";
+  const backHref = from === "gallery" || from === "created" ? "/gallery" : "/explore";
+  const backLabel =
+    from === "gallery" || from === "created"
+      ? "← Back to My POAPs"
+      : "← Back to collection";
   return (
     <section className="page event">
-      <Link href="/explore" className="back">
-        ← Back to collection
+      <Link href={backHref} className="back">
+        {backLabel}
       </Link>
       <div className="event-layout">
         <div className="event-art">

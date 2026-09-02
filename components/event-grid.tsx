@@ -88,6 +88,12 @@ export function EventGrid({
       : ownership === "created"
         ? createdIds.data ?? []
         : allIds;
+  const eventSourceHref =
+    ownership === "collected"
+      ? "gallery"
+      : ownership === "created"
+        ? "created"
+        : undefined;
   const events = useReadContracts({
     contracts: candidateIds.map((id) => ({
       address: CONTRACT, abi: poapAbi, functionName: "events", args: [id],
@@ -188,6 +194,9 @@ export function EventGrid({
             soulbound={event[9]}
             claimsClosed={!claimable}
             manageHref={ownership === "created" ? `/manage/${id}` : undefined}
+            eventHref={
+              eventSourceHref ? `/event/${id}?from=${eventSourceHref}` : undefined
+            }
           />
         ),
       };
@@ -210,6 +219,9 @@ export function EventGrid({
             soulbound={event[9]}
             claimsClosed={!claimable}
             manageHref={ownership === "created" ? `/manage/${id}` : undefined}
+            eventHref={
+              eventSourceHref ? `/event/${id}?from=${eventSourceHref}` : undefined
+            }
           />
         ),
       };

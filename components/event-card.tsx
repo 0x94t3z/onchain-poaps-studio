@@ -7,6 +7,7 @@ export function EventCard({
   soulbound,
   claimsClosed = false,
   manageHref,
+  eventHref,
 }: {
   id: bigint;
   meta: Metadata;
@@ -14,10 +15,11 @@ export function EventCard({
   soulbound: boolean;
   claimsClosed?: boolean;
   manageHref?: string;
+  eventHref?: string;
 }) {
   return (
     <article className="event-card">
-      <Link href={`/event/${id}`} className="event-card-link">
+      <Link href={eventHref ?? `/event/${id}`} className="event-card-link">
         <div className="art">
           <img src={meta.image} alt={meta.name} />
           <span className="id">#{id.toString().padStart(3, "0")}</span>
