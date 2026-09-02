@@ -113,6 +113,7 @@ Open [localhost:3000](http://localhost:3000). Reads work without a wallet; write
 ```env
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_CONTRACT_ADDRESS=0xC3249356a483fbe17d5355D39105D2eA666d9de6
+CONTRACT_DEPLOY_BLOCK=45288813
 NEXT_PUBLIC_RPC_URL=https://sepolia.base.org
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=
 FARCASTER_HEADER=
@@ -124,6 +125,7 @@ FARCASTER_SIGNATURE=
 
 - `NEXT_PUBLIC_APP_URL` must match the final HTTPS origin exactly.
 - `NEXT_PUBLIC_RPC_URL` should use a dedicated provider for production traffic.
+- `CONTRACT_DEPLOY_BLOCK` is optional for the supplied Base Sepolia contract. Set it when using another deployment so the mint-count API can avoid pruned RPC history and scan only relevant logs.
 - A [WalletConnect project ID](https://dashboard.walletconnect.com/) enables the external-wallet chooser.
 - `FARCASTER_HEADER`, `FARCASTER_PAYLOAD`, and `FARCASTER_SIGNATURE` populate `/.well-known/farcaster.json` for Mini App domain/account association.
 - Never place a private key, seed phrase, or server secret in a `NEXT_PUBLIC_` variable.

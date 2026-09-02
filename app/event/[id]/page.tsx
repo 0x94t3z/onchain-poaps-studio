@@ -9,10 +9,11 @@ import { decodeMetadata, deadline, remaining } from "@/lib/metadata";
 import { verifyProof } from "@/lib/merkle";
 import { isSignedPassFormat, verifySignedPass } from "@/lib/signed-pass";
 import { useCurrentTimestamp } from "@/hooks/use-current-timestamp";
+import { useMintCount } from "@/hooks/use-mint-count";
 import { AddressIdentity } from "@/components/address-identity";
 import { TxButton } from "@/components/tx-button";
 import { EventShareActions } from "@/components/event-share-actions";
-import { Clock, ExternalLink, LockKeyhole, MapPin } from "lucide-react";
+import { Clock, ExternalLink, LockKeyhole, MapPin, Users } from "lucide-react";
 export default function EventPage({
   searchParams,
   params,
@@ -52,6 +53,7 @@ export default function EventPage({
     args: [eventId, address!],
     query: { enabled: Boolean(validId && address) },
   });
+  const mintCount = useMintCount(eventId, validId);
   const [tab, setTab] = useState<"public" | "allowlist" | "signature">(
       "public",
     ),
@@ -228,6 +230,11 @@ export default function EventPage({
             <span>
               <LockKeyhole /> {soulbound ? "Soulbound" : "Transferable"}
             </span>
+            {typeof mintCount.data === "number" && (
+              <span>
+                <Users /> {mintCount.data.toLocaleString()} minted
+              </span>
+            )}
           </div>
           <div className="event-meta-actions">
             <span className="event-creator-line">

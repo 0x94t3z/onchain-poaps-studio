@@ -16,6 +16,7 @@ import { buildTree } from "@/lib/merkle";
 import { signedPassMessageHash } from "@/lib/signed-pass";
 import { useResolvedAddressInput } from "@/hooks/use-resolved-address-input";
 import { useCurrentTimestamp } from "@/hooks/use-current-timestamp";
+import { useMintCount } from "@/hooks/use-mint-count";
 import { downloadJson } from "@/lib/download";
 import { AddressIdentity } from "@/components/address-identity";
 import { TxButton } from "@/components/tx-button";
@@ -30,6 +31,7 @@ export default function Manage({
     eventId = BigInt(validId ? id : "0"),
     { address, isReconnecting } = useAccount();
   const now = useCurrentTimestamp();
+  const mintCount = useMintCount(eventId, validId);
   const query = useReadContract({
     address: CONTRACT,
     abi: poapAbi,
@@ -162,6 +164,12 @@ export default function Manage({
         <EventShareActions eventId={id} eventName={name} />
       </div>
       <div className="deadline-bar">
+        {typeof mintCount.data === "number" && (
+          <>
+            <span>Minted</span>
+            <strong>{mintCount.data.toLocaleString()}</strong>
+          </>
+        )}
         <span>Creator controls close in</span>
         <strong>{remaining(controlEnd, now)}</strong>
         <span>Signed passes expire in</span>
