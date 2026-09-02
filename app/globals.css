@@ -652,6 +652,10 @@ button.text-link {
   font: 700 38px "Space Grotesk";
   margin: 8px 0;
 }
+.section-head p {
+  color: var(--muted);
+  margin: 0;
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2084,7 +2088,16 @@ code {
     order: -1;
   }
   .event-layout {
-    gap: 25px;
+    gap: 28px;
+    margin-top: 16px;
+  }
+
+  .page.event {
+    padding-top: 28px;
+  }
+
+  .event-art {
+    margin-top: 8px;
   }
   .wide-card {
     grid-column: auto;
@@ -3023,6 +3036,10 @@ textarea {
   gap: 16px;
 }
 
+.home-latest .section-head {
+  margin-bottom: 22px;
+}
+
 .event-search {
   width: min(100%, 560px);
   margin-bottom: 24px;
@@ -3376,11 +3393,13 @@ textarea {
   .grid.event-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 18px;
+    padding-right: 8px;
   }
 
   .home-latest .grid.event-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 18px;
+    padding-right: 8px;
   }
 
   .event-grid .card-copy {

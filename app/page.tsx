@@ -54,6 +54,7 @@ export default function Home() {
           <div>
             <span className="eyebrow">LATEST POAPS</span>
             <h2>Recently created</h2>
+            <p>Fresh registrations from the Base Sepolia contract.</p>
           </div>
           <Link href="/explore">View all →</Link>
         </div>
