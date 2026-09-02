@@ -3,16 +3,16 @@ import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAccount, useBalance, useReadContract } from "wagmi";
 import { isAddress, type Hex } from "viem";
-import { poapAbi } from "@/lib/abi";
-import { chain, CONTRACT, ZERO_ROOT, explorer, opensea } from "@/lib/constants";
-import { decodeMetadata, deadline, remaining } from "@/lib/metadata";
-import { verifyProof } from "@/lib/merkle";
-import { isSignedPassFormat, verifySignedPass } from "@/lib/signed-pass";
+import { poapAbi } from "@/lib/blockchain/abi";
+import { chain, CONTRACT, ZERO_ROOT, explorer, opensea } from "@/lib/blockchain/constants";
+import { decodeMetadata, deadline, remaining } from "@/lib/metadata/metadata";
+import { verifyProof } from "@/lib/minting/merkle";
+import { isSignedPassFormat, verifySignedPass } from "@/lib/minting/signed-pass";
 import { useCurrentTimestamp } from "@/hooks/use-current-timestamp";
 import { useMintCount } from "@/hooks/use-mint-count";
-import { AddressIdentity } from "@/components/address-identity";
-import { TxButton } from "@/components/tx-button";
-import { EventShareActions } from "@/components/event-share-actions";
+import { AddressIdentity } from "@/components/ui/address-identity";
+import { TxButton } from "@/components/ui/tx-button";
+import { EventShareActions } from "@/features/share/event-share-actions";
 import { CalendarX, Clock, ExternalLink, LockKeyhole, MapPin, Users } from "lucide-react";
 export default function EventPage({
   searchParams,

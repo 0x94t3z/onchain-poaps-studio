@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { loadOgFonts } from "@/lib/og-fonts";
+import { loadOgFonts } from "@/lib/og/og-fonts";
 
 export const runtime = "nodejs";
 

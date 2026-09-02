@@ -3,7 +3,7 @@ import type { Address } from "viem";
 import {
   CREATED_EVENTS_QUERY_KEY,
   fetchCreatedEventIds,
-} from "@/lib/created-events";
+} from "@/lib/minting/created-events";
 
 export function useCreatedEventIds(owner?: Address, enabled = true) {
   return useQuery({

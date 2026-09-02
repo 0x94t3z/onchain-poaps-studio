@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { appKit } from "@/lib/wagmi";
+import { appKit } from "@/lib/blockchain/wagmi";
 
 export type Theme = "light" | "dark";
 

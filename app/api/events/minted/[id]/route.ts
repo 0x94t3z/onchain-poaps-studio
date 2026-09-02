@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { padHex, parseAbiItem, toEventSelector, toHex } from "viem";
-import { poapAbi } from "@/lib/abi";
-import { CONTRACT } from "@/lib/constants";
-import { publicClient } from "@/lib/public-client";
+import { poapAbi } from "@/lib/blockchain/abi";
+import { CONTRACT } from "@/lib/blockchain/constants";
+import { publicClient } from "@/lib/blockchain/public-client";
 
 export const maxDuration = 30;
 

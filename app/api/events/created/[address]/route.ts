@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAddress, isAddress, padHex, toEventSelector } from "viem";
-import { CONTRACT } from "@/lib/constants";
-import { createdEventIdsFromLogs } from "@/lib/event-ownership";
+import { CONTRACT } from "@/lib/blockchain/constants";
+import { createdEventIdsFromLogs } from "@/lib/minting/event-ownership";
 
 const NEW_EVENT_TOPIC = toEventSelector("NewEvent(uint256,string,address)");
 const BLOCKSCOUT_API = "https://base-sepolia.blockscout.com/api";

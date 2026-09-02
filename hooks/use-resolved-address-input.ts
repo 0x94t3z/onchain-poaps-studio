@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { Address } from "viem";
-import { parseAddressEntries, resolveAddressEntries } from "@/lib/address-input";
+import { parseAddressEntries, resolveAddressEntries } from "@/lib/identity/address-input";
 
 type Resolution = {
   key: string;

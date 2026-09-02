@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { CONTRACT, explorer } from "@/lib/constants";
+import { CONTRACT, explorer } from "@/lib/blockchain/constants";
 
 const sections: Array<[string, string, ReactNode]> = [
   [

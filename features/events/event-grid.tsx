@@ -3,10 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { useReadContract, useReadContracts } from "wagmi";
 import { Search, X } from "lucide-react";
 import { useCreatedEventIds } from "@/hooks/use-created-event-ids";
-import { poapAbi } from "@/lib/abi";
-import { CONTRACT, SIGNATURE_WINDOW, ZERO_ROOT } from "@/lib/constants";
-import { decodeMetadata } from "@/lib/metadata";
-import { hasPartialContractResults } from "@/lib/event-ownership";
+import { poapAbi } from "@/lib/blockchain/abi";
+import { CONTRACT, SIGNATURE_WINDOW, ZERO_ROOT } from "@/lib/blockchain/constants";
+import { decodeMetadata } from "@/lib/metadata/metadata";
+import { hasPartialContractResults } from "@/lib/minting/event-ownership";
 import { EventCard } from "./event-card";
 
 type ClaimFilter = "all" | "claimable" | "closed";

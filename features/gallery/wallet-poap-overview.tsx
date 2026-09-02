@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useReadContract, useReadContracts } from "wagmi";
 import type { Address } from "viem";
 import { useCreatedEventIds } from "@/hooks/use-created-event-ids";
-import { poapAbi } from "@/lib/abi";
-import { CONTRACT } from "@/lib/constants";
-import { hasPartialContractResults } from "@/lib/event-ownership";
+import { poapAbi } from "@/lib/blockchain/abi";
+import { CONTRACT } from "@/lib/blockchain/constants";
+import { hasPartialContractResults } from "@/lib/minting/event-ownership";
 
 export function WalletPoapOverview({ owner }: { owner: Address }) {
   const total = useReadContract({

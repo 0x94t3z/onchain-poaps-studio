@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { EventGrid } from "@/components/event-grid";
+import { EventGrid } from "@/features/events/event-grid";
 import { ArrowUpRight, Sparkles, ShieldCheck, Radio } from "lucide-react";
 export default function Home() {
   return (

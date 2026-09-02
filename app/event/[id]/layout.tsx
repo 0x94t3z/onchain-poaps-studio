@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { poapAbi } from "@/lib/abi";
-import { CONTRACT } from "@/lib/constants";
-import { decodeMetadata } from "@/lib/metadata";
-import { publicClient } from "@/lib/public-client";
+import { poapAbi } from "@/lib/blockchain/abi";
+import { CONTRACT } from "@/lib/blockchain/constants";
+import { decodeMetadata } from "@/lib/metadata/metadata";
+import { publicClient } from "@/lib/blockchain/public-client";
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(
   /\/$/,

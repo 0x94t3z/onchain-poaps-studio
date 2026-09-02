@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useAccount } from "wagmi";
-import { EventGrid } from "@/components/event-grid";
-import { WalletButton } from "@/components/wallet-button";
-import { WalletPoapOverview } from "@/components/wallet-poap-overview";
+import { EventGrid } from "@/features/events/event-grid";
+import { WalletButton } from "@/features/wallet/wallet-button";
+import { WalletPoapOverview } from "@/features/gallery/wallet-poap-overview";
 export default function Gallery() {
   const { address } = useAccount();
   const [view, setView] = useState<"collected" | "created">("collected");

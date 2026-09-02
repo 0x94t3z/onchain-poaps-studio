@@ -17,10 +17,10 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useAppKit } from "@reown/appkit/react";
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
-import { chain } from "@/lib/constants";
-import { getPrimaryEnsName } from "@/lib/ens";
-import { short } from "@/lib/metadata";
-import { walletConnectConfigured } from "@/lib/wagmi";
+import { chain } from "@/lib/blockchain/constants";
+import { getPrimaryEnsName } from "@/lib/identity/ens";
+import { short } from "@/lib/metadata/metadata";
+import { walletConnectConfigured } from "@/lib/blockchain/wagmi";
 
 const CONNECT_TIMEOUT = 30_000;
 const BUILT_IN_CONNECTORS = new Set(["farcaster", "injected", "walletConnect"]);

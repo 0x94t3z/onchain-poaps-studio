@@ -1,17 +1,17 @@
 "use client";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArtworkStudio } from "@/components/artwork-studio";
-import { TxButton } from "@/components/tx-button";
-import { explorer, ZERO_ROOT } from "@/lib/constants";
-import { buildTree, normalizeAddresses } from "@/lib/merkle";
-import { downloadJson } from "@/lib/download";
-import { validateSvgSource } from "@/lib/svg";
+import { ArtworkStudio } from "@/features/create/artwork-studio";
+import { TxButton } from "@/components/ui/tx-button";
+import { explorer, ZERO_ROOT } from "@/lib/blockchain/constants";
+import { buildTree, normalizeAddresses } from "@/lib/minting/merkle";
+import { downloadJson } from "@/lib/utils/download";
+import { validateSvgSource } from "@/lib/metadata/svg";
 import { Check } from "lucide-react";
 import { parseEventLogs } from "viem";
-import { poapAbi } from "@/lib/abi";
-import { DateTimePicker } from "@/components/date-time-picker";
-import { EventShareActions } from "@/components/event-share-actions";
+import { poapAbi } from "@/lib/blockchain/abi";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
+import { EventShareActions } from "@/features/share/event-share-actions";
 const blank =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="256" fill="#171717"/><circle cx="256" cy="256" r="210" fill="none" stroke="#eeff41" stroke-width="12"/><text x="256" y="240" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="white">I WAS</text><text x="256" y="302" text-anchor="middle" font-family="sans-serif" font-size="46" font-weight="700" fill="#eeff41">THERE</text></svg>';
 export default function Create() {

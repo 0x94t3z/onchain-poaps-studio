@@ -3,11 +3,11 @@ import { writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
-import { poapAbi } from "@/lib/abi";
-import { CONTRACT } from "@/lib/constants";
-import { decodeMetadata } from "@/lib/metadata";
-import { loadOgFonts, type OgFont } from "@/lib/og-fonts";
-import { publicClient } from "@/lib/public-client";
+import { poapAbi } from "@/lib/blockchain/abi";
+import { CONTRACT } from "@/lib/blockchain/constants";
+import { decodeMetadata } from "@/lib/metadata/metadata";
+import { loadOgFonts, type OgFont } from "@/lib/og/og-fonts";
+import { publicClient } from "@/lib/blockchain/public-client";
 
 export const runtime = "nodejs";
 

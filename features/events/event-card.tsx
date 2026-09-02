@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Metadata } from "@/lib/metadata";
+import type { Metadata } from "@/lib/metadata/metadata";
 export function EventCard({
   id,
   meta,

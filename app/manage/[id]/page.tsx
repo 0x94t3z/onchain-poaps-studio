@@ -3,24 +3,24 @@ import { use, useMemo, useState } from "react";
 import { useAccount, useReadContract, useSignMessage } from "wagmi";
 import { type Hex } from "viem";
 import QRCode from "qrcode";
-import { poapAbi } from "@/lib/abi";
+import { poapAbi } from "@/lib/blockchain/abi";
 import {
   chain,
   CONTRACT,
   CREATOR_WINDOW,
   SIGNATURE_WINDOW,
   ZERO_ROOT,
-} from "@/lib/constants";
-import { deadline, remaining } from "@/lib/metadata";
-import { buildTree } from "@/lib/merkle";
-import { signedPassMessageHash } from "@/lib/signed-pass";
+} from "@/lib/blockchain/constants";
+import { deadline, remaining } from "@/lib/metadata/metadata";
+import { buildTree } from "@/lib/minting/merkle";
+import { signedPassMessageHash } from "@/lib/minting/signed-pass";
 import { useResolvedAddressInput } from "@/hooks/use-resolved-address-input";
 import { useCurrentTimestamp } from "@/hooks/use-current-timestamp";
 import { useMintCount } from "@/hooks/use-mint-count";
-import { downloadJson } from "@/lib/download";
-import { AddressIdentity } from "@/components/address-identity";
-import { TxButton } from "@/components/tx-button";
-import { EventShareActions } from "@/components/event-share-actions";
+import { downloadJson } from "@/lib/utils/download";
+import { AddressIdentity } from "@/components/ui/address-identity";
+import { TxButton } from "@/components/ui/tx-button";
+import { EventShareActions } from "@/features/share/event-share-actions";
 export default function Manage({
   params,
 }: {

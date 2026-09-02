@@ -3,9 +3,9 @@ import { useEffect, useRef } from "react";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { ContractFunctionArgs, ContractFunctionName } from "viem";
 import type { TransactionReceipt } from "viem";
-import { poapAbi } from "@/lib/abi";
-import { CONTRACT, explorer } from "@/lib/constants";
-import { friendlyTransactionError } from "@/lib/transaction-error";
+import { poapAbi } from "@/lib/blockchain/abi";
+import { CONTRACT, explorer } from "@/lib/blockchain/constants";
+import { friendlyTransactionError } from "@/lib/utils/transaction-error";
 export function TxButton<
   T extends ContractFunctionName<typeof poapAbi, "nonpayable">,
 >({

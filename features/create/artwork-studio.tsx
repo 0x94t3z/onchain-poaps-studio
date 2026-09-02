@@ -9,7 +9,7 @@ import {
   Upload,
   Zap,
 } from "lucide-react";
-import { validateSvgSource } from "@/lib/svg";
+import { validateSvgSource } from "@/lib/metadata/svg";
 
 const palettes = [
   { name: "Signal", background: "#171717", accent: "#eeff41", ink: "#ffffff" },

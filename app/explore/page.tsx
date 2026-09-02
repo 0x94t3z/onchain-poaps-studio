@@ -1,5 +1,5 @@
-import { EventGrid } from "@/components/event-grid";
-import { CONTRACT } from "@/lib/constants";
+import { EventGrid } from "@/features/events/event-grid";
+import { CONTRACT } from "@/lib/blockchain/constants";
 
 export default function Explore() {
   return (

@@ -2,9 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { Address } from "viem";
-import { explorer } from "@/lib/constants";
-import { getPrimaryEnsName } from "@/lib/ens";
-import { short } from "@/lib/metadata";
+import { explorer } from "@/lib/blockchain/constants";
+import { getPrimaryEnsName } from "@/lib/identity/ens";
+import { short } from "@/lib/metadata/metadata";
 
 export function AddressIdentity({
   address,
