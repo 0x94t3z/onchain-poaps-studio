@@ -324,7 +324,20 @@ export function WalletButton({
             <div className="wallet-account-summary">
               <span className="eyebrow">CONNECTED WALLET</span>
               {ensName && <strong>{formatEnsName(ensName, 30)}</strong>}
-              <code title={address}>{formatAccountAddress(address)}</code>
+              <div className="wallet-address-row">
+                <code title={address}>{formatAccountAddress(address)}</code>
+                <button
+                  type="button"
+                  className="wallet-copy-button"
+                  aria-label={
+                    addressCopied ? "Address copied" : "Copy wallet address"
+                  }
+                  title={addressCopied ? "Address copied" : "Copy address"}
+                  onClick={copyAddress}
+                >
+                  {addressCopied ? <Check /> : <Copy />}
+                </button>
+              </div>
             </div>
             {pathname === "/gallery" ? (
               <button role="menuitem" onClick={() => setIsAccountOpen(false)}>
@@ -341,10 +354,6 @@ export function WalletButton({
                 <span>My POAPs</span>
               </Link>
             )}
-            <button role="menuitem" onClick={copyAddress}>
-              {addressCopied ? <Check /> : <Copy />}
-              <span>{addressCopied ? "Address Copied" : "Copy Address"}</span>
-            </button>
             <button
               className="wallet-disconnect"
               role="menuitem"

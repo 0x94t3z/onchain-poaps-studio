@@ -304,6 +304,37 @@ footer {
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
+.wallet-address-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.wallet-copy-button {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    transform 0.15s ease;
+}
+.wallet-copy-button:hover,
+.wallet-copy-button:focus-visible {
+  border-color: var(--ink);
+  background: var(--hover);
+  outline: none;
+  transform: translateY(-1px);
+}
+.wallet-copy-button svg {
+  width: 16px;
+  height: 16px;
+}
 .wallet-account-menu > button,
 .wallet-account-menu > a {
   width: 100%;
@@ -2751,6 +2782,12 @@ textarea {
 
   .wallet-account-summary code {
     font-size: 10px;
+  }
+
+  .wallet-copy-button {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
   }
 
   .wallet-account-menu > button,
