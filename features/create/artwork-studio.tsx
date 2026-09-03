@@ -176,6 +176,7 @@ export function ArtworkStudio({
   const [title, setTitle] = useState("EVENT POAP");
   const [detail, setDetail] = useState("BASE · 2026");
   const [source, setSource] = useState("");
+  const [colorPickerReady, setColorPickerReady] = useState(false);
   const palette = useMemo(
     () =>
       paletteIndex === "auto"
@@ -189,6 +190,10 @@ export function ArtworkStudio({
   );
   const activeSvg = mode === "build" ? generated : source;
   const svgValidation = validateSvgSource(activeSvg);
+
+  useEffect(() => {
+    setColorPickerReady(true);
+  }, []);
 
   useEffect(() => onChange(activeSvg), [activeSvg, onChange]);
 
@@ -297,15 +302,17 @@ export function ArtworkStudio({
                   }
                   title="Custom color"
                 >
-                  <input
-                    type="color"
-                    value={customAccent}
-                    aria-label="Custom color"
-                    onChange={(event) => {
-                      setCustomAccent(event.target.value);
-                      setPaletteIndex("auto");
-                    }}
-                  />
+                  {colorPickerReady && (
+                    <input
+                      type="color"
+                      value={customAccent}
+                      aria-label="Custom color"
+                      onChange={(event) => {
+                        setCustomAccent(event.target.value);
+                        setPaletteIndex("auto");
+                      }}
+                    />
+                  )}
                   <span>+</span>
                 </label>
               </div>

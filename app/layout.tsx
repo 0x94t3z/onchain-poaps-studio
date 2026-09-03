@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
+import { ChunkErrorRecovery } from "@/components/layout/chunk-error-recovery";
 import { Header } from "@/components/layout/header";
 import { MiniAppReady } from "@/components/layout/miniapp-ready";
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -63,6 +64,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body suppressHydrationWarning>
         <Providers>
+          <ChunkErrorRecovery />
           <MiniAppReady />
           <Header />
           <main>{children}</main>

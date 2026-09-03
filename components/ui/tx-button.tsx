@@ -1,6 +1,10 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import type { ContractFunctionArgs, ContractFunctionName } from "viem";
 import type { TransactionReceipt } from "viem";
 import { poapAbi } from "@/lib/blockchain/abi";
@@ -27,6 +31,7 @@ export function TxButton<
   variant?: "primary" | "secondary";
   showSuccess?: boolean;
 }) {
+  const { isConnected } = useAccount();
   const { writeContract, data, error, isPending, reset } = useWriteContract();
   const receipt = useWaitForTransactionReceipt({ hash: data });
   const notifiedHash = useRef<string | undefined>(undefined);
@@ -43,6 +48,7 @@ export function TxButton<
   }, [data, onSuccess, receipt.data, transactionSucceeded]);
 
   function submit() {
+    if (!isConnected) return;
     reset();
     notifiedHash.current = undefined;
     writeContract({
@@ -53,6 +59,10 @@ export function TxButton<
     } as any);
   }
 
+  function connectWallet() {
+    window.dispatchEvent(new Event("onchain-poaps:open-wallet"));
+  }
+
   if (transactionSucceeded && !showSuccess) return null;
   if (transactionSucceeded)
     return (
@@ -61,6 +71,25 @@ export function TxButton<
         <a target="_blank" rel="noreferrer" href={explorer(`tx/${data}`)}>
           View transaction ↗
         </a>
+      </div>
+    );
+  if (!isConnected)
+    return (
+      <div>
+        <button
+          type="button"
+          className={
+            "button" +
+            (wide ? " wide" : "") +
+            (variant === "secondary" ? " secondary" : "")
+          }
+          onClick={connectWallet}
+        >
+          Connect Wallet
+        </button>
+        <p className="tx-connect-hint">
+          Connect your wallet before submitting this transaction.
+        </p>
       </div>
     );
   return (

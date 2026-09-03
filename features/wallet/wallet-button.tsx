@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Check,
@@ -57,7 +57,15 @@ function formatAccountAddress(value: `0x${string}`) {
   return `${value.slice(0, 6)}…${value.slice(-4)}`;
 }
 
-export function WalletButton() {
+export function WalletButton({
+  label = "Connect Wallet",
+  wide = false,
+  className = "",
+}: {
+  label?: string;
+  wide?: boolean;
+  className?: string;
+}) {
   const pathname = usePathname();
   const { address, isConnected, isReconnecting, chainId } = useAccount();
   const { data: ensName } = useQuery({
@@ -80,6 +88,12 @@ export function WalletButton() {
   const connectTriggerRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLElement>(null);
 
+  const openConnection = useCallback(() => {
+    reset();
+    setConnectionError("");
+    setIsOpen(true);
+  }, [reset]);
+
   useEffect(() => {
     let active = true;
     import("@farcaster/miniapp-sdk")
@@ -90,6 +104,13 @@ export function WalletButton() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    window.addEventListener("onchain-poaps:open-wallet", openConnection);
+    return () => {
+      window.removeEventListener("onchain-poaps:open-wallet", openConnection);
+    };
+  }, [openConnection]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -265,12 +286,6 @@ export function WalletButton() {
     }
   }
 
-  function openConnection() {
-    reset();
-    setConnectionError("");
-    setIsOpen(true);
-  }
-
   async function copyAddress() {
     if (!address) return;
     await navigator.clipboard.writeText(address);
@@ -352,16 +367,26 @@ export function WalletButton() {
       <button
         ref={connectTriggerRef}
         type="button"
-        className="button"
+        className={[
+          "button",
+          "wallet-connect-trigger",
+          wide ? "wide" : "",
+          className,
+        ]
+          .filter(Boolean)
+          .join(" ")}
         disabled={isPending || isReconnecting || isMiniApp === null}
         aria-haspopup="dialog"
         onClick={openConnection}
       >
-        {isReconnecting
-          ? "Restoring wallet…"
-          : isPending
-            ? "Connecting…"
-            : "Connect wallet"}
+        <WalletCards aria-hidden="true" />
+        <span>
+          {isReconnecting
+            ? "Restoring Wallet…"
+            : isPending
+              ? "Connecting…"
+              : label}
+        </span>
       </button>
 
       {connectionError && !isOpen && (

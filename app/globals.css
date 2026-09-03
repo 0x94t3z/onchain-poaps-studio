@@ -244,6 +244,20 @@ footer {
   position: relative;
   margin-left: 0;
 }
+.wallet-connect-trigger svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+}
+.wallet-connect-trigger span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wallet-connect-trigger.wide {
+  width: 100%;
+  max-width: 100%;
+}
 .wallet-identity {
   max-width: min(220px, 34vw);
   overflow: hidden;
@@ -338,6 +352,12 @@ footer {
   font-size: 12px;
   font-weight: 700;
   box-shadow: 3px 3px 0 var(--ink);
+}
+.tx-connect-hint {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
 }
 .wallet-miniapp-hint {
   display: inline-flex;
@@ -818,6 +838,10 @@ button.text-link {
 }
 .empty p {
   margin: 0;
+}
+.empty .wallet-connect {
+  display: inline-flex;
+  margin-top: 22px;
 }
 .empty-retry {
   margin-top: 20px;
@@ -2695,7 +2719,7 @@ textarea {
   }
 
   header > .button,
-  .wallet-connect > .button {
+  header .wallet-connect > .button {
     max-width: 42vw;
     min-height: 40px;
     margin-left: auto;
@@ -2997,7 +3021,7 @@ textarea {
   }
 
   header > .button,
-  .wallet-connect > .button {
+  header .wallet-connect > .button {
     padding-inline: 9px;
     font-size: 11px;
   }
