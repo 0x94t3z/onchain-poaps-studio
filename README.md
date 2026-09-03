@@ -15,10 +15,10 @@
 
   <p>
     <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-eeff41?style=flat-square&labelColor=171717" /></a>
-    <img alt="Base Sepolia" src="https://img.shields.io/badge/Base-Sepolia-0052ff?style=flat-square" />
-    <img alt="Farcaster Mini App" src="https://img.shields.io/badge/Farcaster-Mini_App-855dcd?style=flat-square" />
-    <img alt="ERC-1155" src="https://img.shields.io/badge/token-ERC--1155-eeff41?style=flat-square&labelColor=171717" />
-    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square" />
+    <a href="https://sepolia.basescan.org/address/0xC3249356a483fbe17d5355D39105D2eA666d9de6#code"><img alt="Base Sepolia" src="https://img.shields.io/badge/Base-Sepolia-0052ff?style=flat-square" /></a>
+    <a href="https://farcaster.xyz/miniapps/7hCH6s_9iSJh/onchain-poaps"><img alt="Farcaster Mini App" src="https://img.shields.io/badge/Farcaster-Mini_App-855dcd?style=flat-square" /></a>
+    <a href="https://eips.ethereum.org/EIPS/eip-1155"><img alt="ERC-1155" src="https://img.shields.io/badge/token-ERC--1155-eeff41?style=flat-square&labelColor=171717" /></a>
+    <a href="./tsconfig.json"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square" /></a>
   </p>
 </div>
 
