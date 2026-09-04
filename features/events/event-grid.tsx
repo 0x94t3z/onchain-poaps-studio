@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useReadContract, useReadContracts } from "wagmi";
 import { Search, X } from "lucide-react";
 import { useCreatedEventIds } from "@/hooks/use-created-event-ids";
@@ -37,7 +38,14 @@ export function EventGrid({
   prioritizeClaimable?: boolean;
   source?: "home";
 }) {
-  const [page, setPage] = useState(0);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const requestedPage = Math.max(
+    0,
+    Number.parseInt(searchParams.get("page") ?? "1", 10) - 1 || 0,
+  );
+  const [page, setPage] = useState(requestedPage);
   const [query, setQuery] = useState("");
   const [claimFilter, setClaimFilter] = useState<ClaimFilter>("all");
   const [isMobile, setIsMobile] = useState(false);
@@ -53,9 +61,9 @@ export function EventGrid({
     return () => media.removeEventListener("change", update);
   }, []);
   useEffect(() => {
-    setPage(0);
+    setPage(paginate ? requestedPage : 0);
     setQuery("");
-  }, [isMobile, owner, ownerFilter]);
+  }, [isMobile, owner, ownerFilter, paginate, requestedPage]);
   useEffect(() => setNow(Math.floor(Date.now() / 1000)), []);
   useEffect(() => {
     if (!restorePosition.current) return;
@@ -108,7 +116,9 @@ export function EventGrid({
       ? "gallery"
       : ownership === "created"
         ? "created"
-        : undefined;
+        : paginate
+          ? "explore"
+          : undefined;
   const events = useReadContracts({
     contracts: candidateIds.map((id) => ({
       address: CONTRACT, abi: poapAbi, functionName: "events", args: [id],
@@ -226,7 +236,13 @@ export function EventGrid({
             claimsClosed={!claimable}
             manageHref={ownership === "created" ? `/manage/${id}` : undefined}
             eventHref={
-              eventSourceHref ? `/event/${id}?from=${eventSourceHref}` : undefined
+              eventSourceHref
+                ? `/event/${id}?from=${eventSourceHref}${
+                    eventSourceHref === "explore" && currentPage > 0
+                      ? `&page=${currentPage + 1}`
+                      : ""
+                  }`
+                : undefined
             }
           />
         ),
@@ -248,7 +264,13 @@ export function EventGrid({
             claimsClosed={!claimable}
             manageHref={ownership === "created" ? `/manage/${id}` : undefined}
             eventHref={
-              eventSourceHref ? `/event/${id}?from=${eventSourceHref}` : undefined
+              eventSourceHref
+                ? `/event/${id}?from=${eventSourceHref}${
+                    eventSourceHref === "explore" && currentPage > 0
+                      ? `&page=${currentPage + 1}`
+                      : ""
+                  }`
+                : undefined
             }
           />
         ),
@@ -274,11 +296,31 @@ export function EventGrid({
   function goToPage(next: number) {
     restorePosition.current = true;
     setPage(next);
+    if (paginate && !owner) {
+      const params = new URLSearchParams(searchParams);
+      if (next > 0) {
+        params.set("page", String(next + 1));
+      } else {
+        params.delete("page");
+      }
+      const queryString = params.toString();
+      router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+        scroll: false,
+      });
+    }
   }
 
   function updateFilter(next: ClaimFilter) {
     setClaimFilter(next);
     setPage(0);
+    if (paginate && !owner) {
+      const params = new URLSearchParams(searchParams);
+      params.delete("page");
+      const queryString = params.toString();
+      router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
+        scroll: false,
+      });
+    }
   }
 
   return (

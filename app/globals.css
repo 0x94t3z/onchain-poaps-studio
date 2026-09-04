@@ -800,7 +800,7 @@ button.text-link {
 }
 .art {
   aspect-ratio: 1;
-  background: var(--art-placeholder);
+  background: transparent;
   position: relative;
   display: grid;
   place-items: center;

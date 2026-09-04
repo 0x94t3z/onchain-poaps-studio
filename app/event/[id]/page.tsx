@@ -19,10 +19,10 @@ export default function EventPage({
   params,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ from?: string }>;
+  searchParams: Promise<{ from?: string; page?: string }>;
 }) {
   const { id } = use(params);
-  const { from } = use(searchParams);
+  const { from, page } = use(searchParams);
   const validId = /^[1-9]\d*$/.test(id);
   const eventId = BigInt(validId ? id : "0");
   const now = useCurrentTimestamp();
@@ -187,11 +187,14 @@ export default function EventPage({
     signatureCheck.key === signatureValidationKey
       ? signatureCheck.status
       : "checking";
+  const backPage = /^[2-9]\d*$/.test(page ?? "") ? page : "";
   const backHref =
     from === "home"
       ? "/"
       : from === "gallery" || from === "created"
         ? "/gallery"
+        : from === "explore" && backPage
+          ? `/explore?page=${backPage}`
         : "/explore";
   const backLabel =
     from === "home"
