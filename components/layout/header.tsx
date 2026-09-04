@@ -1,8 +1,25 @@
 "use client";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { WalletButton } from "@/features/wallet/wallet-button";
+
+const WalletButton = dynamic(
+  () =>
+    import("@/features/wallet/wallet-button").then(
+      (module) => module.WalletButton,
+    ),
+  {
+    loading: () => (
+      <button className="button wallet-connect-trigger" type="button" disabled>
+        <span>Connect</span>
+      </button>
+    ),
+    ssr: false,
+  },
+);
+
 const links = [
   ["/explore", "Explore"],
   ["/create", "Create"],
@@ -11,6 +28,15 @@ const links = [
 ];
 export function Header() {
   const path = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      links.forEach(([href]) => router.prefetch(href));
+    }, 500);
+    return () => window.clearTimeout(timeoutId);
+  }, [router]);
+
   const navigation = (className: string) => (
     <nav className={className} aria-label="Primary navigation">
       {links.map(([href, label]) => (
@@ -18,6 +44,9 @@ export function Header() {
           className={path.startsWith(href) ? "active" : ""}
           key={href}
           href={href}
+          onFocus={() => router.prefetch(href)}
+          onPointerEnter={() => router.prefetch(href)}
+          prefetch
         >
           {label}
         </Link>
