@@ -160,7 +160,11 @@ function makeSvg({
     style === "orbit"
       ? `<defs><path id="orbit-top" d="M91 256a165 165 0 0 1 330 0"/><path id="orbit-bottom" d="M91 256a165 165 0 0 0 330 0"/></defs><text text-anchor="middle" font-family="Arial,sans-serif" font-size="${titleFontSize}" font-weight="700" letter-spacing="${titleLetterSpacing}" fill="${palette.ink}"><textPath href="#orbit-top" startOffset="50%">${escapeXml(titleText)}</textPath></text><text text-anchor="middle" font-family="Arial,sans-serif" font-size="${detailFontSize}" font-weight="700" letter-spacing="2" fill="${palette.ink}"><textPath href="#orbit-bottom" startOffset="50%">${escapeXml(detailText)}</textPath></text>`
       : `<text x="256" y="${layout.titleY}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${titleFontSize}" font-weight="700" letter-spacing="${titleLetterSpacing}" fill="${layout.titleColor}">${escapeXml(titleText)}</text><text x="256" y="${layout.detailY}" text-anchor="middle" font-family="Arial,sans-serif" font-size="${detailFontSize}" font-weight="700" letter-spacing="2" fill="${palette.ink}">${escapeXml(detailText)}</text>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="${palette.background}"/>${frame}<g transform="${layout.markTransform}">${center}</g>${labels}</svg>`;
+  const background =
+    style === "orbit"
+      ? `<circle cx="256" cy="256" r="256" fill="${palette.background}"/>`
+      : `<rect width="512" height="512" fill="${palette.background}"/>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">${background}${frame}<g transform="${layout.markTransform}">${center}</g>${labels}</svg>`;
 }
 
 export function ArtworkStudio({

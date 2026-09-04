@@ -155,6 +155,24 @@ export function EventGrid({
   const pageSize = (isMobile ? mobileLimit : limit) ?? Math.max(filteredRows.length, 1);
   const pageCount = Math.max(1, Math.ceil(filteredRows.length / pageSize));
   const currentPage = paginate ? Math.min(page, pageCount - 1) : 0;
+  const eventBackHref =
+    eventSourceHref === "home"
+      ? "/"
+      : eventSourceHref === "gallery" || eventSourceHref === "created"
+        ? "/gallery"
+        : eventSourceHref === "explore"
+          ? currentPage > 0
+            ? `/explore?page=${currentPage + 1}`
+            : "/explore"
+          : undefined;
+  const eventBackLabel =
+    eventSourceHref === "home"
+      ? "← Back to home"
+      : eventSourceHref === "gallery" || eventSourceHref === "created"
+        ? "← Back to My POAPs"
+        : eventSourceHref === "explore"
+          ? "← Back to collection"
+          : undefined;
   const visibleRows = filteredRows.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
   const uris = useReadContracts({
     contracts: visibleRows.map(({ id }) => ({
@@ -235,15 +253,9 @@ export function EventGrid({
             soulbound={event[9]}
             claimsClosed={!claimable}
             manageHref={ownership === "created" ? `/manage/${id}` : undefined}
-            eventHref={
-              eventSourceHref
-                ? `/event/${id}?from=${eventSourceHref}${
-                    eventSourceHref === "explore" && currentPage > 0
-                      ? `&page=${currentPage + 1}`
-                      : ""
-                  }`
-                : undefined
-            }
+            eventHref={`/event/${id}`}
+            backHref={eventBackHref}
+            backLabel={eventBackLabel}
           />
         ),
       };
@@ -263,15 +275,9 @@ export function EventGrid({
             soulbound={event[9]}
             claimsClosed={!claimable}
             manageHref={ownership === "created" ? `/manage/${id}` : undefined}
-            eventHref={
-              eventSourceHref
-                ? `/event/${id}?from=${eventSourceHref}${
-                    eventSourceHref === "explore" && currentPage > 0
-                      ? `&page=${currentPage + 1}`
-                      : ""
-                  }`
-                : undefined
-            }
+            eventHref={`/event/${id}`}
+            backHref={eventBackHref}
+            backLabel={eventBackLabel}
           />
         ),
       };

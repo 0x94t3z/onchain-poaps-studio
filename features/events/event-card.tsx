@@ -1,5 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "@/lib/metadata/metadata";
+
+const EVENT_BACK_KEY = "onchain-poaps:event-back";
+
 export function EventCard({
   id,
   meta,
@@ -8,6 +11,8 @@ export function EventCard({
   claimsClosed = false,
   manageHref,
   eventHref,
+  backHref,
+  backLabel,
 }: {
   id: bigint;
   meta: Metadata;
@@ -16,10 +21,32 @@ export function EventCard({
   claimsClosed?: boolean;
   manageHref?: string;
   eventHref?: string;
+  backHref?: string;
+  backLabel?: string;
 }) {
+  function rememberBackContext() {
+    if (!backHref || !backLabel) return;
+    try {
+      sessionStorage.setItem(
+        EVENT_BACK_KEY,
+        JSON.stringify({
+          eventId: id.toString(),
+          href: backHref,
+          label: backLabel,
+        }),
+      );
+    } catch {
+      // Navigation still works when session storage is unavailable.
+    }
+  }
+
   return (
     <article className="event-card">
-      <Link href={eventHref ?? `/event/${id}`} className="event-card-link">
+      <Link
+        href={eventHref ?? `/event/${id}`}
+        className="event-card-link"
+        onClick={rememberBackContext}
+      >
         <div className="art">
           <img src={meta.image} alt={meta.name} />
           <span className="id">#{id.toString().padStart(3, "0")}</span>

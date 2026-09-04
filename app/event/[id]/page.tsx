@@ -14,17 +14,21 @@ import { AddressIdentity } from "@/components/ui/address-identity";
 import { TxButton } from "@/components/ui/tx-button";
 import { EventShareActions } from "@/features/share/event-share-actions";
 import { CalendarX, Clock, ExternalLink, LockKeyhole, MapPin, Users } from "lucide-react";
+
+const EVENT_BACK_KEY = "onchain-poaps:event-back";
+
 export default function EventPage({
-  searchParams,
   params,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ from?: string; page?: string }>;
 }) {
   const { id } = use(params);
-  const { from, page } = use(searchParams);
   const validId = /^[1-9]\d*$/.test(id);
   const eventId = BigInt(validId ? id : "0");
+  const [backContext, setBackContext] = useState<{
+    href: string;
+    label: string;
+  } | null>(null);
   const now = useCurrentTimestamp();
   const { address } = useAccount();
   const balance = useBalance({
@@ -118,6 +122,26 @@ export default function EventPage({
       active = false;
     };
   }, [address, eventCreator, eventId, sig, signatureValidationKey]);
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(EVENT_BACK_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        eventId?: string;
+        href?: string;
+        label?: string;
+      };
+      if (
+        parsed.eventId === id &&
+        parsed.href?.startsWith("/") &&
+        parsed.label
+      ) {
+        setBackContext({ href: parsed.href, label: parsed.label });
+      }
+    } catch {
+      // Direct event links keep the default collection back target.
+    }
+  }, [id]);
   if (!validId)
     return (
       <section className="page"><div className="empty">POAP not found.</div></section>
@@ -187,21 +211,8 @@ export default function EventPage({
     signatureCheck.key === signatureValidationKey
       ? signatureCheck.status
       : "checking";
-  const backPage = /^[2-9]\d*$/.test(page ?? "") ? page : "";
-  const backHref =
-    from === "home"
-      ? "/"
-      : from === "gallery" || from === "created"
-        ? "/gallery"
-        : from === "explore" && backPage
-          ? `/explore?page=${backPage}`
-        : "/explore";
-  const backLabel =
-    from === "home"
-      ? "← Back to home"
-      : from === "gallery" || from === "created"
-      ? "← Back to My POAPs"
-      : "← Back to collection";
+  const backHref = backContext?.href ?? "/explore";
+  const backLabel = backContext?.label ?? "← Back to collection";
   return (
     <section className="page event">
       <Link href={backHref} className="back">
