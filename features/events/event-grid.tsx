@@ -8,12 +8,10 @@ import { CONTRACT, SIGNATURE_WINDOW, ZERO_ROOT } from "@/lib/blockchain/constant
 import { decodeMetadata } from "@/lib/metadata/metadata";
 import { hasPartialContractResults } from "@/lib/minting/event-ownership";
 import { EventCard } from "./event-card";
+import { EXPLORE_PAGE_KEY, GALLERY_PAGE_KEY_PREFIX } from "./event-return";
 
 type ClaimFilter = "all" | "claimable" | "closed";
 type OwnerFilter = "collected" | "created";
-
-const EXPLORE_PAGE_KEY = "onchain-poaps:explore-page";
-const GALLERY_PAGE_KEY_PREFIX = "onchain-poaps:gallery-page";
 
 const metadataFallbackImage = `data:image/svg+xml,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#171717"/><circle cx="256" cy="256" r="112" fill="none" stroke="#eaff2f" stroke-width="24"/><circle cx="256" cy="256" r="24" fill="#eaff2f"/></svg>',
@@ -79,7 +77,7 @@ export function EventGrid({
       const rawPage = legacyQueryPage ?? sessionStorage.getItem(pageStateKey);
       const nextPage = Math.max(0, Number.parseInt(rawPage ?? "1", 10) - 1 || 0);
       setPage(nextPage);
-      sessionStorage.setItem(pageStateKey, String(nextPage + 1));
+      sessionStorage.removeItem(pageStateKey);
 
       if (legacyQueryPage) {
         params.delete("page");
@@ -284,6 +282,9 @@ export function EventGrid({
             eventHref={`/event/${id}`}
             backHref={eventBackHref}
             backLabel={eventBackLabel}
+            returnPage={currentPage}
+            returnPageKey={pageStateKey}
+            returnView={ownership === "collected" || ownership === "created" ? ownership : undefined}
           />
         ),
       };
@@ -306,6 +307,9 @@ export function EventGrid({
             eventHref={`/event/${id}`}
             backHref={eventBackHref}
             backLabel={eventBackLabel}
+            returnPage={currentPage}
+            returnPageKey={pageStateKey}
+            returnView={ownership === "collected" || ownership === "created" ? ownership : undefined}
           />
         ),
       };
@@ -327,29 +331,14 @@ export function EventGrid({
       : ownership === "collected"
         ? "POAP name or ID"
         : "Name, event ID, or location";
-  function rememberPage(next: number) {
-    if (!pageStateKey) return;
-    try {
-      sessionStorage.setItem(pageStateKey, String(next + 1));
-    } catch {
-      // Pagination still works for the current render when storage is unavailable.
-    }
-  }
-
-  function resetPage() {
-    setPage(0);
-    rememberPage(0);
-  }
-
   function goToPage(next: number) {
     restorePosition.current = true;
     setPage(next);
-    rememberPage(next);
   }
 
   function updateFilter(next: ClaimFilter) {
     setClaimFilter(next);
-    resetPage();
+    setPage(0);
   }
 
   return (
@@ -365,8 +354,8 @@ export function EventGrid({
           <label htmlFor="event-search">{searchLabel}</label>
           <div className="event-search-field">
             <Search size={19} aria-hidden="true" />
-            <input id="event-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); resetPage(); }} placeholder={searchPlaceholder} autoComplete="off" />
-            {query && <button type="button" aria-label="Clear search" onClick={() => { setQuery(""); resetPage(); }}><X size={19} aria-hidden="true" /></button>}
+            <input id="event-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(0); }} placeholder={searchPlaceholder} autoComplete="off" />
+            {query && <button type="button" aria-label="Clear search" onClick={() => { setQuery(""); setPage(0); }}><X size={19} aria-hidden="true" /></button>}
           </div>
           <span aria-live="polite">{displayCount} {displayNoun}</span>
         </div>

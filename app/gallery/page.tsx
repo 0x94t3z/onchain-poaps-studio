@@ -4,8 +4,7 @@ import { useAccount } from "wagmi";
 import { EventGrid } from "@/features/events/event-grid";
 import { WalletButton } from "@/features/wallet/wallet-button";
 import { WalletPoapOverview } from "@/features/gallery/wallet-poap-overview";
-
-const GALLERY_VIEW_KEY = "onchain-poaps:gallery-view";
+import { GALLERY_VIEW_KEY } from "@/features/events/event-return";
 
 export default function Gallery() {
   const { address } = useAccount();
@@ -18,6 +17,7 @@ export default function Gallery() {
       if (savedView === "collected" || savedView === "created") {
         setView(savedView);
       }
+      sessionStorage.removeItem(GALLERY_VIEW_KEY);
     } catch {
       // Keep the default collected view when storage is unavailable.
     }
@@ -25,11 +25,6 @@ export default function Gallery() {
 
   function selectView(next: "collected" | "created") {
     setView(next);
-    try {
-      sessionStorage.setItem(GALLERY_VIEW_KEY, next);
-    } catch {
-      // The tab change still works for the current render.
-    }
   }
 
   return (

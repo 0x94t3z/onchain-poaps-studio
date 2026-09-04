@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "@/lib/metadata/metadata";
-
-const EVENT_BACK_KEY = "onchain-poaps:event-back";
+import { EVENT_BACK_KEY, GALLERY_VIEW_KEY, type EventReturnView } from "./event-return";
 
 export function EventCard({
   id,
@@ -13,6 +12,9 @@ export function EventCard({
   eventHref,
   backHref,
   backLabel,
+  returnPage,
+  returnPageKey,
+  returnView,
 }: {
   id: bigint;
   meta: Metadata;
@@ -23,6 +25,9 @@ export function EventCard({
   eventHref?: string;
   backHref?: string;
   backLabel?: string;
+  returnPage?: number;
+  returnPageKey?: string;
+  returnView?: EventReturnView;
 }) {
   function rememberBackContext() {
     if (!backHref || !backLabel) return;
@@ -35,6 +40,12 @@ export function EventCard({
           label: backLabel,
         }),
       );
+      if (typeof returnPage === "number" && returnPageKey) {
+        sessionStorage.setItem(returnPageKey, String(returnPage + 1));
+      }
+      if (returnView) {
+        sessionStorage.setItem(GALLERY_VIEW_KEY, returnView);
+      }
     } catch {
       // Navigation still works when session storage is unavailable.
     }

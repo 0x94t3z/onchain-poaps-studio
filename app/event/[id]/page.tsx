@@ -12,10 +12,9 @@ import { useCurrentTimestamp } from "@/hooks/use-current-timestamp";
 import { useMintCount } from "@/hooks/use-mint-count";
 import { AddressIdentity } from "@/components/ui/address-identity";
 import { TxButton } from "@/components/ui/tx-button";
+import { EVENT_BACK_KEY } from "@/features/events/event-return";
 import { EventShareActions } from "@/features/share/event-share-actions";
 import { CalendarX, Clock, ExternalLink, LockKeyhole, MapPin, Users } from "lucide-react";
-
-const EVENT_BACK_KEY = "onchain-poaps:event-back";
 
 export default function EventPage({
   params,
@@ -126,6 +125,7 @@ export default function EventPage({
     try {
       const raw = sessionStorage.getItem(EVENT_BACK_KEY);
       if (!raw) return;
+      sessionStorage.removeItem(EVENT_BACK_KEY);
       const parsed = JSON.parse(raw) as {
         eventId?: string;
         href?: string;
