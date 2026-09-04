@@ -72,17 +72,23 @@ The frontend calls the supplied methods directly: `registerEvent`, `mint`, `allo
   <a href="https://farcaster.xyz/0x94t3z.eth/0x4dd9ea63">Launch cast ↗</a>
 </p>
 
-## Social sharing
+## Shareable event embeds
 
-Every event page can be distributed outside the app. Farcaster sharing opens a cast composer with the event title, claim link, and Mini App embed. The embed uses the same artwork and event metadata shown on the website, so recipients can review the POAP before opening the mint page.
+Event pages include social share actions for distribution outside the app.
+
+| Channel | Output |
+| --- | --- |
+| Farcaster | Cast composer with event copy, claim link, and Mini App embed |
+| X | Pre-filled post with the event claim link |
+| Copy link | Plain URL for chat, email, QR pages, or community announcements |
+
+Farcaster embeds use the same event artwork and metadata shown on the website, so recipients can review the POAP before opening the mint page.
 
 <p align="center">
   <img src="./public/readme-farcaster-embed.png" alt="Farcaster composer showing an Onchain POAPs event embed" width="760" />
   <br />
-  <a href="https://farcaster.xyz/0x94t3z.eth/0x4bf5bf5f">View Farcaster embed proof ↗</a>
+  <a href="https://farcaster.xyz/0x94t3z.eth/0x4bf5bf5f">Farcaster embed proof ↗</a>
 </p>
-
-The share menu also supports X posts and plain link copying for organizers who distribute POAPs through chat, email, QR pages, or community announcements.
 
 ## Product map
 
