@@ -42,30 +42,19 @@ async function rasterFontFiles(fonts: OgFont[]) {
 async function rasterizeArtwork(image: string | null, fonts: OgFont[]) {
   const prefix = "data:image/svg+xml;base64,";
   if (!image?.startsWith(prefix)) return image;
-  if (fonts.length === 0) return image;
 
   try {
-    const preferredFont = fonts.some((font) => font.name === "Space Grotesk")
-      ? "Space Grotesk"
-      : fonts[0].name;
-    const svg = Buffer.from(image.slice(prefix.length), "base64")
-      .toString("utf8")
-      .replace(
-        /font-family=(["'])Arial,sans-serif\1/g,
-        `font-family="${preferredFont}"`,
-      )
-      .replace(
-        /font-family=(["'])sans-serif\1/g,
-        `font-family="${preferredFont}"`,
-      );
-    const fontFiles = await rasterFontFiles(fonts);
+    const svg = Buffer.from(image.slice(prefix.length), "base64").toString(
+      "utf8",
+    );
+    const fontFiles = fonts.length > 0 ? await rasterFontFiles(fonts) : [];
     const png = new Resvg(svg, {
       fitTo: { mode: "width", value: 548 },
       font: {
         fontFiles,
-        loadSystemFonts: false,
-        defaultFontFamily: preferredFont,
-        sansSerifFamily: preferredFont,
+        loadSystemFonts: true,
+        defaultFontFamily: "Arial",
+        sansSerifFamily: "Arial",
       },
     })
       .render()
@@ -182,7 +171,7 @@ export async function GET(
             alignItems: "center",
             justifyContent: "center",
             position: "relative",
-            background: "#171717",
+            background: "transparent",
             overflow: "hidden",
           }}
         >
