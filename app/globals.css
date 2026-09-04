@@ -590,6 +590,58 @@ footer {
   color: var(--dark-panel-muted);
   line-height: 1.4;
 }
+
+@keyframes hero-copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes medal-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(7deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(5deg);
+  }
+}
+
+@keyframes medal-spark {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.08) rotate(8deg);
+  }
+}
+
+@keyframes orbit-drift {
+  0%,
+  100% {
+    transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+@keyframes marquee-drift {
+  0%,
+  100% {
+    transform: translateX(-8px);
+  }
+  50% {
+    transform: translateX(8px);
+  }
+}
+
 .hero {
   min-height: 660px;
   display: grid;
@@ -597,6 +649,21 @@ footer {
   align-items: center;
   padding: 70px 7vw;
   overflow: hidden;
+}
+.hero-copy .pill,
+.hero-copy h1,
+.hero-copy > p,
+.hero-copy .actions {
+  animation: hero-copy-in 0.55s ease-out both;
+}
+.hero-copy h1 {
+  animation-delay: 0.08s;
+}
+.hero-copy > p {
+  animation-delay: 0.16s;
+}
+.hero-copy .actions {
+  animation-delay: 0.24s;
 }
 .pill,
 .eyebrow {
@@ -667,6 +734,12 @@ button.text-link {
   text-align: center;
   transform: rotate(7deg);
   box-shadow: 18px 18px 0 var(--ink);
+  animation: medal-float 6s ease-in-out infinite;
+  will-change: transform;
+}
+.medal svg {
+  animation: medal-spark 4.8s ease-in-out infinite;
+  transform-origin: center;
 }
 .medal strong {
   font: 700 clamp(30px, 4vw, 52px) / 0.83 "Space Grotesk";
@@ -681,6 +754,7 @@ button.text-link {
   font-weight: 700;
   letter-spacing: 0.3em;
   top: -35px;
+  animation: orbit-drift 8s ease-in-out infinite;
 }
 .marquee {
   background: var(--dark-panel);
@@ -691,6 +765,10 @@ button.text-link {
   text-align: center;
   font: 700 17px "Space Grotesk";
   letter-spacing: 0.1em;
+}
+.marquee span {
+  display: inline-block;
+  animation: marquee-drift 9s ease-in-out infinite;
 }
 .marquee-mobile {
   display: none;
@@ -2880,12 +2958,13 @@ textarea {
     white-space: nowrap;
   }
 
-  .marquee-desktop {
+  .marquee .marquee-desktop {
     display: none;
   }
 
-  .marquee-mobile {
-    display: block;
+  .marquee .marquee-mobile {
+    display: inline-block;
+    animation: none;
   }
 
   .section,

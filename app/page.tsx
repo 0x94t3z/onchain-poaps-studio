@@ -29,7 +29,7 @@ export default function Home() {
           </div>
         </div>
         <div className="hero-medal">
-          <div className="orbit">ONCHAIN • BASE • ERC-1155 •</div>
+          <div className="orbit">ONCHAIN • BASE • ERC-1155</div>
           <div className="medal">
             <Sparkles size={56} />
             <strong>
