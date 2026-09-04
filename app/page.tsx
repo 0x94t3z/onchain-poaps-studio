@@ -58,7 +58,7 @@ export default function Home() {
           </div>
           <Link href="/explore">View all →</Link>
         </div>
-        <EventGrid limit={3} mobileLimit={2} prioritizeClaimable source="home" />
+        <EventGrid limit={3} mobileLimit={2} source="home" />
       </section>
       <section className="features">
         <article>

@@ -1451,7 +1451,7 @@ code {
   width: 100%;
   aspect-ratio: 1;
   object-fit: contain;
-  background: var(--dark-panel);
+  background: transparent;
 }
 .event-art > span {
   position: absolute;

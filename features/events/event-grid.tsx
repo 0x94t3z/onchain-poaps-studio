@@ -72,8 +72,19 @@ export function EventGrid({
 
   const total = useReadContract({ address: CONTRACT, abi: poapAbi, functionName: "totalEvents" });
   const count = Number(total.data ?? 0n);
-  const allIds = Array.from({ length: count }, (_, index) => BigInt(count - index));
+  const allEventIds = Array.from({ length: count }, (_, index) => BigInt(count - index));
   const ownership = owner ? ownerFilter ?? "collected" : undefined;
+  const requestedPageSize = Math.max(limit ?? 0, mobileLimit ?? 0);
+  const canReadFirstPageOnly =
+    !owner &&
+    !paginate &&
+    !searchable &&
+    !filterable &&
+    !prioritizeClaimable &&
+    requestedPageSize > 0;
+  const allIds = canReadFirstPageOnly
+    ? allEventIds.slice(0, requestedPageSize)
+    : allEventIds;
   const createdIds = useCreatedEventIds(
     owner,
     ownership === "created",
@@ -104,16 +115,42 @@ export function EventGrid({
     }) as const),
     query: { enabled: candidateIds.length > 0 },
   });
-  const selectedEntries = candidateIds.map((id, index) => ({
-    id,
-    event: events.data?.[index]?.result,
-  }));
-  const collectionIds = selectedEntries.map(({ id }) => id);
+  const normalizedQuery = query.trim().toLowerCase();
+  const rows = candidateIds.map((id, index) => {
+    const event = events.data?.[index]?.result;
+    const publicMint = event?.[10] ?? false;
+    const hasAllowlist = event
+      ? event[4].toLowerCase() !== ZERO_ROOT
+      : false;
+    const signedPassOpen = event
+      ? Number(event[7]) + SIGNATURE_WINDOW >= now
+      : false;
+    const claimable = publicMint || hasAllowlist || signedPassOpen;
+    const search = event
+      ? `${id} ${event[0]} ${event[1]} ${event[3]}`.toLowerCase()
+      : id.toString();
+
+    return { id, event, claimable, search };
+  });
+  const orderedRows = prioritizeClaimable
+    ? [...rows].sort((a, b) => {
+        if (a.claimable !== b.claimable) return Number(b.claimable) - Number(a.claimable);
+        return a.id === b.id ? 0 : a.id > b.id ? -1 : 1;
+      })
+    : rows;
+  const statusRows = claimFilter === "all"
+    ? orderedRows
+    : orderedRows.filter((row) => claimFilter === "claimable" ? row.claimable : !row.claimable);
+  const filteredRows = normalizedQuery ? statusRows.filter((row) => row.search.includes(normalizedQuery)) : statusRows;
+  const pageSize = (isMobile ? mobileLimit : limit) ?? Math.max(filteredRows.length, 1);
+  const pageCount = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+  const currentPage = paginate ? Math.min(page, pageCount - 1) : 0;
+  const visibleRows = filteredRows.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
   const uris = useReadContracts({
-    contracts: collectionIds.map((id) => ({
+    contracts: visibleRows.map(({ id }) => ({
       address: CONTRACT, abi: poapAbi, functionName: "uri", args: [id],
     }) as const),
-    query: { enabled: collectionIds.length > 0 },
+    query: { enabled: visibleRows.length > 0 && !events.isLoading },
   });
   const loading =
     now === 0 ||
@@ -121,7 +158,7 @@ export function EventGrid({
     (ownership === "collected" && balances.isLoading) ||
     (ownership === "created" && createdIds.isLoading) ||
     (candidateIds.length > 0 && events.isLoading) ||
-    (collectionIds.length > 0 && uris.isLoading);
+    (visibleRows.length > 0 && uris.isLoading);
   if (loading) return <div className="empty">Loading POAPs from Base Sepolia…</div>;
   if (
     total.isError ||
@@ -155,16 +192,12 @@ export function EventGrid({
   const hasPartialResults =
     hasPartialContractResults(events.data) ||
     hasPartialContractResults(uris.data);
-
-  const cards = selectedEntries.map(({ id, event }, index) => {
+  const visibleCards = visibleRows.map(({ id, event, claimable }, index) => {
     const uri = uris.data?.[index]?.result;
 
     if (!event || !uri) {
       return {
         key: `event-${id}`,
-        id,
-        claimable: false,
-        search: id.toString(),
         node: (
           <div className="event-card event-card-unavailable" role="status" key={id.toString()}>
             <div className="card-copy">
@@ -178,17 +211,11 @@ export function EventGrid({
     }
 
     const publicMint = event[10];
-    const hasAllowlist = event[4].toLowerCase() !== ZERO_ROOT;
-    const signedPassOpen = Number(event[7]) + SIGNATURE_WINDOW >= now;
-    const claimable = publicMint || hasAllowlist || signedPassOpen;
 
     try {
       const meta = decodeMetadata(uri as string);
       return {
         key: `event-${id}`,
-        id,
-        claimable,
-        search: `${id} ${JSON.stringify(meta)}`.toLowerCase(),
         node: (
           <EventCard
             key={id.toString()}
@@ -207,16 +234,13 @@ export function EventGrid({
     } catch {
       return {
         key: `event-${id}`,
-        id,
-        claimable,
-        search: `${id} ${(event as any)[0]} ${(event as any)[1]} ${(event as any)[3]}`.toLowerCase(),
         node: (
           <EventCard
             key={id.toString()}
             id={id}
             meta={{
-              name: (event as any)[0] || `Event #${id}`,
-              description: (event as any)[1] || "This registration has unreadable metadata.",
+              name: event[0] || `Event #${id}`,
+              description: event[1] || "This registration has unreadable metadata.",
               image: metadataFallbackImage,
             }}
             publicMint={publicMint}
@@ -231,22 +255,7 @@ export function EventGrid({
       };
     }
   });
-  const normalizedQuery = query.trim().toLowerCase();
-  const orderedCards = prioritizeClaimable
-    ? [...cards].sort((a, b) => {
-        if (a.claimable !== b.claimable) return Number(b.claimable) - Number(a.claimable);
-        return a.id === b.id ? 0 : a.id > b.id ? -1 : 1;
-      })
-    : cards;
-  const statusCards = claimFilter === "all"
-    ? orderedCards
-    : orderedCards.filter((card) => claimFilter === "claimable" ? card.claimable : !card.claimable);
-  const filteredCards = normalizedQuery ? statusCards.filter((card) => card.search.includes(normalizedQuery)) : statusCards;
-  const pageSize = (isMobile ? mobileLimit : limit) ?? Math.max(filteredCards.length, 1);
-  const pageCount = Math.max(1, Math.ceil(filteredCards.length / pageSize));
-  const currentPage = paginate ? Math.min(page, pageCount - 1) : 0;
-  const visibleCards = filteredCards.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
-  const displayCount = filteredCards.length;
+  const displayCount = filteredRows.length;
   const displayNoun = ownership === "created"
     ? displayCount === 1 ? "event" : "events"
     : displayCount === 1 ? "POAP" : "POAPs";
@@ -301,7 +310,7 @@ export function EventGrid({
       {visibleCards.length ? <div className="grid event-grid">{visibleCards.map((card) => card.node)}</div> : (
         <div className="empty">{query ? `No ${ownership === "created" ? "created events" : "POAPs"} match “${query.trim()}”.` : claimFilter !== "all" ? `No ${claimFilter === "claimable" ? "live POAPs" : "ended POAPs"} found.` : ownership === "created" ? "This wallet has not created any POAPs yet." : ownership === "collected" ? "This wallet has not collected any POAPs yet." : "No POAPs found here yet."}</div>
       )}
-      {filteredCards.length > 0 && paginate && pageCount > 1 && (
+      {filteredRows.length > 0 && paginate && pageCount > 1 && (
         <nav className="event-pagination" aria-label="POAP collection pages">
           <button type="button" onClick={() => goToPage(Math.max(0, currentPage - 1))} disabled={currentPage === 0}>← Previous</button>
           <span aria-live="polite">Page {currentPage + 1} of {pageCount}</span>
