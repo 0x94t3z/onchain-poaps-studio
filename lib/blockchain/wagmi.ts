@@ -1,39 +1,22 @@
 "use client";
 
 import { createAppKit } from "@reown/appkit/react";
-import { baseSepolia } from "@reown/appkit/networks";
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { createStorage, http } from "wagmi";
-import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
+import {
+  appUrl,
+  config,
+  networks,
+  projectId,
+  wagmiAdapter,
+  walletConnectConfigured,
+} from "@/lib/blockchain/wagmi-config";
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID?.trim();
-export const walletConnectConfigured = Boolean(projectId);
-
-const networks = [baseSepolia] as const;
-const wagmiAdapter = new WagmiAdapter({
-  networks: [...networks],
-  projectId: projectId || "walletconnect-project-id-required",
-  ssr: true,
-  connectors: [farcasterMiniApp()],
-  storage: createStorage({
-    key: "wagmi",
-    storage: typeof window === "undefined" ? undefined : window.localStorage,
-  }),
-  transports: {
-    [baseSepolia.id]: http(
-      process.env.NEXT_PUBLIC_RPC_URL || "https://sepolia.base.org",
-    ),
-  },
-});
-
-export const config = wagmiAdapter.wagmiConfig;
+export { config, walletConnectConfigured };
 
 export const appKit = projectId
   ? createAppKit({
       adapters: [wagmiAdapter],
       networks: [...networks],
-      defaultNetwork: baseSepolia,
+      defaultNetwork: networks[0],
       projectId,
       metadata: {
         name: "Onchain POAPs",

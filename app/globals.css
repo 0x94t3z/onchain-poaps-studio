@@ -264,6 +264,10 @@ footer {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+.wallet-identity:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
 .wallet-identity > span {
   min-width: 0;
   overflow: hidden;
@@ -291,8 +295,8 @@ footer {
 .wallet-account-summary {
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  padding: 18px;
+  gap: 6px;
+  padding: 18px 20px 16px;
   border-bottom: 1px solid var(--line);
 }
 .wallet-account-summary strong {
@@ -305,31 +309,34 @@ footer {
   overflow-wrap: anywhere;
 }
 .wallet-address-row {
+  width: fit-content;
+  max-width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 6px;
 }
 .wallet-copy-button {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--line);
+  border: 1px solid transparent;
   border-radius: 50%;
   background: transparent;
-  color: var(--ink);
+  color: var(--muted);
   cursor: pointer;
+  opacity: 0.82;
   transition: background 0.15s ease, border-color 0.15s ease,
-    transform 0.15s ease;
+    color 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
 }
 .wallet-copy-button:hover,
 .wallet-copy-button:focus-visible {
-  border-color: var(--ink);
+  border-color: var(--line);
   background: var(--hover);
+  color: var(--ink);
+  opacity: 1;
   outline: none;
-  transform: translateY(-1px);
 }
 .wallet-copy-button svg {
   width: 16px;
@@ -2788,6 +2795,7 @@ textarea {
     width: 44px;
     height: 44px;
     flex-basis: 44px;
+    margin: -8px 0;
   }
 
   .wallet-account-menu > button,
