@@ -38,7 +38,7 @@ export function Header() {
         {navigation("desktop-nav")}
         <div className="header-actions">
           <ThemeToggle />
-          <WalletButton />
+          <WalletButton label="Connect" />
         </div>
       </header>
       {navigation("mobile-nav")}

@@ -622,26 +622,6 @@ footer {
   }
 }
 
-@keyframes orbit-drift {
-  0%,
-  100% {
-    transform: translateX(-10px);
-  }
-  50% {
-    transform: translateX(10px);
-  }
-}
-
-@keyframes marquee-drift {
-  0%,
-  100% {
-    transform: translateX(-8px);
-  }
-  50% {
-    transform: translateX(8px);
-  }
-}
-
 .hero {
   min-height: 660px;
   display: grid;
@@ -720,6 +700,7 @@ button.text-link {
   display: grid;
   place-items: center;
   position: relative;
+  padding-top: 42px;
 }
 .medal {
   width: min(31vw, 410px);
@@ -751,10 +732,12 @@ button.text-link {
 }
 .orbit {
   position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
   font-weight: 700;
   letter-spacing: 0.3em;
-  top: -35px;
-  animation: orbit-drift 8s ease-in-out infinite;
 }
 .marquee {
   background: var(--dark-panel);
@@ -766,11 +749,11 @@ button.text-link {
   font: 700 17px "Space Grotesk";
   letter-spacing: 0.1em;
 }
-.marquee span {
+.marquee .marquee-desktop {
   display: inline-block;
-  animation: marquee-drift 9s ease-in-out infinite;
 }
-.marquee-mobile {
+
+.marquee .marquee-mobile {
   display: none;
 }
 .section,
@@ -2192,6 +2175,7 @@ code {
   }
   .hero-medal {
     margin: 0 auto;
+    padding-top: 0;
   }
   .medal {
     width: 280px;
@@ -2202,6 +2186,8 @@ code {
   }
   .features article {
     border-bottom: 1px solid var(--line);
+    border-right: 0;
+    padding: 48px 22px;
   }
   .section,
   .page {
@@ -2836,9 +2822,10 @@ textarea {
 
   header > .button,
   header .wallet-connect > .button {
-    max-width: 42vw;
+    max-width: 34vw;
     min-height: 40px;
     margin-left: auto;
+    padding-inline: 12px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2901,8 +2888,8 @@ textarea {
 
   .hero {
     min-height: auto;
-    padding: 48px 20px 58px;
-    gap: 64px;
+    padding: 46px 18px 54px;
+    gap: 58px;
   }
 
   .hero-copy {
@@ -2911,7 +2898,7 @@ textarea {
 
   .hero h1 {
     max-width: 100%;
-    font-size: clamp(42px, 12.5vw, 54px);
+    font-size: clamp(38px, 10.4vw, 46px);
     line-height: 0.9;
     letter-spacing: -0.06em;
   }
@@ -2927,9 +2914,9 @@ textarea {
 
   .hero-copy > p,
   .page > .lead {
-    max-width: 100%;
+    max-width: calc(100vw - 36px);
     font-size: 16px;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
 
   .actions {
@@ -2946,16 +2933,17 @@ textarea {
   }
 
   .medal {
-    width: min(74vw, 300px);
-    box-shadow: 10px 10px 0 var(--ink);
+    width: min(68vw, 280px);
+    box-shadow: 8px 8px 0 var(--ink);
   }
 
   .marquee {
-    padding: 13px 18px;
-    font-size: clamp(11px, 3.2vw, 13px);
+    padding: 13px 12px;
+    font-size: clamp(10px, 2.8vw, 12px);
     line-height: 1;
     text-align: center;
     white-space: nowrap;
+    letter-spacing: 0.06em;
   }
 
   .marquee .marquee-desktop {
@@ -3146,12 +3134,17 @@ textarea {
 
   header > .button,
   header .wallet-connect > .button {
-    padding-inline: 9px;
+    width: 44px;
+    padding-inline: 0;
     font-size: 11px;
   }
 
+  header .wallet-connect-trigger span {
+    display: none;
+  }
+
   .hero h1 {
-    font-size: 42px;
+    font-size: 38px;
   }
 
   .section,

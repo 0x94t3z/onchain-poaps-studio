@@ -43,10 +43,10 @@ export default function Home() {
       </section>
       <section className="marquee">
         <span className="marquee-desktop">
-          ONCHAIN ARTWORK ✦ SOULBOUND OR TRANSFERABLE ✦ FOUR WAYS TO MINT ✦
+          ONCHAIN ARTWORK ✦ SOULBOUND OR TRANSFERABLE ✦ FOUR WAYS TO MINT
         </span>
         <span className="marquee-mobile">
-          ONCHAIN ART ✦ FLEXIBLE MINTS ✦ BASE
+          ONCHAIN ✦ FLEXIBLE MINTS ✦ BASE
         </span>
       </section>
       <section className="section home-latest">
