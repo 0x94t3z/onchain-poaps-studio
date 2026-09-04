@@ -1,12 +1,37 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { EventGrid } from "@/features/events/event-grid";
 import { WalletButton } from "@/features/wallet/wallet-button";
 import { WalletPoapOverview } from "@/features/gallery/wallet-poap-overview";
+
+const GALLERY_VIEW_KEY = "onchain-poaps:gallery-view";
+
 export default function Gallery() {
   const { address } = useAccount();
   const [view, setView] = useState<"collected" | "created">("collected");
+
+  useEffect(() => {
+    if (!address) return;
+    try {
+      const savedView = sessionStorage.getItem(GALLERY_VIEW_KEY);
+      if (savedView === "collected" || savedView === "created") {
+        setView(savedView);
+      }
+    } catch {
+      // Keep the default collected view when storage is unavailable.
+    }
+  }, [address]);
+
+  function selectView(next: "collected" | "created") {
+    setView(next);
+    try {
+      sessionStorage.setItem(GALLERY_VIEW_KEY, next);
+    } catch {
+      // The tab change still works for the current render.
+    }
+  }
+
   return (
     <section className="page gallery-page">
       <div
@@ -39,7 +64,7 @@ export default function Gallery() {
               id="collected-tab"
               aria-selected={view === "collected"}
               aria-controls="poap-ownership-panel"
-              onClick={() => setView("collected")}
+              onClick={() => selectView("collected")}
             >
               Collected
             </button>
@@ -49,7 +74,7 @@ export default function Gallery() {
               id="created-tab"
               aria-selected={view === "created"}
               aria-controls="poap-ownership-panel"
-              onClick={() => setView("created")}
+              onClick={() => selectView("created")}
             >
               Created
             </button>

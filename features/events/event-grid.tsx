@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useReadContract, useReadContracts } from "wagmi";
 import { Search, X } from "lucide-react";
 import { useCreatedEventIds } from "@/hooks/use-created-event-ids";
@@ -12,6 +11,9 @@ import { EventCard } from "./event-card";
 
 type ClaimFilter = "all" | "claimable" | "closed";
 type OwnerFilter = "collected" | "created";
+
+const EXPLORE_PAGE_KEY = "onchain-poaps:explore-page";
+const GALLERY_PAGE_KEY_PREFIX = "onchain-poaps:gallery-page";
 
 const metadataFallbackImage = `data:image/svg+xml,${encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#171717"/><circle cx="256" cy="256" r="112" fill="none" stroke="#eaff2f" stroke-width="24"/><circle cx="256" cy="256" r="24" fill="#eaff2f"/></svg>',
@@ -38,20 +40,19 @@ export function EventGrid({
   prioritizeClaimable?: boolean;
   source?: "home";
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const requestedPage = Math.max(
-    0,
-    Number.parseInt(searchParams.get("page") ?? "1", 10) - 1 || 0,
-  );
-  const [page, setPage] = useState(requestedPage);
+  const [page, setPage] = useState(0);
   const [query, setQuery] = useState("");
   const [claimFilter, setClaimFilter] = useState<ClaimFilter>("all");
   const [isMobile, setIsMobile] = useState(false);
   const [now, setNow] = useState(0);
   const collectionRef = useRef<HTMLDivElement>(null);
   const restorePosition = useRef(false);
+  const restoredPageKey = useRef<string | null>(null);
+  const pageStateKey = paginate
+    ? owner
+      ? `${GALLERY_PAGE_KEY_PREFIX}:${owner.toLowerCase()}:${ownerFilter ?? "collected"}`
+      : EXPLORE_PAGE_KEY
+    : undefined;
 
   useEffect(() => {
     const media = matchMedia("(max-width: 850px)");
@@ -61,9 +62,38 @@ export function EventGrid({
     return () => media.removeEventListener("change", update);
   }, []);
   useEffect(() => {
-    setPage(paginate ? requestedPage : 0);
     setQuery("");
-  }, [isMobile, owner, ownerFilter, paginate, requestedPage]);
+
+    if (!pageStateKey) {
+      restoredPageKey.current = null;
+      setPage(0);
+      return;
+    }
+
+    if (restoredPageKey.current === pageStateKey) return;
+    restoredPageKey.current = pageStateKey;
+
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const legacyQueryPage = owner ? null : params.get("page");
+      const rawPage = legacyQueryPage ?? sessionStorage.getItem(pageStateKey);
+      const nextPage = Math.max(0, Number.parseInt(rawPage ?? "1", 10) - 1 || 0);
+      setPage(nextPage);
+      sessionStorage.setItem(pageStateKey, String(nextPage + 1));
+
+      if (legacyQueryPage) {
+        params.delete("page");
+        const queryString = params.toString();
+        window.history.replaceState(
+          window.history.state,
+          "",
+          `${window.location.pathname}${queryString ? `?${queryString}` : ""}${window.location.hash}`,
+        );
+      }
+    } catch {
+      // Keep the first page when browser storage/history is unavailable.
+    }
+  }, [owner, pageStateKey]);
   useEffect(() => setNow(Math.floor(Date.now() / 1000)), []);
   useEffect(() => {
     if (!restorePosition.current) return;
@@ -161,9 +191,7 @@ export function EventGrid({
       : eventSourceHref === "gallery" || eventSourceHref === "created"
         ? "/gallery"
         : eventSourceHref === "explore"
-          ? currentPage > 0
-            ? `/explore?page=${currentPage + 1}`
-            : "/explore"
+          ? "/explore"
           : undefined;
   const eventBackLabel =
     eventSourceHref === "home"
@@ -299,34 +327,29 @@ export function EventGrid({
       : ownership === "collected"
         ? "POAP name or ID"
         : "Name, event ID, or location";
+  function rememberPage(next: number) {
+    if (!pageStateKey) return;
+    try {
+      sessionStorage.setItem(pageStateKey, String(next + 1));
+    } catch {
+      // Pagination still works for the current render when storage is unavailable.
+    }
+  }
+
+  function resetPage() {
+    setPage(0);
+    rememberPage(0);
+  }
+
   function goToPage(next: number) {
     restorePosition.current = true;
     setPage(next);
-    if (paginate && !owner) {
-      const params = new URLSearchParams(searchParams);
-      if (next > 0) {
-        params.set("page", String(next + 1));
-      } else {
-        params.delete("page");
-      }
-      const queryString = params.toString();
-      router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
-        scroll: false,
-      });
-    }
+    rememberPage(next);
   }
 
   function updateFilter(next: ClaimFilter) {
     setClaimFilter(next);
-    setPage(0);
-    if (paginate && !owner) {
-      const params = new URLSearchParams(searchParams);
-      params.delete("page");
-      const queryString = params.toString();
-      router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
-        scroll: false,
-      });
-    }
+    resetPage();
   }
 
   return (
@@ -342,8 +365,8 @@ export function EventGrid({
           <label htmlFor="event-search">{searchLabel}</label>
           <div className="event-search-field">
             <Search size={19} aria-hidden="true" />
-            <input id="event-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(0); }} placeholder={searchPlaceholder} autoComplete="off" />
-            {query && <button type="button" aria-label="Clear search" onClick={() => { setQuery(""); setPage(0); }}><X size={19} aria-hidden="true" /></button>}
+            <input id="event-search" type="search" value={query} onChange={(event) => { setQuery(event.target.value); resetPage(); }} placeholder={searchPlaceholder} autoComplete="off" />
+            {query && <button type="button" aria-label="Clear search" onClick={() => { setQuery(""); resetPage(); }}><X size={19} aria-hidden="true" /></button>}
           </div>
           <span aria-live="polite">{displayCount} {displayNoun}</span>
         </div>
