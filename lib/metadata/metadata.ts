@@ -7,6 +7,7 @@ export type Metadata = {
 };
 
 const METADATA_PREFIX = "data:application/json;base64,";
+const SVG_IMAGE_PREFIX = "data:image/svg+xml";
 
 // A few immutable registrations contain literal control characters inside
 // JSON strings. Escape those characters while leaving valid JSON whitespace
@@ -46,10 +47,65 @@ export function decodeMetadata(uri: string): Metadata {
   const json = new TextDecoder().decode(bytes);
 
   try {
-    return JSON.parse(json);
+    return normalizeMetadata(JSON.parse(json));
   } catch {
-    return JSON.parse(escapeControlCharacters(json));
+    return normalizeMetadata(JSON.parse(escapeControlCharacters(json)));
   }
+}
+
+function normalizeMetadata(metadata: Metadata): Metadata {
+  return {
+    ...metadata,
+    image: normalizeSvgDataImage(metadata.image),
+  };
+}
+
+export function svgFromDataImage(image: string) {
+  if (!image.startsWith(SVG_IMAGE_PREFIX)) return null;
+
+  const comma = image.indexOf(",");
+  if (comma === -1) return null;
+
+  const header = image.slice(0, comma).toLowerCase();
+  const payload = image.slice(comma + 1);
+
+  try {
+    if (header.includes(";base64")) {
+      const binary = atob(payload);
+      const bytes = Uint8Array.from(binary, (character) =>
+        character.charCodeAt(0),
+      );
+      return new TextDecoder().decode(bytes);
+    }
+
+    return decodeURIComponent(payload);
+  } catch {
+    return null;
+  }
+}
+
+function normalizeSvgDataImage(image: string) {
+  const svg = svgFromDataImage(image);
+  if (!svg) return image;
+
+  const normalized = normalizeSvgNamespace(svg);
+  if (normalized === svg) return image;
+
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(normalized)}`;
+}
+
+function normalizeSvgNamespace(svg: string) {
+  const corrected = svg.replace(
+    /\s+xmlns=(["'])http:\/\/w3\.org\1/i,
+    ' xmlns="http://www.w3.org/2000/svg"',
+  );
+
+  if (/\s+xmlns=/i.test(corrected)) return corrected;
+
+  return corrected.replace(
+    /^<svg(?=\s|>)/i,
+    '<svg xmlns="http://www.w3.org/2000/svg"',
+  );
 }
 
 export const short = (value: string, n = 5) =>

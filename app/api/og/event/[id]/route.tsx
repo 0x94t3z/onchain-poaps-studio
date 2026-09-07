@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import { poapAbi } from "@/lib/blockchain/abi";
 import { CONTRACT } from "@/lib/blockchain/constants";
-import { decodeMetadata } from "@/lib/metadata/metadata";
+import { decodeMetadata, svgFromDataImage } from "@/lib/metadata/metadata";
 import { loadOgFonts, type OgFont } from "@/lib/og/og-fonts";
 import { publicClient } from "@/lib/blockchain/public-client";
 
@@ -40,13 +40,11 @@ async function rasterFontFiles(fonts: OgFont[]) {
 }
 
 async function rasterizeArtwork(image: string | null, fonts: OgFont[]) {
-  const prefix = "data:image/svg+xml;base64,";
-  if (!image?.startsWith(prefix)) return image;
+  if (!image) return image;
+  const svg = svgFromDataImage(image);
+  if (!svg) return image;
 
   try {
-    const svg = Buffer.from(image.slice(prefix.length), "base64").toString(
-      "utf8",
-    );
     const fontFiles = fonts.length > 0 ? await rasterFontFiles(fonts) : [];
     const png = new Resvg(svg, {
       fitTo: { mode: "width", value: 548 },
