@@ -1,5 +1,6 @@
 import {
   createPublicClient,
+  fallback,
   getAddress,
   http,
   isAddress,
@@ -8,13 +9,36 @@ import {
 import { normalize } from "viem/ens";
 import { mainnet } from "viem/chains";
 
+const ENS_LOOKUP_TIMEOUT = 5_000;
+const ENS_RPC_URLS = [
+  process.env.NEXT_PUBLIC_ETHEREUM_RPC_URL,
+  "https://eth.drpc.org",
+  "https://ethereum-rpc.publicnode.com",
+  "https://eth-mainnet.public.blastapi.io",
+].filter(Boolean) as string[];
+
 const ensClient = createPublicClient({
   chain: mainnet,
-  transport: http(),
+  transport: fallback(
+    ENS_RPC_URLS.map((url) =>
+      http(url, {
+        retryCount: 0,
+        timeout: ENS_LOOKUP_TIMEOUT,
+      }),
+    ),
+    {
+      retryCount: 0,
+    },
+  ),
 });
 
 export async function getPrimaryEnsName(address: Address) {
-  return ensClient.getEnsName({ address });
+  try {
+    return await ensClient.getEnsName({ address });
+  } catch (error) {
+    console.warn("ENS reverse lookup failed", error);
+    return null;
+  }
 }
 
 export async function resolveAddressOrEns(value: string): Promise<Address> {
